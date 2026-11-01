@@ -112,7 +112,9 @@ serve(async (req: Request) => {
     await supabaseAdmin.auth.admin.createUser({
       email: userData.email.trim(),
       password: userData.password,
-      email_confirm: false,
+      // Admin-created accounts are pre-confirmed: the admin sets the password,
+      // so no confirmation email is needed (and SMTP failures can't block creation).
+      email_confirm: true,
       user_metadata: { full_name: userData.fullName.trim() },
     });
   if (createError || !created.user) {
@@ -146,20 +148,6 @@ serve(async (req: Request) => {
     return jsonResponse({ error: "Unable to finish creating user" }, 500);
   }
 
-  const { error: confirmationError } = await supabaseAdmin.auth.resend({
-    type: "signup",
-    email: userData.email.trim(),
-  });
-  if (confirmationError) {
-    console.error("Failed to send signup confirmation:", confirmationError);
-    const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(
-      created.user.id,
-    );
-    if (deleteError) {
-      console.error("Failed to remove user after confirmation failed:", deleteError);
-    }
-    return jsonResponse({ error: "Unable to send account confirmation" }, 502);
-  }
 
   return jsonResponse({ profile }, 201);
 });
