@@ -129,6 +129,18 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/095e06d9-c491-47ec-9d35-0647fb9fe1de) and click on Share -> Publish.
 
+### Deploy to Cloudflare Workers
+
+The project includes the Cloudflare Vite plugin and Wrangler configuration. After
+setting the Worker name in `wrangler.jsonc` and authenticating Wrangler, deploy with:
+
+```sh
+npm run deploy
+```
+
+The Worker serves the Vite build as a single-page application, including client-side
+routes.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!

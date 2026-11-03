@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
+import { cloudflare } from "@cloudflare/vite-plugin";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
@@ -12,7 +13,7 @@ export default defineConfig({
     host: "::",
     port: 8080,
   },
-  plugins: [react(), tagger],
+  plugins: [react(), cloudflare(), tagger],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
