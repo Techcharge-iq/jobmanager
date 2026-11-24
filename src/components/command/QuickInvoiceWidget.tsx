@@ -82,8 +82,8 @@ export function QuickInvoiceWidget({ jobs, isAdmin, initialJobId, onSaved }: Pro
                     {jobs.slice(0, 300).map((j) => (
                       <CommandItem key={j.id} value={`${j.jobOrderNumber} ${j.customer} ${j.title}`} onSelect={() => { setJobId(j.id); setOpen(false); }}>
                         <span className="font-mono">{j.jobOrderNumber}</span>
-                        <span className="ml-2 truncate text-muted-foreground">{j.customer}</span>
-                        <span className="ml-auto text-xs text-muted-foreground">{statusLabel(j.status)}</span>
+                        <span className="ms-2 truncate text-muted-foreground">{j.customer}</span>
+                        <span className="ms-auto text-xs text-muted-foreground">{statusLabel(j.status)}</span>
                       </CommandItem>
                     ))}
                   </CommandGroup>

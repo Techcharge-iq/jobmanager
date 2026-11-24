@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { JobFlowMark } from "@/components/brand/JobFlowMark";
+import { HeroAmbient } from "@/components/hero/HeroAmbient";
 
 export function LoginPage() {
   const { signIn, signUp } = useAuth();
@@ -56,7 +57,16 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="grid min-h-screen lg:grid-cols-2">
+      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-lavender via-sky to-mint lg:flex lg:flex-col lg:justify-end lg:p-12">
+        <HeroAmbient className="absolute inset-0" />
+        <div className="relative max-w-md space-y-3">
+          <JobFlowMark className="h-12 w-12" />
+          <h2 className="text-h1 text-foreground">Every job, from quote to invoice, in one calm place.</h2>
+          <p className="text-muted-foreground">Approvals, designers, production and billing, all in step.</p>
+        </div>
+      </aside>
+      <div className="flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
@@ -100,7 +110,7 @@ export function LoginPage() {
                 )}
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
               </form>
@@ -143,7 +153,7 @@ export function LoginPage() {
                 )}
 
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
                   Sign Up
                 </Button>
               </form>
@@ -151,6 +161,7 @@ export function LoginPage() {
           </Tabs>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

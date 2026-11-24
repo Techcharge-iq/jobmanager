@@ -343,7 +343,7 @@ export function DataManagement() {
           variant="outline"
           className="w-full"
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isResyncing ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-4 h-4 me-2 ${isResyncing ? 'animate-spin' : ''}`} />
           {isResyncing ? 'Syncing all jobs...' : 'Force Full Resync'}
         </Button>
       </div>
@@ -383,7 +383,7 @@ export function DataManagement() {
             disabled={isExporting}
             className="w-full"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-4 h-4 me-2" />
             {isExporting ? 'Exporting...' : `Export ${getDataTypeLabel(exportType)}`}
           </Button>
         </div>
@@ -434,7 +434,7 @@ export function DataManagement() {
               accept=".csv"
               onChange={handleImportData}
               disabled={isImporting}
-              className="block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="block w-full text-sm text-foreground file:me-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90 file:cursor-pointer cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             />
           </div>
 

@@ -192,9 +192,9 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
   if (!isAdmin) return <div className="p-6">Access Denied</div>;
 
   return (
-    <div className="space-y-6 p-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+    <div className="space-y-6 p-6 bg-background min-h-screen">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">Admin Job Management</h1>
+        <h1 className="text-3xl font-bold text-foreground">Admin Job Management</h1>
         <SyncStatusIndicator />
       </div>
       
@@ -202,7 +202,7 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
       <Card className="mb-4">
         <CardContent className="py-4">
           <div className="flex items-center justify-between">
-            <div className="text-lg font-semibold text-gray-700">
+            <div className="text-lg font-semibold text-foreground">
               {isLoading ? (
                 <span className="flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -216,16 +216,16 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
             </div>
             <div className="flex items-center gap-2">
               {isSyncing && (
-                <span className="text-sm text-blue-600 flex items-center gap-1">
+                <span className="text-sm text-blue-600 dark:text-blue-300 flex items-center gap-1">
                   <Loader2 className="w-3 h-3 animate-spin" />
                   Syncing...
                 </span>
               )}
               {syncError && (
-                <span className="text-sm text-red-600">Sync error: {syncError}</span>
+                <span className="text-sm text-red-600 dark:text-red-300">Sync error: {syncError}</span>
               )}
               <Button variant="outline" size="sm" onClick={refresh} disabled={isSyncing}>
-                <RefreshCw className={cn("w-4 h-4 mr-1", isSyncing && "animate-spin")} />
+                <RefreshCw className={cn("w-4 h-4 me-1", isSyncing && "animate-spin")} />
                 Sync Now
               </Button>
             </div>
@@ -234,14 +234,14 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
       </Card>
 
       {/* Filter Panel */}
-      <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+      <Card className="shadow-lg border-0 bg-card ">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between text-gray-900">
+          <CardTitle className="flex items-center justify-between text-foreground">
             <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-blue-600" />
+              <Filter className="w-5 h-5 text-blue-600 dark:text-blue-300" />
               Job Orders Management
               {hasActiveFilters() && (
-                <span className="text-sm bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                <span className="text-sm bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full">
                   Filters Active
                 </span>
               )}
@@ -333,9 +333,9 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  className={cn("w-auto justify-start text-left font-normal", !dateFilter && "text-muted-foreground")}
+                  className={cn("w-auto justify-start text-start font-normal", !dateFilter && "text-muted-foreground")}
                 >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  <CalendarIcon className="me-2 h-4 w-4" />
                   {dateFilter?.from
                     ? `${format(dateFilter.from, "LLL dd, y")}${dateFilter?.to ? ` - ${format(dateFilter.to, "LLL dd, y")}` : ""}`
                     : "Filter by date range"}

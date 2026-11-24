@@ -65,25 +65,25 @@ export function CommunicationsManagement() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <h3 className="font-medium text-yellow-800 mb-2">Migration Required</h3>
-                <p className="text-yellow-700 text-sm mb-3">
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-500/15 border border-yellow-200 dark:border-yellow-500/30 rounded-lg">
+                <h3 className="font-medium text-yellow-800 dark:text-yellow-300 mb-2">Migration Required</h3>
+                <p className="text-yellow-700 dark:text-yellow-300 text-sm mb-3">
                   To enable full communications management functionality, the following database tables need to be created:
                 </p>
-                <ul className="text-yellow-700 text-sm space-y-1 mb-3">
+                <ul className="text-yellow-700 dark:text-yellow-300 text-sm space-y-1 mb-3">
                   <li>• email_recipients - For managing email distribution lists</li>
                   <li>• email_logs - For tracking sent emails and delivery status</li>
                   <li>• system_configurations - For storing WhatsApp and other settings</li>
                   <li>• user_permissions - For granular permission management</li>
                 </ul>
-                <p className="text-yellow-700 text-sm">
+                <p className="text-yellow-700 dark:text-yellow-300 text-sm">
                   Once the migration is complete, you'll be able to manage email recipients, view email logs, and configure communication settings.
                 </p>
               </div>
               
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <h3 className="font-medium text-blue-800 mb-2">Current Functionality</h3>
-                <p className="text-blue-700 text-sm">
+              <div className="p-4 bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 rounded-lg">
+                <h3 className="font-medium text-blue-800 dark:text-blue-300 mb-2">Current Functionality</h3>
+                <p className="text-blue-700 dark:text-blue-300 text-sm">
                   The send-notification edge function is already configured and ready to log emails once the database tables are created.
                   WhatsApp configuration can be set up in the next tab.
                 </p>
@@ -104,7 +104,7 @@ export function CommunicationsManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-medium">Enable WhatsApp Integration</h3>
-                  <p className="text-sm text-gray-600">Allow sending messages via WhatsApp</p>
+                  <p className="text-sm text-muted-foreground">Allow sending messages via WhatsApp</p>
                 </div>
                 <Switch
                   checked={whatsappConfig.enabled}
@@ -133,7 +133,7 @@ export function CommunicationsManagement() {
               </div>
               
               <Button onClick={handleWhatsAppConfigUpdate}>
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-4 h-4 me-2" />
                 Update Configuration
               </Button>
             </CardContent>
@@ -150,13 +150,13 @@ export function CommunicationsManagement() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Email and communication settings will be available here after the database migration is completed.
                 </p>
                 
-                <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <div className="p-4 bg-muted border border-border rounded-lg">
                   <h4 className="font-medium mb-2">Planned Features</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                  <ul className="text-sm text-muted-foreground space-y-1">
                     <li>• Email template management</li>
                     <li>• Notification preferences</li>
                     <li>• SMTP configuration</li>

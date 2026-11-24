@@ -36,7 +36,7 @@ export function HighPriorityReminder({ jobs, onViewJob }: HighPriorityReminderPr
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <AlertTriangle className={cn("w-5 h-5 mt-0.5", hasOverdue ? "text-destructive" : "text-amber-600")} />
+          <AlertTriangle className={cn("w-5 h-5 mt-0.5", hasOverdue ? "text-destructive" : "text-amber-600 dark:text-amber-300")} />
           <div className="flex-1">
             <h3 className={cn("font-semibold", hasOverdue ? "text-destructive" : "text-amber-900 dark:text-amber-200")}>
               {hasOverdue
@@ -54,20 +54,20 @@ export function HighPriorityReminder({ jobs, onViewJob }: HighPriorityReminderPr
                 <button
                   key={job.id}
                   onClick={() => onViewJob?.(job)}
-                  className="flex items-center gap-2 text-sm w-full text-left p-2 rounded-md hover:bg-muted"
+                  className="flex items-center gap-2 text-sm w-full text-start p-2 rounded-md hover:bg-muted"
                 >
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                  <ChevronRight className="w-4 h-4 text-muted-foreground rtl:-scale-x-100" />
                   <span className="font-medium">{job.jobOrderNumber}</span>
                   <span className="text-xs text-muted-foreground">— {job.customer}</span>
                   {new Date(job.dueDate) < new Date() && (
-                    <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground">
+                    <span className="ms-auto text-xs px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground">
                       OVERDUE
                     </span>
                   )}
                 </button>
               ))}
               {highPriorityJobs.length > 3 && (
-                <p className="text-xs text-muted-foreground pl-6">
+                <p className="text-xs text-muted-foreground ps-6">
                   +{highPriorityJobs.length - 3} more...
                 </p>
               )}

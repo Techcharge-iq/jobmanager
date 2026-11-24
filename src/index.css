@@ -2,92 +2,122 @@
 @tailwind components;
 @tailwind utilities;
 
-/* JobFlow tokens — HSL, flat surfaces, no gradients. */
+/* JobFlow tokens: HSL. Solid cards for data, glass only on shell chrome (see .glass). */
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11%;
+    --background: 225 33% 97%;
+    --foreground: 224 40% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 224 40% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 224 40% 11%;
 
-    --primary: 0 72% 51%;               /* AA with white text */
+    --primary: 0 72% 51%;               /* JobFlow red, AA with white text */
     --primary-foreground: 0 0% 100%;
+    --brand: 358 75% 59%;               /* brighter red for glow and accents only */
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 40% 96%;              /* the one muted accent: slate tint */
-    --accent-foreground: 222 47% 11%;
+    --secondary: 225 30% 95%;
+    --secondary-foreground: 224 40% 11%;
+    --muted: 225 30% 95%;
+    --muted-foreground: 220 14% 42%;
+    --accent: 255 60% 96%;
+    --accent-foreground: 224 40% 11%;
 
     --destructive: 0 74% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 0 84% 60%;                  /* bright red only for focus + mark */
-    --radius: 0.5rem;
+    --border: 224 28% 90%;
+    --input: 224 28% 88%;
+    --ring: 0 84% 60%;
+    --radius: 0.875rem;                 /* lg 14px, md 12px, sm 10px */
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 19% 35%;
-    --sidebar-primary: 0 72% 51%;
+    /* pastel secondary palette: background + readable foreground */
+    --tone-lavender: 255 92% 95%;  --tone-lavender-fg: 255 52% 36%;
+    --tone-mint:     152 62% 91%;  --tone-mint-fg:     162 78% 21%;
+    --tone-peach:    24 96% 92%;   --tone-peach-fg:    18 78% 29%;
+    --tone-sky:      205 95% 92%;  --tone-sky-fg:      212 78% 28%;
+    --tone-rose:     350 92% 94%;  --tone-rose-fg:     350 66% 31%;
+
+    /* glass recipe (light) */
+    --glass-bg: 0 0% 100%;
+    --glass-alpha: 0.72;
+    --glass-border: 224 30% 30% / 0.14;
+    --glass-blur: 22px;
+
+    /* dark glass sidebar (used in both themes) */
+    --sidebar-background: 252 32% 11%;
+    --sidebar-foreground: 225 22% 80%;
+    --sidebar-primary: 358 75% 59%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 0 84% 60%;
+    --sidebar-accent: 252 24% 19%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 252 22% 22%;
+    --sidebar-ring: 358 75% 59%;
 
-    --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
-    --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.08);
-    --shadow-lg: 0 12px 32px -8px rgb(15 23 42 / 0.16);
+    --shadow-sm: 0 1px 2px 0 rgb(24 24 60 / 0.05);
+    --shadow-md: 0 4px 14px -4px rgb(24 24 60 / 0.10);
+    --shadow-lg: 0 16px 36px -10px rgb(24 24 60 / 0.18);
+    --shadow-card: 0 1px 2px rgb(24 24 60 / 0.04), 0 6px 18px -8px rgb(24 24 60 / 0.10);
+    --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 10px 30px -12px rgb(24 24 60 / 0.25);
+    --shadow-glow: 0 0 0 1px hsl(var(--brand) / 0.45), 0 8px 22px -6px hsl(var(--brand) / 0.55);
   }
 
   .dark {
     color-scheme: dark;
-    --background: 222 47% 7%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 10%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 40% 98%;
+    --background: 232 40% 7%;
+    --foreground: 225 40% 97%;
+    --card: 232 34% 11%;
+    --card-foreground: 225 40% 97%;
+    --popover: 232 34% 11%;
+    --popover-foreground: 225 40% 97%;
 
     --primary: 0 72% 51%;
     --primary-foreground: 0 0% 100%;
+    --brand: 358 80% 62%;
 
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
+    --secondary: 232 28% 17%;
+    --secondary-foreground: 225 40% 97%;
+    --muted: 232 28% 17%;
+    --muted-foreground: 224 18% 68%;
+    --accent: 250 28% 20%;
+    --accent-foreground: 225 40% 97%;
 
     --destructive: 0 63% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
+    --border: 232 24% 20%;
+    --input: 232 24% 22%;
     --ring: 0 84% 60%;
 
-    --sidebar-background: 222 47% 9%;
-    --sidebar-foreground: 215 20% 75%;
-    --sidebar-primary: 0 72% 51%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 217 33% 17%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 33% 17%;
-    --sidebar-ring: 0 84% 60%;
+    --tone-lavender: 255 34% 20%;  --tone-lavender-fg: 255 90% 86%;
+    --tone-mint:     160 40% 15%;  --tone-mint-fg:     152 60% 78%;
+    --tone-peach:    22 42% 17%;   --tone-peach-fg:    24 92% 82%;
+    --tone-sky:      208 46% 17%;  --tone-sky-fg:      205 92% 82%;
+    --tone-rose:     350 40% 18%;  --tone-rose-fg:     350 92% 85%;
+
+    /* glass recipe (dark): darker fill, lighter border, lower blur */
+    --glass-bg: 232 40% 10%;
+    --glass-alpha: 0.62;
+    --glass-border: 0 0% 100% / 0.10;
+    --glass-blur: 14px;
+
+    --sidebar-background: 252 36% 8%;
+    --sidebar-accent: 252 26% 16%;
+    --sidebar-border: 252 22% 17%;
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
-    --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.5);
-    --shadow-lg: 0 12px 32px -8px rgb(0 0 0 / 0.6);
+    --shadow-md: 0 4px 14px -4px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 16px 36px -10px rgb(0 0 0 / 0.6);
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 22px -10px rgb(0 0 0 / 0.55);
+    --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 12px 32px -12px rgb(0 0 0 / 0.7);
   }
 }
 
 @layer base {
   * { @apply border-border; }
-  body { @apply bg-background text-foreground antialiased; min-height: 100vh; }
+  body { @apply bg-background text-foreground font-sans antialiased; min-height: 100vh; line-height: 1.55; }
+  h1 { @apply text-h1; } h2 { @apply text-h2; } h3 { @apply text-h3; }
+  :where(button, [role="tab"], a, input, select, textarea):focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; }
 }
 
 @keyframes dashboard-card-enter {
@@ -98,13 +128,7 @@
 @media (prefers-reduced-motion: reduce) { .dashboard-card-enter { animation: none; } }
 
 @layer components {
-  .dashboard-shell {
-    height: 100dvh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px));
-  }
+  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); }
   .dashboard-workspace {
     flex: 1;
     min-height: 0;
@@ -113,9 +137,20 @@
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;
   }
-  .floating-dock {
-    bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  .floating-dock { bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px)); }
+
+  /* Glass: only on top bar, tab strip, dock, hero. Solid fallback first. */
+  .glass { background: hsl(var(--background) / 0.96); border: 1px solid hsl(var(--border)); box-shadow: var(--shadow-glass); }
+  .glass-dark { background: hsl(var(--sidebar-background) / 0.97); border-color: hsl(var(--sidebar-border)); color: hsl(var(--sidebar-foreground)); }
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass { background: hsl(var(--glass-bg) / var(--glass-alpha)); border-color: hsl(var(--glass-border)); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5); backdrop-filter: blur(var(--glass-blur)) saturate(1.5); }
+    .glass-dark { background: hsl(var(--sidebar-background) / 0.94); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.4); backdrop-filter: blur(var(--glass-blur)) saturate(1.4); }
   }
+  @media (prefers-reduced-transparency: reduce) {
+    .glass { background: hsl(var(--card)); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .glass-dark { background: hsl(var(--sidebar-background)); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  }
+  .nav-glow { box-shadow: var(--shadow-glow); }
   .dashboard-scroll-panel { @apply max-h-[26rem] overflow-y-auto rounded-lg border border-border bg-card shadow-sm; }
   .dashboard-scroll-panel > * { @apply border-0 shadow-none; }
   .dashboard-card-enter .rounded-lg, .dashboard-card-enter .rounded-xl { @apply shadow-sm; }
@@ -139,4 +174,8 @@
 .job-slide-prev { animation: job-slide-prev 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
 @media (prefers-reduced-motion: reduce) {
   .job-slide-next, .job-slide-prev { animation: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

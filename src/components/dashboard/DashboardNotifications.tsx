@@ -47,17 +47,18 @@ export function DashboardNotifications({ notifications: propNotifications, onNot
         variant="outline"
         size="sm"
         onClick={toggleNotifications}
+        aria-label={`Notifications${unreadNotifications > 0 ? `, ${unreadNotifications} unread` : ""}`}
         className="relative"
       >
         <Bell className="w-4 h-4" />
         {unreadNotifications > 0 && (
-          <span className="absolute -top-1 -right-1 text-xs rounded-full w-5 h-5 flex items-center justify-center bg-destructive text-destructive-foreground">
+          <span className="absolute -top-1 -end-1 text-xs rounded-full w-5 h-5 flex items-center justify-center bg-destructive text-destructive-foreground">
             {unreadNotifications}
           </span>
         )}
       </Button>
       {showNotifications && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-md border bg-popover text-popover-foreground shadow-lg z-50">
+        <div className="absolute end-0 top-full mt-2 w-80 rounded-md border bg-popover text-popover-foreground shadow-lg z-50">
           <div className="p-4 border-b flex items-center justify-between">
             <h3 className="font-semibold">Notifications</h3>
             {notifications.length > 0 && (
@@ -67,7 +68,7 @@ export function DashboardNotifications({ notifications: propNotifications, onNot
                 onClick={clearNotifications}
                 className="h-7 px-2 text-xs"
               >
-                <Trash2 className="w-3 h-3 mr-1" />
+                <Trash2 className="w-3 h-3 me-1" />
                 Clear
               </Button>
             )}

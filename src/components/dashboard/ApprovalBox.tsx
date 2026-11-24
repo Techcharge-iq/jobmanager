@@ -274,13 +274,13 @@ export function ApprovalBox() {
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
                         <Button size="sm" variant="outline" onClick={() => handleViewJob(activeJob.id)} className="h-8 px-2 text-xs">
-                          <Eye className="mr-1 h-3 w-3" />View
+                          <Eye className="me-1 h-3 w-3" />View
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => handleApproval(activeJob.id, 'approve')} disabled={approvalMutation.isPending} className="h-8 px-2 text-xs">
-                          <CheckCircle className="mr-1 h-3 w-3" />Approve
+                          <CheckCircle className="me-1 h-3 w-3" />Approve
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => handleApproval(activeJob.id, 'reject')} disabled={approvalMutation.isPending} className="h-8 px-2 text-xs text-destructive">
-                          <XCircle className="mr-1 h-3 w-3" />Reject
+                          <XCircle className="me-1 h-3 w-3" />Reject
                         </Button>
                       </div>
                     </div>
@@ -298,7 +298,7 @@ export function ApprovalBox() {
                 disabled={activeCardIndex === 0}
                 className="h-8 w-8"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
               </Button>
               <span className="min-w-12 text-center text-xs tabular-nums text-muted-foreground" aria-live="polite">
                 {activeCardIndex + 1} / {pendingJobs.length}
@@ -312,7 +312,7 @@ export function ApprovalBox() {
                 disabled={activeCardIndex >= pendingJobs.length - 1}
                 className="h-8 w-8"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
               </Button>
             </div>
           </div>

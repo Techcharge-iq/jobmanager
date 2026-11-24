@@ -77,20 +77,20 @@ export function UserManagement({
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
-      case "admin": return "bg-red-100 text-red-800 border-red-200";
-      case "manager": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "designer": return "bg-purple-100 text-purple-800 border-purple-200";
-      case "salesman": return "bg-green-100 text-green-800 border-green-200";
-      case "job_order_manager": return "bg-orange-100 text-orange-800 border-orange-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+      case "admin": return "bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300 border-red-200 dark:border-red-500/30";
+      case "manager": return "bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-500/30";
+      case "designer": return "bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-500/30";
+      case "salesman": return "bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 border-green-200 dark:border-green-500/30";
+      case "job_order_manager": return "bg-orange-100 dark:bg-orange-500/15 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-500/30";
+      default: return "bg-muted text-foreground border-border";
     }
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {/* Add New User Form */}
-      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-t-lg">
+      <Card className="bg-card  border-0 shadow-xl">
+        <CardHeader className="bg-primary text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-2 text-white">
             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
               <Plus className="w-4 h-4" />
@@ -103,7 +103,7 @@ export function UserManagement({
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="userEmail" className="flex items-center gap-2 font-medium">
-                  <Mail className="w-4 h-4 text-gray-500" />
+                  <Mail className="w-4 h-4 text-muted-foreground" />
                   Email Address
                 </Label>
                 <Input
@@ -112,14 +112,14 @@ export function UserManagement({
                   value={userForm.email}
                   onChange={(e) => setUserForm(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="Enter email address"
-                  className="bg-white/50 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  className="bg-card border-border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   required
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="userPassword" className="flex items-center gap-2 font-medium">
-                  <Shield className="w-4 h-4 text-gray-500" />
+                  <Shield className="w-4 h-4 text-muted-foreground" />
                   Password
                 </Label>
                 <Input
@@ -129,14 +129,14 @@ export function UserManagement({
                   onChange={(e) => setUserForm(prev => ({ ...prev, password: e.target.value }))}
                   placeholder="At least 8 characters"
                   minLength={8}
-                  className="bg-white/50 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  className="bg-card border-border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   required
                 />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="userFullName" className="flex items-center gap-2 font-medium">
-                  <User className="w-4 h-4 text-gray-500" />
+                  <User className="w-4 h-4 text-muted-foreground" />
                   Full Name
                 </Label>
                 <Input
@@ -144,7 +144,7 @@ export function UserManagement({
                   value={userForm.fullName}
                   onChange={(e) => setUserForm(prev => ({ ...prev, fullName: e.target.value }))}
                   placeholder="Enter full name"
-                  className="bg-white/50 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  className="bg-card border-border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   required
                 />
               </div>
@@ -152,7 +152,7 @@ export function UserManagement({
               <div className="space-y-2">
                 <Label htmlFor="userRole" className="font-medium">User Role</Label>
                 <Select value={userForm.role} onValueChange={(value) => setUserForm(prev => ({ ...prev, role: value }))}>
-                  <SelectTrigger className="bg-white/50 border-gray-200 focus:border-indigo-500">
+                  <SelectTrigger className="bg-card border-border focus:border-indigo-500">
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -169,7 +169,7 @@ export function UserManagement({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="userDepartment" className="flex items-center gap-2 font-medium">
-                    <Building className="w-4 h-4 text-gray-500" />
+                    <Building className="w-4 h-4 text-muted-foreground" />
                     Department
                   </Label>
                   <Input
@@ -177,7 +177,7 @@ export function UserManagement({
                     value={userForm.department}
                     onChange={(e) => setUserForm(prev => ({ ...prev, department: e.target.value }))}
                     placeholder="Enter department"
-                    className="bg-white/50 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    className="bg-card border-border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   />
                 </div>
 
@@ -188,14 +188,14 @@ export function UserManagement({
                     value={userForm.branch}
                     onChange={(e) => setUserForm(prev => ({ ...prev, branch: e.target.value }))}
                     placeholder="Enter branch"
-                    className="bg-white/50 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                    className="bg-card border-border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="userPhone" className="flex items-center gap-2 font-medium">
-                  <Phone className="w-4 h-4 text-gray-500" />
+                  <Phone className="w-4 h-4 text-muted-foreground" />
                   Phone Number
                 </Label>
                 <Input
@@ -203,14 +203,14 @@ export function UserManagement({
                   value={userForm.phone}
                   onChange={(e) => setUserForm(prev => ({ ...prev, phone: e.target.value }))}
                   placeholder="Enter phone number"
-                  className="bg-white/50 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
+                  className="bg-card border-border focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
                 />
               </div>
             </div>
 
             <Button 
               type="submit" 
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white font-medium py-3 shadow-lg"
+              className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 shadow-lg"
               disabled={isAdding}
             >
               {isAdding ? (
@@ -230,8 +230,8 @@ export function UserManagement({
       </Card>
 
       {/* Existing Users Table */}
-      <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-        <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
+      <Card className="bg-card  border-0 shadow-xl">
+        <CardHeader className="bg-primary text-white rounded-t-lg">
           <CardTitle className="flex items-center gap-2 text-white">
             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
               <User className="w-4 h-4" />
@@ -245,31 +245,31 @@ export function UserManagement({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-lg border border-gray-200">
+            <div className="overflow-hidden rounded-lg border border-border">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50/80">
-                    <TableHead className="font-semibold text-gray-900">Name</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Email</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Role</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Department</TableHead>
-                    <TableHead className="font-semibold text-gray-900">Status</TableHead>
+                  <TableRow className="bg-muted/80">
+                    <TableHead className="font-semibold text-foreground">Name</TableHead>
+                    <TableHead className="font-semibold text-foreground">Email</TableHead>
+                    <TableHead className="font-semibold text-foreground">Role</TableHead>
+                    <TableHead className="font-semibold text-foreground">Department</TableHead>
+                    <TableHead className="font-semibold text-foreground">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {profiles.map((profile) => (
                     <TableRow key={profile.id} className="hover:bg-white/50 transition-colors">
                       <TableCell className="font-medium flex items-center gap-2">
-                        <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
                           <span className="text-white text-sm font-medium">
                             {profile.full_name?.charAt(0) || 'U'}
                           </span>
                         </div>
                         {profile.full_name || 'N/A'}
                       </TableCell>
-                      <TableCell className="text-gray-600">
+                      <TableCell className="text-muted-foreground">
                         <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-gray-400" />
+                          <Mail className="w-4 h-4 text-muted-foreground" />
                           {profile.email}
                         </div>
                       </TableCell>
@@ -281,9 +281,9 @@ export function UserManagement({
                           {profile.role}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-gray-600">
+                      <TableCell className="text-muted-foreground">
                         <div className="flex items-center gap-2">
-                          <Building className="w-4 h-4 text-gray-400" />
+                          <Building className="w-4 h-4 text-muted-foreground" />
                           {profile.department || 'N/A'}
                         </div>
                       </TableCell>
@@ -297,8 +297,8 @@ export function UserManagement({
                           <Badge 
                             variant="outline"
                             className={profile.is_active !== false 
-                              ? "bg-green-100 text-green-800 border-green-200" 
-                              : "bg-gray-100 text-gray-800 border-gray-200"}
+                              ? "bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 border-green-200 dark:border-green-500/30" 
+                              : "bg-muted text-foreground border-border"}
                           >
                             {profile.is_active !== false ? (
                               <span className="flex items-center gap-1">

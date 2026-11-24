@@ -11,8 +11,8 @@ import { useNotifications } from "@/contexts/NotificationContext";
 import { isSyncAvailable } from "@/services/syncService";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ThemeProvider } from "next-themes";
+import { DirectionProvider } from "@/lib/direction";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { FloatingCreateButton } from "@/components/FloatingCreateButton";
 import { WorkflowAlertManager } from "@/components/WorkflowAlertManager";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import Index from "./pages/Index";
@@ -76,6 +76,7 @@ function App() {
   return (
     <ErrorBoundary>
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="theme">
+    <DirectionProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <NotificationProvider>
@@ -129,7 +130,6 @@ function App() {
                   <Route path="/unauthorized" element={<Unauthorized />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                <FloatingCreateButton />
               </BrowserRouter>
               <WorkflowAlertManager />
             </div>
@@ -137,6 +137,7 @@ function App() {
         </NotificationProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </DirectionProvider>
     </ThemeProvider>
     </ErrorBoundary>
   );

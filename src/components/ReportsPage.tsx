@@ -213,17 +213,17 @@ export function ReportsPage() {
       <div className="space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Reports & Analytics</h1>
-            <p className="text-gray-600">Generate detailed reports and analyze business performance</p>
+            <h1 className="text-3xl font-bold text-foreground mb-2">Reports & Analytics</h1>
+            <p className="text-muted-foreground">Generate detailed reports and analyze business performance</p>
           </div>
         </div>
         
-        <Card className="border-red-200 bg-red-50">
+        <Card className="border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/15">
           <CardContent className="flex items-center p-6">
-            <AlertCircle className="h-8 w-8 text-red-600 mr-4" />
+            <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-300 me-4" />
             <div>
-              <h3 className="text-lg font-semibold text-red-800">Report Generation Failed</h3>
-              <p className="text-red-600">{error}</p>
+              <h3 className="text-lg font-semibold text-red-800 dark:text-red-300">Report Generation Failed</h3>
+              <p className="text-red-600 dark:text-red-300">{error}</p>
               <Button 
                 onClick={generateReport} 
                 className="mt-2"
@@ -242,8 +242,8 @@ export function ReportsPage() {
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Reports & Analytics</h1>
-          <p className="text-gray-600">Generate detailed reports and analyze business performance</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Reports & Analytics</h1>
+          <p className="text-muted-foreground">Generate detailed reports and analyze business performance</p>
         </div>
         <Button onClick={exportReport} className="flex items-center gap-2" disabled={reportData.length === 0}>
           <Download className="w-4 h-4" />
@@ -299,9 +299,9 @@ export function ReportsPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="flex items-center p-6">
-            <DollarSign className="h-8 w-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+            <DollarSign className="h-8 w-8 text-green-600 dark:text-green-300" />
+            <div className="ms-4">
+              <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
               <p className="text-2xl font-bold">{formatOmaniRial(summaryStats.totalRevenue)}</p>
             </div>
           </CardContent>
@@ -309,9 +309,9 @@ export function ReportsPage() {
         
         <Card>
           <CardContent className="flex items-center p-6">
-            <FileText className="h-8 w-8 text-blue-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Total Jobs</p>
+            <FileText className="h-8 w-8 text-blue-600 dark:text-blue-300" />
+            <div className="ms-4">
+              <p className="text-sm font-medium text-muted-foreground">Total Jobs</p>
               <p className="text-2xl font-bold">{summaryStats.totalJobs}</p>
             </div>
           </CardContent>
@@ -319,9 +319,9 @@ export function ReportsPage() {
         
         <Card>
           <CardContent className="flex items-center p-6">
-            <TrendingUp className="h-8 w-8 text-purple-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Completion Rate</p>
+            <TrendingUp className="h-8 w-8 text-purple-600 dark:text-purple-300" />
+            <div className="ms-4">
+              <p className="text-sm font-medium text-muted-foreground">Completion Rate</p>
               <p className="text-2xl font-bold">{summaryStats.completionRate.toFixed(1)}%</p>
             </div>
           </CardContent>
@@ -329,9 +329,9 @@ export function ReportsPage() {
         
         <Card>
           <CardContent className="flex items-center p-6">
-            <DollarSign className="h-8 w-8 text-orange-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Avg Job Value</p>
+            <DollarSign className="h-8 w-8 text-orange-600 dark:text-orange-300" />
+            <div className="ms-4">
+              <p className="text-sm font-medium text-muted-foreground">Avg Job Value</p>
               <p className="text-2xl font-bold">{formatOmaniRial(summaryStats.averageJobValue)}</p>
             </div>
           </CardContent>
@@ -347,10 +347,10 @@ export function ReportsPage() {
           {isLoading ? (
             <div className="flex items-center justify-center h-32">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-              <span className="ml-2">Loading report data...</span>
+              <span className="ms-2">Loading report data...</span>
             </div>
           ) : reportData.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               No data available for the selected period.
             </div>
           ) : (

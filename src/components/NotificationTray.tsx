@@ -12,8 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications as useServerNotifications } from "@/hooks/useNotifications";
 import { useNotifications as useLocalNotifications } from "@/contexts/NotificationContext";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
-export function NotificationTray() {
+export function NotificationTray({ className }: { className?: string } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const {
     allNotifications,
@@ -70,19 +71,19 @@ export function NotificationTray() {
           variant="ghost"
           size="icon"
           aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
-          className="relative w-10 h-10 mx-auto rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={cn("relative mx-auto h-10 w-10 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground", className)}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full px-1 text-[10px]">
+            <Badge className="absolute -end-1 -top-1 h-5 min-w-5 justify-center rounded-full px-1 text-[10px]">
               {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        side="right"
-        align="start"
+        side="bottom"
+        align="end"
         className="w-[min(24rem,calc(100vw-5rem))] p-0"
         aria-label="Notification tray"
       >
@@ -113,7 +114,7 @@ export function NotificationTray() {
                     key={notification.id}
                     className={`flex gap-3 px-4 py-3 ${notification.read ? "" : "bg-primary/5"}`}
                   >
-                    <div className={`mt-0.5 rounded-full p-2 ${notification.isHighPriority ? "bg-amber-100 text-amber-700" : "bg-muted text-muted-foreground"}`}>
+                    <div className={`mt-0.5 rounded-full p-2 ${notification.isHighPriority ? "bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground"}`}>
                       {notification.isHighPriority
                         ? <AlertTriangle className="h-4 w-4" />
                         : <Bell className="h-4 w-4" />}

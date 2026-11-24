@@ -118,13 +118,13 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
                 value={formData.newPassword}
                 onChange={(e) => setFormData(prev => ({ ...prev, newPassword: e.target.value }))}
                 required
-                className="pr-10"
+                className="pe-10"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-0 top-0 h-full"
+                className="absolute end-0 top-0 h-full"
                 onClick={() => setShowPasswords(prev => ({ ...prev, new: !prev.new }))}
               >
                 {showPasswords.new ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -141,13 +141,13 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                 required
-                className="pr-10"
+                className="pe-10"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-0 top-0 h-full"
+                className="absolute end-0 top-0 h-full"
                 onClick={() => setShowPasswords(prev => ({ ...prev, confirm: !prev.confirm }))}
               >
                 {showPasswords.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

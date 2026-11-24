@@ -170,12 +170,12 @@ export function JobEditLog({ jobOrderId, jobOrderNumber, isOpen, onClose }: JobE
             />
 
             <Button variant="outline" size="sm" onClick={exportToCSV} disabled={filteredLogs.length === 0}>
-              <Download className="w-4 h-4 mr-2" />
+              <Download className="w-4 h-4 me-2" />
               Export CSV
             </Button>
           </div>
 
-          <ScrollArea className="h-[500px] pr-4">
+          <ScrollArea className="h-[500px] pe-4">
             {isLoading ? (
               <div className="text-center py-8 text-muted-foreground">Loading...</div>
             ) : filteredLogs.length === 0 ? (
@@ -195,7 +195,7 @@ export function JobEditLog({ jobOrderId, jobOrderNumber, isOpen, onClose }: JobE
                         {isExpanded ? (
                           <ChevronDown className="w-4 h-4 mt-0.5 flex-shrink-0" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <ChevronRight className="w-4 h-4 mt-0.5 flex-shrink-0 rtl:-scale-x-100" />
                         )}
 
                         <div className="flex-1 min-w-0">
@@ -209,8 +209,8 @@ export function JobEditLog({ jobOrderId, jobOrderNumber, isOpen, onClose }: JobE
                             <span
                               className={`text-xs px-2 py-0.5 rounded-full ${
                                 isCreation
-                                  ? "bg-emerald-500/10 text-emerald-600"
-                                  : "bg-blue-500/10 text-blue-600"
+                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
+                                  : "bg-blue-500/10 text-blue-600 dark:text-blue-300"
                               }`}
                             >
                               {isCreation ? "Created" : "Updated"}
@@ -231,7 +231,7 @@ export function JobEditLog({ jobOrderId, jobOrderNumber, isOpen, onClose }: JobE
                                 log.changed_fields && (
                                   <div className="space-y-2">
                                     {Object.entries(log.changed_fields).map(([field, values]) => (
-                                      <div key={field} className="text-sm border-l-2 border-primary/30 pl-3">
+                                      <div key={field} className="text-sm border-s-2 border-primary/30 ps-3">
                                         <div className="font-medium text-foreground">{formatFieldName(field)}</div>
                                         <div className="flex items-center gap-2 text-muted-foreground mt-1">
                                           <span className="line-through">{values.old || "(empty)"}</span>
@@ -253,9 +253,9 @@ export function JobEditLog({ jobOrderId, jobOrderNumber, isOpen, onClose }: JobE
                                   e.stopPropagation();
                                   handleRevert(log);
                                 }}
-                                className="mt-2 text-orange-600 hover:text-orange-700 border-orange-300 hover:border-orange-400"
+                                className="mt-2 text-orange-600 dark:text-orange-300 hover:text-orange-700 border-orange-300 dark:border-orange-500/30 hover:border-orange-400"
                               >
-                                <RotateCcw className="w-4 h-4 mr-2" />
+                                <RotateCcw className="w-4 h-4 me-2" />
                                 Revert to this version
                               </Button>
                             </div>

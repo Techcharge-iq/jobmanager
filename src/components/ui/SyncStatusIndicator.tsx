@@ -51,8 +51,8 @@ export function SyncStatusIndicator({ className, showLabel = true }: SyncStatusI
     if (!isOnline) {
       return {
         icon: CloudOff,
-        color: 'text-amber-500',
-        bgColor: 'bg-amber-50',
+        color: 'text-amber-700 dark:text-amber-300',
+        bgColor: 'bg-amber-50 dark:bg-amber-500/15',
         label: 'Offline',
         description: `Working offline with ${localCount} cached jobs`
       };
@@ -62,8 +62,8 @@ export function SyncStatusIndicator({ className, showLabel = true }: SyncStatusI
       case 'syncing':
         return {
           icon: RefreshCw,
-          color: 'text-blue-500',
-          bgColor: 'bg-blue-50',
+          color: 'text-blue-700 dark:text-blue-300',
+          bgColor: 'bg-blue-50 dark:bg-blue-500/15',
           label: 'Syncing',
           description: 'Synchronizing with server...',
           animate: true
@@ -71,8 +71,8 @@ export function SyncStatusIndicator({ className, showLabel = true }: SyncStatusI
       case 'synced':
         return {
           icon: CheckCircle2,
-          color: 'text-green-500',
-          bgColor: 'bg-green-50',
+          color: 'text-green-700 dark:text-green-300',
+          bgColor: 'bg-green-50 dark:bg-green-500/15',
           label: 'Synced',
           description: lastSyncTime 
             ? `Last synced: ${new Date(lastSyncTime).toLocaleTimeString()}`
@@ -81,8 +81,8 @@ export function SyncStatusIndicator({ className, showLabel = true }: SyncStatusI
       case 'error':
         return {
           icon: AlertCircle,
-          color: 'text-red-500',
-          bgColor: 'bg-red-50',
+          color: 'text-red-700 dark:text-red-300',
+          bgColor: 'bg-red-50 dark:bg-red-500/15',
           label: 'Sync Error',
           description: 'Failed to sync. Working with cached data.'
         };
@@ -116,7 +116,7 @@ export function SyncStatusIndicator({ className, showLabel = true }: SyncStatusI
                 status.animate && 'animate-spin'
               )} />
               {isOnline && syncState === 'synced' && (
-                <Cloud className="h-3 w-3 text-green-500 absolute -top-1 -right-1" />
+                <Cloud className="h-3 w-3 text-green-700 dark:text-green-300 absolute -top-1 -end-1" />
               )}
             </div>
             {showLabel && (

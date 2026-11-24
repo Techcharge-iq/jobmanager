@@ -160,12 +160,12 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
   const filterControls = (
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 w-52"
+          className="ps-10 w-52"
         />
       </div>
       {[
@@ -190,7 +190,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
       ))}
       {onRefresh && (
         <Button variant="outline" size="sm" onClick={onRefresh} disabled={isSyncing || isLoading}>
-          <RefreshCw className={cn("w-4 h-4 mr-1", isSyncing && "animate-spin")} />
+          <RefreshCw className={cn("w-4 h-4 me-1", isSyncing && "animate-spin")} />
           Sync
         </Button>
       )}
@@ -222,7 +222,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
   return (
     <div className="p-6 min-h-screen">
       {(isSyncing || isLoading) && (
-        <div className="fixed inset-0 bg-background/70 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-background/70  z-50 flex items-center justify-center">
           <div className="flex items-center gap-3 bg-card border px-5 py-4 rounded-md shadow-lg">
             <RefreshCw className="w-5 h-5 animate-spin text-primary" />
             <span className="text-sm font-medium">{isLoading ? "Loading data..." : "Syncing..."}</span>
@@ -266,7 +266,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
                     key={job.id}
                     onClick={() => setSelectedJobIndex(idx)}
                     className={cn(
-                      "w-full text-left p-3 rounded-md border transition-colors",
+                      "w-full text-start p-3 rounded-md border transition-colors",
                       isActive
                         ? "bg-primary text-primary-foreground border-primary"
                         : "bg-card hover:bg-muted border-border"
@@ -308,10 +308,10 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
                   {currentJob?.status}
                 </Badge>
                 <Button variant="outline" size="sm" onClick={() => currentJob && handleViewDetails(currentJob)}>
-                  <Eye className="w-4 h-4 mr-1" /> View
+                  <Eye className="w-4 h-4 me-1" /> View
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => currentJob && handleEditJob(currentJob)}>
-                  <Edit className="w-4 h-4 mr-1" /> Edit
+                  <Edit className="w-4 h-4 me-1" /> Edit
                 </Button>
               </div>
             </div>

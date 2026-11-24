@@ -26,7 +26,7 @@ export function FloatingCreateButton() {
         onClick={() => setIsCreateJobDialogOpen(true)}
         disabled={!isOnline}
         title={isOnline ? "Create a job order" : "Connect to the internet to create a job order"}
-        className="fixed bottom-20 right-5 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors flex items-center justify-center group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="fixed bottom-20 end-5 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors flex items-center justify-center group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
         aria-label="Create New Job Order"
       >
         <Plus className="w-6 h-6 transition-transform duration-300 group-hover:rotate-90" />

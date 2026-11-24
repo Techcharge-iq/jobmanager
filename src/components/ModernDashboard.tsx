@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { KpiStrip } from "@/components/command/KpiStrip";
+import { HeroPanel } from "@/components/hero/HeroPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ReactNode } from "react";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
@@ -18,7 +19,9 @@ import { Search, Eye, Palette, Cog, Receipt, UserRound, ChevronLeft, ChevronRigh
 
 interface ModernDashboardProps {
   jobs: Job[];
-  onViewChange?: (view: "dashboard" | "jobs" | "settings" | "admin" | "admin-management" | "reports") => void;
+  onViewChange?: (view: string) => void;
+  /** When provided, jobs open in their own tab instead of the dialog. */
+  onOpenJob?: (job: Job) => void;
   onStatusUpdate?: (jobId: string, status: string) => void;
   quickWidget?: ReactNode;
 }
@@ -167,7 +170,7 @@ function WorkflowBucket({
                 }}
                 onPointerDown={handlePointerDown}
                 onWheel={handleWheel}
-                className={`job-slide-${slideDir} absolute inset-x-0 top-0 z-10 flex h-full w-full flex-col items-start justify-between gap-2 whitespace-normal rounded-lg border bg-card p-3 text-left shadow-sm transition-[transform,opacity] duration-300 hover:bg-muted/30 motion-reduce:duration-0`}
+                className={`job-slide-${slideDir} absolute inset-x-0 top-0 z-10 flex h-full w-full flex-col items-start justify-between gap-2 whitespace-normal rounded-lg border bg-card p-3 text-start shadow-sm transition-[transform,opacity] duration-300 hover:bg-muted/30 motion-reduce:duration-0`}
                 style={{
                   transform: `translateX(${dragOffset}px) rotate(${dragOffset / 35}deg)`,
                   transition: isDragging ? "none" : undefined,
@@ -199,7 +202,7 @@ function WorkflowBucket({
                 disabled={activeIndex === 0}
                 className="h-11 w-11"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
               </Button>
               <span className="min-w-12 text-center text-xs tabular-nums text-muted-foreground" aria-live="polite">
                 {activeIndex + 1} / {bucketJobs.length}
@@ -213,7 +216,7 @@ function WorkflowBucket({
                 disabled={activeIndex >= bucketJobs.length - 1}
                 className="h-11 w-11"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
               </Button>
             </div>
           </div>
@@ -223,7 +226,7 @@ function WorkflowBucket({
   );
 }
 
-export function ModernDashboard({ jobs, quickWidget }: ModernDashboardProps) {
+export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: ModernDashboardProps) {
   const [tab, setTab] = useState("work");
   const workRef = useRef<HTMLDivElement>(null);
   useScrollDepth(workRef, tab === "work");
@@ -264,7 +267,23 @@ export function ModernDashboard({ jobs, quickWidget }: ModernDashboardProps) {
   const assignedTo = (job: Job) =>
     [job.assignee, job.designer, job.salesman].find((name) => name && name !== "Unassigned") || "Unassigned";
 
+  const pendingApprovals = jobs.filter(job => job.approval_status === "pending_approval").length;
+  const urgentCount = jobs.filter(job => job.priority === "high" && !["completed", "invoiced", "cancelled", "finished"].includes(job.status)).length;
+  const toInvoice = pendingInvoiceJobs.length;
+  const heroTitle = pendingApprovals > 0
+    ? `${pendingApprovals} job${pendingApprovals === 1 ? "" : "s"} need${pendingApprovals === 1 ? "s" : ""} approval today`
+    : urgentCount > 0
+      ? `${urgentCount} high priority job${urgentCount === 1 ? " is" : "s are"} in progress`
+      : "You’re all caught up";
+  const heroSubtitle = toInvoice > 0
+    ? `${toInvoice} completed job${toInvoice === 1 ? " is" : "s are"} waiting for an invoice.`
+    : "Nothing is waiting on you right now.";
+
   const handleViewDetails = (job: Job) => {
+    if (onOpenJob) {
+      onOpenJob(job);
+      return;
+    }
     setSelectedJob(job);
     setIsJobDetailsOpen(true);
   };
@@ -278,14 +297,14 @@ export function ModernDashboard({ jobs, quickWidget }: ModernDashboardProps) {
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden bg-background px-3 py-3 text-sm md:px-5">
-      <div className="dashboard-card-enter flex shrink-0 items-center justify-between gap-2">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto bg-background px-3 py-3 text-sm md:overflow-hidden md:px-5">
+      <div className="flex shrink-0 items-center justify-between gap-2">
         <div>
           <h1 className="flex items-center gap-2 text-base font-semibold text-foreground"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />Dashboard</h1>
         </div>
         <div className="flex min-w-0 items-center gap-1">
           <div className="relative min-w-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search jobs..."
               aria-label="Search jobs"
@@ -296,7 +315,7 @@ export function ModernDashboard({ jobs, quickWidget }: ModernDashboardProps) {
               }}
               onFocus={() => searchQuery && setShowSearchDropdown(true)}
               onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
-              className="pl-9 h-10 w-36 text-sm bg-card sm:w-56"
+              className="ps-9 h-10 w-36 text-sm bg-card sm:w-56"
             />
             {showSearchDropdown && searchFilteredJobs.length > 0 && (
               <div className="absolute top-full mt-2 w-full rounded-md border bg-popover text-popover-foreground shadow-lg z-50 max-h-80 overflow-y-auto">
@@ -323,7 +342,7 @@ export function ModernDashboard({ jobs, quickWidget }: ModernDashboardProps) {
                             setShowSearchDropdown(false);
                             setSearchQuery("");
                           }}
-                          className="ml-2 h-8 w-8 p-0"
+                          className="ms-2 h-8 w-8 p-0"
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
@@ -351,11 +370,25 @@ export function ModernDashboard({ jobs, quickWidget }: ModernDashboardProps) {
         </div>
       </div>
 
-      <div className="dashboard-card-enter dashboard-kpis shrink-0" style={{ animationDelay: "40ms" }}>
+      <HeroPanel
+        title={heroTitle}
+        subtitle={heroSubtitle}
+        actionLabel={pendingApprovals > 0 ? "Review approvals" : "Create job order"}
+        onAction={() => {
+          if (pendingApprovals > 0) {
+            setTab("work");
+            requestAnimationFrame(() => document.getElementById("approvals-section")?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          } else {
+            onViewChange?.("create");
+          }
+        }}
+      />
+
+      <div className="dashboard-kpis shrink-0">
         <KpiStrip jobs={jobs} />
       </div>
 
-      <Tabs defaultValue="work" value={tab} onValueChange={setTab} className="flex min-h-0 flex-1 flex-col">
+      <Tabs defaultValue="work" value={tab} onValueChange={setTab} className="flex min-h-[26rem] shrink-0 flex-col md:min-h-0 md:flex-1 md:shrink">
         <TabsList aria-label="Dashboard panels" className="grid h-11 shrink-0 grid-cols-4 gap-0 p-1">
           <TabsTrigger value="work" className="h-full px-1 text-xs">Work</TabsTrigger>
           <TabsTrigger value="status" className="h-full px-1 text-xs">Status</TabsTrigger>
@@ -399,7 +432,7 @@ export function ModernDashboard({ jobs, quickWidget }: ModernDashboardProps) {
           />
         </div>
       </section>
-      <section aria-label="Approvals" data-scroll-card className="space-y-2">
+      <section id="approvals-section" aria-label="Approvals" data-scroll-card className="space-y-2">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Approvals</h2>
         <ApprovalBox />
       </section>

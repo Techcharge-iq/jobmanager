@@ -87,22 +87,22 @@ const roleTemplates: Record<ValidRole, string[]> = {
 
 const getPermissionLevelColor = (level: string) => {
   switch (level) {
-    case 'basic': return 'bg-green-100 text-green-800 border-green-200';
-    case 'moderate': return 'bg-blue-100 text-blue-800 border-blue-200';
-    case 'advanced': return 'bg-orange-100 text-orange-800 border-orange-200';
-    case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-    default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    case 'basic': return 'bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 border-green-200 dark:border-green-500/30';
+    case 'moderate': return 'bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-500/30';
+    case 'advanced': return 'bg-orange-100 dark:bg-orange-500/15 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-500/30';
+    case 'critical': return 'bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300 border-red-200 dark:border-red-500/30';
+    default: return 'bg-muted text-foreground border-border';
   }
 };
 
 const getRoleBadgeStyle = (role: string) => {
   switch (role) {
-    case "admin": return "bg-red-100 text-red-800 border-red-200";
-    case "manager": return "bg-blue-100 text-blue-800 border-blue-200";
-    case "designer": return "bg-purple-100 text-purple-800 border-purple-200";
-    case "salesman": return "bg-green-100 text-green-800 border-green-200";
-    case "job_order_manager": return "bg-orange-100 text-orange-800 border-orange-200";
-    default: return "bg-gray-100 text-gray-800 border-gray-200";
+    case "admin": return "bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300 border-red-200 dark:border-red-500/30";
+    case "manager": return "bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-500/30";
+    case "designer": return "bg-purple-100 dark:bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-200 dark:border-purple-500/30";
+    case "salesman": return "bg-green-100 dark:bg-green-500/15 text-green-800 dark:text-green-300 border-green-200 dark:border-green-500/30";
+    case "job_order_manager": return "bg-orange-100 dark:bg-orange-500/15 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-500/30";
+    default: return "bg-muted text-foreground border-border";
   }
 };
 
@@ -230,13 +230,13 @@ export function AdvancedUserPermissions() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-blue-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
             Advanced User Access Control
           </h1>
-          <p className="text-gray-600">Comprehensive user permission management with granular control</p>
+          <p className="text-muted-foreground">Comprehensive user permission management with granular control</p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -258,8 +258,8 @@ export function AdvancedUserPermissions() {
           <TabsContent value="users">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Users List */}
-              <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+              <Card className="bg-card  border-0 shadow-xl">
+                <CardHeader className="bg-primary text-white">
                   <CardTitle className="flex items-center gap-2">
                     <UserCheck className="w-5 h-5" />
                     System Users ({users.length})
@@ -289,16 +289,16 @@ export function AdvancedUserPermissions() {
                           <TableRow 
                             key={user.id}
                             className={`cursor-pointer transition-colors ${
-                              selectedUser?.id === user.id ? 'bg-blue-50' : 'hover:bg-gray-50'
+                              selectedUser?.id === user.id ? 'bg-blue-50 dark:bg-blue-500/15' : 'hover:bg-muted'
                             }`}
                             onClick={() => selectUser(user)}
                           >
                             <TableCell>
                               <div>
                                 <div className="font-medium">{user.full_name || 'N/A'}</div>
-                                <div className="text-sm text-gray-500">{user.email}</div>
+                                <div className="text-sm text-muted-foreground">{user.email}</div>
                                 {user.department && (
-                                  <div className="text-xs text-gray-400">{user.department}</div>
+                                  <div className="text-xs text-muted-foreground">{user.department}</div>
                                 )}
                               </div>
                             </TableCell>
@@ -334,8 +334,8 @@ export function AdvancedUserPermissions() {
               </Card>
 
               {/* Permissions Panel */}
-              <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-                <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+              <Card className="bg-card  border-0 shadow-xl">
+                <CardHeader className="bg-primary text-white">
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="w-5 h-5" />
                     Permissions & Access Control
@@ -345,10 +345,10 @@ export function AdvancedUserPermissions() {
                   {selectedUser ? (
                     <div className="space-y-6">
                       <div className="text-center">
-                        <h3 className="text-lg font-semibold text-gray-800">
+                        <h3 className="text-lg font-semibold text-foreground">
                           {selectedUser.full_name || 'Unknown User'}
                         </h3>
-                        <p className="text-sm text-gray-600">{selectedUser.email}</p>
+                        <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
                         <Badge variant="outline" className={`mt-2 capitalize ${getRoleBadgeStyle(selectedUser.role)}`}>
                           {selectedUser.role}
                         </Badge>
@@ -359,7 +359,7 @@ export function AdvancedUserPermissions() {
                       {/* Permission Categories */}
                       {Object.entries(groupedPermissions).map(([category, perms]) => (
                         <div key={category}>
-                          <h4 className="font-medium text-gray-800 mb-3 flex items-center gap-2 capitalize">
+                          <h4 className="font-medium text-foreground mb-3 flex items-center gap-2 capitalize">
                             {category === 'page' && <BarChart3 className="w-4 h-4" />}
                             {category === 'action' && <Settings className="w-4 h-4" />}
                             {category === 'data' && <Eye className="w-4 h-4" />}
@@ -369,10 +369,10 @@ export function AdvancedUserPermissions() {
                           <div className="space-y-2">
                             {perms.map((permission) => (
                               <div key={permission.id} className={`flex items-center justify-between p-3 rounded-lg border-2 ${
-                                category === 'page' ? 'bg-blue-50 border-blue-200' :
-                                category === 'action' ? 'bg-green-50 border-green-200' :
-                                category === 'data' ? 'bg-purple-50 border-purple-200' :
-                                'bg-red-50 border-red-200'
+                                category === 'page' ? 'bg-blue-50 dark:bg-blue-500/15 border-blue-200 dark:border-blue-500/30' :
+                                category === 'action' ? 'bg-green-50 dark:bg-green-500/15 border-green-200 dark:border-green-500/30' :
+                                category === 'data' ? 'bg-purple-50 dark:bg-purple-500/15 border-purple-200 dark:border-purple-500/30' :
+                                'bg-red-50 dark:bg-red-500/15 border-red-200 dark:border-red-500/30'
                               }`}>
                                 <div className="flex items-center gap-2">
                                   {permission.icon}
@@ -386,7 +386,7 @@ export function AdvancedUserPermissions() {
                                         {permission.level}
                                       </Badge>
                                     </div>
-                                    <div className="text-xs text-gray-600">{permission.description}</div>
+                                    <div className="text-xs text-muted-foreground">{permission.description}</div>
                                   </div>
                                 </div>
                                 <Switch
@@ -401,7 +401,7 @@ export function AdvancedUserPermissions() {
                       ))}
 
                       <Button 
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                         onClick={() => {
                           toast({
                             title: "Success",
@@ -409,14 +409,14 @@ export function AdvancedUserPermissions() {
                           });
                         }}
                       >
-                        <Lock className="w-4 h-4 mr-2" />
+                        <Lock className="w-4 h-4 me-2" />
                         Save Permissions
                       </Button>
                     </div>
                   ) : (
                     <div className="text-center py-8">
-                      <UserCheck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600">Select a user to manage their permissions</p>
+                      <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">Select a user to manage their permissions</p>
                     </div>
                   )}
                 </CardContent>
@@ -425,8 +425,8 @@ export function AdvancedUserPermissions() {
           </TabsContent>
 
           <TabsContent value="permissions">
-            <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-green-500 to-teal-500 text-white">
+            <Card className="bg-card  border-0 shadow-xl">
+              <CardHeader className="bg-primary text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="w-5 h-5" />
                   Permission Reference Guide
@@ -437,10 +437,10 @@ export function AdvancedUserPermissions() {
                   {Object.entries(groupedPermissions).map(([category, perms]) => (
                     <div key={category} className="space-y-4">
                       <h3 className="text-lg font-semibold capitalize flex items-center gap-2">
-                        {category === 'page' && <BarChart3 className="w-5 h-5 text-blue-500" />}
-                        {category === 'action' && <Settings className="w-5 h-5 text-green-500" />}
-                        {category === 'data' && <Eye className="w-5 h-5 text-purple-500" />}
-                        {category === 'admin' && <Crown className="w-5 h-5 text-red-500" />}
+                        {category === 'page' && <BarChart3 className="w-5 h-5 text-blue-500 dark:text-blue-300" />}
+                        {category === 'action' && <Settings className="w-5 h-5 text-green-500 dark:text-green-300" />}
+                        {category === 'data' && <Eye className="w-5 h-5 text-purple-500 dark:text-purple-300" />}
+                        {category === 'admin' && <Crown className="w-5 h-5 text-red-500 dark:text-red-300" />}
                         {category}
                       </h3>
                       <div className="space-y-2">
@@ -456,7 +456,7 @@ export function AdvancedUserPermissions() {
                                 {permission.level}
                               </Badge>
                             </div>
-                            <p className="text-xs text-gray-600">{permission.description}</p>
+                            <p className="text-xs text-muted-foreground">{permission.description}</p>
                           </div>
                         ))}
                       </div>
@@ -468,8 +468,8 @@ export function AdvancedUserPermissions() {
           </TabsContent>
 
           <TabsContent value="bulk">
-            <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
+            <Card className="bg-card  border-0 shadow-xl">
+              <CardHeader className="bg-primary text-white">
                 <CardTitle className="flex items-center gap-2">
                   <Crown className="w-5 h-5" />
                   Bulk Operations
@@ -477,12 +477,12 @@ export function AdvancedUserPermissions() {
               </CardHeader>
               <CardContent className="p-6">
                 <div className="space-y-6">
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-amber-800">
+                  <div className="bg-amber-50 dark:bg-amber-500/15 border border-amber-200 dark:border-amber-500/30 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300">
                       <AlertTriangle className="w-5 h-5" />
                       <span className="font-medium">Bulk Operations Warning</span>
                     </div>
-                    <p className="text-sm text-amber-700 mt-1">
+                    <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
                       Bulk operations affect multiple users simultaneously. Use with caution.
                     </p>
                   </div>
@@ -492,7 +492,7 @@ export function AdvancedUserPermissions() {
                       <h3 className="text-lg font-semibold mb-4">Select Users for Bulk Operations</h3>
                       <div className="max-h-64 overflow-y-auto border rounded-lg">
                         {users.map((user) => (
-                          <div key={user.id} className="flex items-center gap-3 p-3 border-b hover:bg-gray-50">
+                          <div key={user.id} className="flex items-center gap-3 p-3 border-b hover:bg-muted">
                             <input
                               type="checkbox"
                               checked={bulkOperations.includes(user.id)}
@@ -507,7 +507,7 @@ export function AdvancedUserPermissions() {
                             />
                             <div>
                               <div className="font-medium">{user.full_name || 'N/A'}</div>
-                              <div className="text-sm text-gray-500">{user.email}</div>
+                              <div className="text-sm text-muted-foreground">{user.email}</div>
                             </div>
                           </div>
                         ))}
@@ -521,7 +521,7 @@ export function AdvancedUserPermissions() {
                           className="w-full justify-start bg-green-500 hover:bg-green-600"
                           onClick={() => handleBulkPermissionUpdate('grant', ['dashboard', 'jobs'])}
                         >
-                          <Unlock className="w-4 h-4 mr-2" />
+                          <Unlock className="w-4 h-4 me-2" />
                           Grant Basic Permissions
                         </Button>
                         
@@ -529,7 +529,7 @@ export function AdvancedUserPermissions() {
                           className="w-full justify-start bg-blue-500 hover:bg-blue-600"
                           onClick={() => handleBulkPermissionUpdate('grant', ['reports', 'view_branch_jobs'])}
                         >
-                          <Eye className="w-4 h-4 mr-2" />
+                          <Eye className="w-4 h-4 me-2" />
                           Grant Reporting Access
                         </Button>
                         
@@ -538,7 +538,7 @@ export function AdvancedUserPermissions() {
                           className="w-full justify-start"
                           onClick={() => handleBulkPermissionUpdate('revoke', ['admin', 'delete_jobs'])}
                         >
-                          <Lock className="w-4 h-4 mr-2" />
+                          <Lock className="w-4 h-4 me-2" />
                           Revoke Critical Permissions
                         </Button>
                         
@@ -547,14 +547,14 @@ export function AdvancedUserPermissions() {
                           className="w-full justify-start"
                           onClick={() => setBulkOperations([])}
                         >
-                          <X className="w-4 h-4 mr-2" />
+                          <X className="w-4 h-4 me-2" />
                           Clear Selection
                         </Button>
                       </div>
                       
                       {bulkOperations.length > 0 && (
-                        <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                          <p className="text-sm text-blue-800">
+                        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-500/15 border border-blue-200 dark:border-blue-500/30 rounded-lg">
+                          <p className="text-sm text-blue-800 dark:text-blue-300">
                             Selected {bulkOperations.length} users for bulk operations
                           </p>
                         </div>

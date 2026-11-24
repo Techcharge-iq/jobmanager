@@ -140,14 +140,14 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
             variant="ghost"
             size="sm"
             onClick={handleBackToForm}
-            className="text-gray-600 hover:text-gray-800"
+            className="text-muted-foreground hover:text-foreground"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" />
+            <ArrowLeft className="w-4 h-4 me-2 rtl:-scale-x-100" />
             Back
           </Button>
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">Upload Job Images</h3>
-            <p className="text-sm text-gray-600">
+            <h3 className="text-lg font-semibold text-foreground">Upload Job Images</h3>
+            <p className="text-sm text-muted-foreground">
               Add images related to this job order (optional)
             </p>
           </div>
@@ -164,15 +164,15 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
             <Button
               onClick={handleSkipImageUpload}
               variant="outline"
-              className="flex-1 hover:bg-gray-50"
+              className="flex-1 hover:bg-muted"
             >
               Skip Image Upload
             </Button>
             <Button
               onClick={handleImageUploadComplete}
-              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+              className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground"
             >
-              <Check className="w-4 h-4 mr-2" />
+              <Check className="w-4 h-4 me-2" />
               Finish
             </Button>
           </div>
@@ -185,9 +185,9 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
     <div className="space-y-6 max-h-[80vh] overflow-y-auto">
       {/* Progress Indicator */}
       <div className="text-center">
-        <div className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full">
-          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-          <p className="text-sm font-medium text-gray-700">
+        <div className="inline-flex items-center px-4 py-2 bg-accent rounded-full">
+          <div className="w-2 h-2 bg-blue-500 rounded-full me-2"></div>
+          <p className="text-sm font-medium text-foreground">
             Step 1 of 2: Job Details
           </p>
         </div>
@@ -195,11 +195,11 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Customer Info Section */}
-        <Card className="border-l-4 border-l-blue-400 bg-gradient-to-r from-blue-50/50 to-blue-50/20">
+        <Card className="border-s-4 border-s-blue-400 bg-accent">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <User className="w-5 h-5 text-blue-600" />
-              <h3 className="text-lg font-semibold text-gray-800">Customer Information</h3>
+              <User className="w-5 h-5 text-blue-600 dark:text-blue-300" />
+              <h3 className="text-lg font-semibold text-foreground">Customer Information</h3>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,11 +219,11 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
         </Card>
 
         {/* Job Details Section */}
-        <Card className="border-l-4 border-l-green-400 bg-gradient-to-r from-green-50/50 to-green-50/20">
+        <Card className="border-s-4 border-s-green-400 bg-accent">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Briefcase className="w-5 h-5 text-green-600" />
-              <h3 className="text-lg font-semibold text-gray-800">Job Details</h3>
+              <Briefcase className="w-5 h-5 text-green-600 dark:text-green-300" />
+              <h3 className="text-lg font-semibold text-foreground">Job Details</h3>
             </div>
             
             <JobDetailsSection 
@@ -237,11 +237,11 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
         </Card>
 
         {/* Team Assignment Section */}
-        <Card className="border-l-4 border-l-purple-400 bg-gradient-to-r from-purple-50/50 to-purple-50/20">
+        <Card className="border-s-4 border-s-purple-400 bg-accent">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Users className="w-5 h-5 text-purple-600" />
-              <h3 className="text-lg font-semibold text-gray-800">Team Assignment</h3>
+              <Users className="w-5 h-5 text-purple-600 dark:text-purple-300" />
+              <h3 className="text-lg font-semibold text-foreground">Team Assignment</h3>
             </div>
             
             <TeamSection 
@@ -256,11 +256,11 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
         </Card>
 
         {/* Project Details Section */}
-        <Card className="border-l-4 border-l-orange-400 bg-gradient-to-r from-orange-50/50 to-orange-50/20">
+        <Card className="border-s-4 border-s-orange-400 bg-accent">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <Calendar className="w-5 h-5 text-orange-600" />
-              <h3 className="text-lg font-semibold text-gray-800">Schedule & Priority</h3>
+              <Calendar className="w-5 h-5 text-orange-600 dark:text-orange-300" />
+              <h3 className="text-lg font-semibold text-foreground">Schedule & Priority</h3>
             </div>
             
             <div className="space-y-6">
@@ -282,12 +282,12 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
         </Card>
 
         {/* Job Items Section */}
-        <Card className="border-l-4 border-l-teal-400 bg-gradient-to-r from-teal-50/50 to-teal-50/20">
+        <Card className="border-s-4 border-s-teal-400 bg-accent">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-teal-600" />
-                <h3 className="text-lg font-semibold text-gray-800">Job Items (Optional)</h3>
+                <Briefcase className="w-5 h-5 text-teal-600 dark:text-teal-300" />
+                <h3 className="text-lg font-semibold text-foreground">Job Items (Optional)</h3>
               </div>
               <Button
                 type="button"
@@ -295,23 +295,23 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
                 size="sm"
                 onClick={() => setJobItems([...jobItems, { job_title_id: "", description: "", quantity: 1 }])}
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 me-2" />
                 Add Item
               </Button>
             </div>
             
             <div className="space-y-4">
               {jobItems.map((item, index) => (
-                <Card key={index} className="p-4 bg-white">
+                <Card key={index} className="p-4 bg-card">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
-                      <span className="text-sm font-medium text-gray-600">Item #{index + 1}</span>
+                      <span className="text-sm font-medium text-muted-foreground">Item #{index + 1}</span>
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
                         onClick={() => setJobItems(jobItems.filter((_, i) => i !== index))}
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 dark:text-red-300 hover:text-red-700"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -361,7 +361,7 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
               ))}
               
               {jobItems.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4">
                   No items added yet. Click "Add Item" to get started.
                 </p>
               )}
@@ -370,11 +370,11 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
         </Card>
 
         {/* Additional Details Section */}
-        <Card className="border-l-4 border-l-indigo-400 bg-gradient-to-r from-indigo-50/50 to-indigo-50/20">
+        <Card className="border-s-4 border-s-indigo-400 bg-accent">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-4">
-              <FileText className="w-5 h-5 text-indigo-600" />
-              <h3 className="text-lg font-semibold text-gray-800">Additional Details</h3>
+              <FileText className="w-5 h-5 text-indigo-600 dark:text-indigo-300" />
+              <h3 className="text-lg font-semibold text-foreground">Additional Details</h3>
             </div>
             
             <JobOrderDetailsSection 
@@ -385,13 +385,13 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
         </Card>
 
         {/* Form Actions */}
-        <div className="flex gap-4 pt-6 border-t border-gray-200">
+        <div className="flex gap-4 pt-6 border-t border-border">
           {onCancel && (
             <Button 
               type="button" 
               variant="outline" 
               onClick={onCancel} 
-              className="flex-1 hover:bg-gray-50"
+              className="flex-1 hover:bg-muted"
             >
               Cancel
             </Button>
@@ -399,7 +399,7 @@ export function JobFormWithImageUpload({ onCancel }: JobFormWithImageUploadProps
           <Button 
             type="submit" 
             disabled={isCreating} 
-            className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+            className="flex-1 bg-primary hover:bg-primary/90 text-white font-medium py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
           >
             {isCreating ? (
               <div className="flex items-center gap-2">
