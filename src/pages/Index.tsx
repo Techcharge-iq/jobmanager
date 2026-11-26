@@ -235,7 +235,7 @@ const Index = () => {
               : "Synchronizing the latest job data..."}
           </div>
         )}
-        <div className={fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-24"}>
+        <div className={fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-32"}>
           <Suspense fallback={<PageSkeleton />}>
             <EnterStagger key={jobParam ?? currentView} className="flex min-h-0 flex-1 flex-col">
               {renderContent()}

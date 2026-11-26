@@ -1,0 +1,1004 @@
+diff --git a/CHANGES.md b/CHANGES.md
+index e7e173c..7ad1e68 100644
+--- a/CHANGES.md
++++ b/CHANGES.md
+@@ -1,5 +1,13 @@
+ # JobFlow redesign: frontend only
+ 
++## Round 2 (latest): no sidebar, macOS dock, more colour
++- The left menu is gone. All navigation is the bottom dock: icons only, coloured app-icon tiles, magnification on hover, a dot under every page that is open in a tab, a ring on the current page, labels as tooltips. Search, invoice update and New job sit at the right end of the dock. Shrinks to fit 360px phones.
++- Soft pastel wallpaper behind the app (neon-glow night version in dark mode). Top bar, tab strip, dock and hero are glass; cards stay solid, bigger radius.
++- Tabs are pills with a lavender-to-peach active state.
++- Dashboard: vivid gradient hero, larger gradient KPI cards, new **Invoiced, last 30 days** area chart (gradient, hover tooltip), semicircle **Open jobs by status** gauge, and a coloured **Pipeline by branch** grid. All computed from the jobs already in the local cache.
++- Status chips on the approved-jobs screen now use the shared colourful badge; the selected job row is a soft gradient instead of solid red.
++- Dashboard now scrolls as one page instead of nested scroll panels.
++
+ No database, API, route, prop or data-flow changes. `src/data`, `src/services`, `src/integrations` and `supabase/` are untouched.
+ New UI state lives in localStorage only: `jobflow:tabs:v1:<userId>` (open tabs), `jobflow:dir` (layout direction), `theme` (existing).
+ 
+@@ -13,7 +21,7 @@ tailwind.config.ts, src/index.css (tokens, glass recipe with @supports and prefe
+ Primary stays the AA-safe red `0 72% 51%`; the brighter `--brand` red is used only for glow and accents.
+ 
+ ## Phase 2: shell
+-`components/shell/*` (AppShell, AppSidebar, TopBar, TabStrip, JobDetailsPanel, EnterStagger, nav metadata, shortcuts), `hooks/useTabs.ts`, upgraded `FloatingDock` (magnification, running dots, bounce), `CommandPalette` (tabs, actions, theme toggle), `pages/Index.tsx` wraps the existing views.
++`components/shell/*` (AppShell, TopBar, TabStrip, JobDetailsPanel, EnterStagger, nav metadata, shortcuts), `hooks/useTabs.ts`, upgraded `FloatingDock` (magnification, running dots, bounce), `CommandPalette` (tabs, actions, theme toggle), `pages/Index.tsx` wraps the existing views.
+ Tabs: open, pin, drag to reorder, close, close others, middle-click close, Delete key, restore on reload. Shortcuts: Ctrl/Cmd+K palette, Ctrl/Cmd+T or Alt+T new tab (opens palette), Ctrl/Cmd+W or Alt+W close, Ctrl/Cmd+1..9 or Alt+1..9 jump. Browsers reserve the Ctrl/Cmd versions, hence the Alt aliases.
+ Job tabs use the URL `/dashboard?job=<id>`; the same sections and `useJobDetails` hook as the dialog.
+ 
+diff --git a/package.json b/package.json
+index fd27447..54f8427 100644
+--- a/package.json
++++ b/package.json
+@@ -107,13 +107,5 @@
+     "typescript-eslint": "^8.0.1",
+     "vite": "^7.3.6",
+     "wrangler": "^4.156.2"
+-  },
+-  "allowScripts": {
+-    "esbuild@0.28.2": true,
+-    "esbuild@0.25.12": true,
+-    "@swc/core@1.16.2": true,
+-    "workerd@1.20261101.1": true,
+-    "workerd@1.20261102.1": true,
+-    "core-js@3.50.0": true
+   }
+ }
+diff --git a/src/App.tsx b/src/App.tsx
+index 97ee5ae..90bab7a 100644
+--- a/src/App.tsx
++++ b/src/App.tsx
+@@ -81,7 +81,7 @@ function App() {
+       <AuthProvider>
+         <NotificationProvider>
+           <TooltipProvider>
+-            <div className="min-h-screen bg-background">
++            <div className="min-h-screen">
+               <Toaster />
+               <Sonner />
+               <JobEditNotifications />
+diff --git a/src/components/AdminJobManagement.tsx b/src/components/AdminJobManagement.tsx
+index d8f69c9..af5d8d8 100644
+--- a/src/components/AdminJobManagement.tsx
++++ b/src/components/AdminJobManagement.tsx
+@@ -192,7 +192,7 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
+   if (!isAdmin) return <div className="p-6">Access Denied</div>;
+ 
+   return (
+-    <div className="space-y-6 p-6 bg-background min-h-screen">
++    <div className="space-y-6 p-6 min-h-screen">
+       <div className="flex items-center justify-between">
+         <h1 className="text-3xl font-bold text-foreground">Admin Job Management</h1>
+         <SyncStatusIndicator />
+diff --git a/src/components/AdminManagement.tsx b/src/components/AdminManagement.tsx
+index 02ea517..a16378d 100644
+--- a/src/components/AdminManagement.tsx
++++ b/src/components/AdminManagement.tsx
+@@ -24,7 +24,7 @@ export function AdminManagement() {
+   const userHook = useUserManagement();
+ 
+   return (
+-    <div className="min-h-screen bg-background p-6">
++    <div className="min-h-screen p-6">
+       <div className="max-w-7xl mx-auto space-y-8">
+         {/* Header Section */}
+         <div className="flex items-center justify-between">
+diff --git a/src/components/LoginPage.tsx b/src/components/LoginPage.tsx
+index caf0df4..40fadc7 100644
+--- a/src/components/LoginPage.tsx
++++ b/src/components/LoginPage.tsx
+@@ -58,12 +58,12 @@ export function LoginPage() {
+ 
+   return (
+     <div className="grid min-h-screen lg:grid-cols-2">
+-      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-lavender via-sky to-mint lg:flex lg:flex-col lg:justify-end lg:p-12">
++      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-violet-700 via-purple-600 to-fuchsia-600 text-white lg:flex lg:flex-col lg:justify-end lg:p-12">
+         <HeroAmbient className="absolute inset-0" />
+         <div className="relative max-w-md space-y-3">
+           <JobFlowMark className="h-12 w-12" />
+-          <h2 className="text-h1 text-foreground">Every job, from quote to invoice, in one calm place.</h2>
+-          <p className="text-muted-foreground">Approvals, designers, production and billing, all in step.</p>
++          <h2 className="text-h1 text-white">Every job, from quote to invoice, in one calm place.</h2>
++          <p className="text-white/90">Approvals, designers, production and billing, all in step.</p>
+         </div>
+       </aside>
+       <div className="flex items-center justify-center bg-background p-4">
+diff --git a/src/components/ModernDashboard.tsx b/src/components/ModernDashboard.tsx
+index 1d4f824..a1ed3fa 100644
+--- a/src/components/ModernDashboard.tsx
++++ b/src/components/ModernDashboard.tsx
+@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input";
+ import { Button } from "@/components/ui/button";
+ import { KpiStrip } from "@/components/command/KpiStrip";
+ import { HeroPanel } from "@/components/hero/HeroPanel";
++import { RevenueTrend } from "@/components/dashboard/insights/RevenueTrend";
++import { JobSummaryGauge } from "@/components/dashboard/insights/JobSummaryGauge";
++import { BranchPipeline } from "@/components/dashboard/insights/BranchPipeline";
+ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+ import type { ReactNode } from "react";
+ import { useScrollDepth } from "@/hooks/useScrollDepth";
+@@ -297,7 +300,7 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }:
+   };
+ 
+   return (
+-    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto bg-background px-3 py-3 text-sm md:overflow-hidden md:px-5">
++    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-3 text-sm md:px-5">
+       <div className="flex shrink-0 items-center justify-between gap-2">
+         <div>
+           <h1 className="flex items-center gap-2 text-base font-semibold text-foreground"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />Dashboard</h1>
+@@ -388,8 +391,14 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }:
+         <KpiStrip jobs={jobs} />
+       </div>
+ 
+-      <Tabs defaultValue="work" value={tab} onValueChange={setTab} className="flex min-h-[26rem] shrink-0 flex-col md:min-h-0 md:flex-1 md:shrink">
+-        <TabsList aria-label="Dashboard panels" className="grid h-11 shrink-0 grid-cols-4 gap-0 p-1">
++      <div className="grid shrink-0 gap-3 lg:grid-cols-3">
++        <RevenueTrend jobs={jobs} className="lg:col-span-2" />
++        <JobSummaryGauge jobs={jobs} />
++      </div>
++      <BranchPipeline jobs={jobs} className="shrink-0" />
++
++      <Tabs defaultValue="work" value={tab} onValueChange={setTab} className="flex shrink-0 flex-col">
++        <TabsList aria-label="Dashboard panels" className="grid h-12 shrink-0 grid-cols-4 gap-0 rounded-2xl bg-card/70 p-1.5 shadow-card">
+           <TabsTrigger value="work" className="h-full px-1 text-xs">Work</TabsTrigger>
+           <TabsTrigger value="status" className="h-full px-1 text-xs">Status</TabsTrigger>
+           <TabsTrigger value="invoice" className="h-full px-1 text-xs">Invoice</TabsTrigger>
+diff --git a/src/components/UserAccessManagement.tsx b/src/components/UserAccessManagement.tsx
+index 60ee2d6..6c1c106 100644
+--- a/src/components/UserAccessManagement.tsx
++++ b/src/components/UserAccessManagement.tsx
+@@ -150,7 +150,7 @@ export default function UserAccessManagement() {
+   }
+ 
+   return (
+-    <div className="min-h-screen bg-background p-6">
++    <div className="min-h-screen p-6">
+       <div className="max-w-7xl mx-auto">
+         <div className="mb-8">
+           <h1 className="text-3xl font-bold text-foreground mb-2">User Access Management</h1>
+diff --git a/src/components/admin/AdvancedUserPermissions.tsx b/src/components/admin/AdvancedUserPermissions.tsx
+index 085e05f..3a39be9 100644
+--- a/src/components/admin/AdvancedUserPermissions.tsx
++++ b/src/components/admin/AdvancedUserPermissions.tsx
+@@ -230,7 +230,7 @@ export function AdvancedUserPermissions() {
+   }
+ 
+   return (
+-    <div className="min-h-screen bg-background p-6">
++    <div className="min-h-screen p-6">
+       <div className="max-w-7xl mx-auto">
+         <div className="mb-8">
+           <h1 className="text-3xl font-bold text-foreground mb-2">
+diff --git a/src/components/command/FloatingDock.tsx b/src/components/command/FloatingDock.tsx
+index d01ced9..155ab84 100644
+--- a/src/components/command/FloatingDock.tsx
++++ b/src/components/command/FloatingDock.tsx
+@@ -1,7 +1,5 @@
+ import { useEffect, useRef } from "react";
+-import { Menu, Plus, Receipt, Search } from "lucide-react";
+-import { Button } from "@/components/ui/button";
+-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
++import { Plus, Receipt, Search } from "lucide-react";
+ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+ import { cn } from "@/lib/utils";
+ import { gsap, useMotionOK } from "@/lib/motion";
+@@ -19,8 +17,9 @@ interface Props {
+   bounce?: { view: string; n: number } | null;
+ }
+ 
+-const item = "relative h-11 w-11 shrink-0 origin-bottom rounded-full p-0 text-muted-foreground hover:bg-muted hover:text-foreground";
++const tileBase = "relative flex h-9 w-9 shrink-0 origin-bottom items-center justify-center rounded-xl max-[380px]:h-8 max-[380px]:w-8 text-white shadow-md outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:h-12 sm:w-12 sm:rounded-[15px]";
+ 
++/** macOS-style dock: icons only, magnification on hover, dots for open tabs, bounce on open. */
+ export function FloatingDock({ currentView, onNavigate, onOpenPalette, onQuickInvoice, userRole, openViews, bounce }: Props) {
+   const navRef = useRef<HTMLElement>(null);
+   const motionOK = useMotionOK();
+@@ -34,79 +33,65 @@ export function FloatingDock({ currentView, onNavigate, onOpenPalette, onQuickIn
+       const r = el.getBoundingClientRect();
+       if (!r.width) return;
+       const d = Math.abs(e.clientX - (r.left + r.width / 2));
+-      const scale = 1 + 0.5 * Math.exp(-(d * d) / (2 * 56 * 56));
+-      gsap.to(el, { scale, y: -(scale - 1) * 16, duration: 0.18, ease: "power3.out", overwrite: "auto" });
++      const scale = 1 + 0.65 * Math.exp(-(d * d) / (2 * 58 * 58));
++      gsap.to(el, { scale, y: -(scale - 1) * 14, duration: 0.18, ease: "power3.out", overwrite: "auto" });
+     });
+   };
+   const onPointerLeave = () => {
+-    dockItems().forEach((el) => gsap.to(el, { scale: 1, y: 0, duration: 0.55, ease: "elastic.out(1, 0.55)", overwrite: "auto" }));
++    dockItems().forEach((el) => gsap.to(el, { scale: 1, y: 0, duration: 0.6, ease: "elastic.out(1, 0.55)", overwrite: "auto" }));
+   };
+ 
+   useEffect(() => {
+     if (!bounce || !motionOK.current) return;
+     const el = navRef.current?.querySelector<HTMLElement>(`[data-dock-id="${bounce.view}"]`);
+-    if (!el || !el.getBoundingClientRect().width) return;
+-    gsap.timeline().to(el, { y: -18, duration: 0.2, ease: "power2.out" }).to(el, { y: 0, duration: 0.7, ease: "bounce.out" });
++    if (!el) return;
++    gsap.timeline().to(el, { y: -20, duration: 0.2, ease: "power2.out" }).to(el, { y: 0, duration: 0.75, ease: "bounce.out" });
+   }, [bounce, motionOK]);
+ 
++  const action = (label: string, onClick: () => void, tile: string, icon: React.ReactNode, extra?: string) => (
++    <Tooltip>
++      <TooltipTrigger asChild>
++        <button type="button" data-dock-item aria-label={label} onClick={onClick} className={cn(tileBase, tile, extra)}>{icon}</button>
++      </TooltipTrigger>
++      <TooltipContent side="top" sideOffset={14}>{label}</TooltipContent>
++    </Tooltip>
++  );
++
+   return (
+-    <TooltipProvider delayDuration={150}>
++    <TooltipProvider delayDuration={100}>
+       <nav
+         ref={navRef}
+         aria-label="Main menu"
+         onPointerMove={onPointerMove}
+         onPointerLeave={onPointerLeave}
+-        className="floating-dock glass fixed inset-x-0 z-40 mx-auto flex w-fit max-w-[calc(100vw-1rem)] items-center gap-0 rounded-full px-1 py-1.5 sm:gap-1 sm:px-2"
++        className="floating-dock glass fixed inset-x-0 z-40 mx-auto flex w-fit max-w-[calc(100vw-0.75rem)] items-end gap-0.5 rounded-[26px] px-1.5 pb-2 pt-1.5 sm:gap-2 sm:px-3"
+       >
+-        <div className="sm:hidden">
+-          <DropdownMenu>
+-            <DropdownMenuTrigger asChild>
+-              <Button variant="ghost" size="icon" aria-label="All menu items" className={cn(item, "text-primary")}><Menu className="h-5 w-5" /></Button>
+-            </DropdownMenuTrigger>
+-            <DropdownMenuContent side="top" align="start" sideOffset={12} className="max-h-[60dvh] w-60 overflow-y-auto">
+-              {items.map(({ id, label, icon: Icon }) => (
+-                <DropdownMenuItem key={id} onSelect={() => onNavigate(id)} className={cn("min-h-11 gap-3", currentView === id && "bg-primary/10 text-primary")}>
+-                  <Icon className="h-4 w-4" />{label}
+-                  {openViews?.has(id) && <span aria-label="Open in a tab" className="ms-auto h-1.5 w-1.5 rounded-full bg-muted-foreground" />}
+-                </DropdownMenuItem>
+-              ))}
+-            </DropdownMenuContent>
+-          </DropdownMenu>
+-        </div>
+-        <div className="hidden items-center gap-1 sm:max-lg:flex">
+-          {items.map(({ id, label, icon: Icon }) => (
++        {items.map(({ id, label, icon: Icon, tile }) => {
++          const current = currentView === id;
++          return (
+             <Tooltip key={id}>
+               <TooltipTrigger asChild>
+-                <Button
+-                  variant="ghost" size="icon" type="button" data-dock-item data-dock-id={id}
+-                  aria-label={label} aria-current={currentView === id ? "page" : undefined}
++                <button
++                  type="button"
++                  data-dock-item
++                  data-dock-id={id}
++                  aria-label={label}
++                  aria-current={current ? "page" : undefined}
+                   onClick={() => onNavigate(id)}
+-                  className={cn(item, currentView === id && "bg-primary/10 text-primary")}
++                  className={cn(tileBase, "bg-gradient-to-br", tile, current && "ring-2 ring-white/80 shadow-glow")}
+                 >
+-                  <Icon className="h-[18px] w-[18px]" />
+-                  {openViews?.has(id) && <span aria-hidden className="absolute inset-x-0 -bottom-1 mx-auto h-1 w-1 rounded-full bg-foreground/60" />}
+-                </Button>
++                  <Icon className="h-[18px] w-[18px] sm:h-[22px] sm:w-[22px]" aria-hidden />
++                  {openViews?.has(id) && <span aria-hidden className="absolute inset-x-0 -bottom-2 mx-auto h-1 w-1 rounded-full bg-foreground/70" />}
++                </button>
+               </TooltipTrigger>
+-              <TooltipContent>{label}</TooltipContent>
++              <TooltipContent side="top" sideOffset={14}>{label}</TooltipContent>
+             </Tooltip>
+-          ))}
+-          <div className="mx-1 h-6 w-px shrink-0 bg-border" />
+-        </div>
+-        <Button variant="ghost" type="button" data-dock-item onClick={onOpenPalette} aria-label="Search or command" className={cn(item, "lg:hidden")}>
+-          <Search className="h-[18px] w-[18px]" />
+-        </Button>
+-        <Tooltip>
+-          <TooltipTrigger asChild>
+-            <Button variant="ghost" size="icon" type="button" data-dock-item aria-label="Update invoice" onClick={onQuickInvoice} className={item}><Receipt className="h-[18px] w-[18px]" /></Button>
+-          </TooltipTrigger>
+-          <TooltipContent>Update invoice no. & value</TooltipContent>
+-        </Tooltip>
+-        <Tooltip>
+-          <TooltipTrigger asChild>
+-            <Button size="icon" type="button" data-dock-item aria-label="New job order" onClick={() => onNavigate("create")} className="h-11 w-11 shrink-0 origin-bottom rounded-full"><Plus className="h-5 w-5" /></Button>
+-          </TooltipTrigger>
+-          <TooltipContent>New job order</TooltipContent>
+-        </Tooltip>
++          );
++        })}
++        <div aria-hidden className="mx-0.5 mb-1 h-8 w-px shrink-0 self-end bg-border sm:mx-1 sm:h-10" />
++        {action("Search or command (Ctrl K)", onOpenPalette, "bg-card text-foreground ring-1 ring-border", <Search className="h-5 w-5" aria-hidden />, "hidden sm:flex")}
++        {action("Update invoice no. & value", onQuickInvoice, "bg-gradient-to-br from-cyan-400 to-emerald-600", <Receipt className="h-5 w-5" aria-hidden />)}
++        {action("New job order", () => onNavigate("create"), "bg-gradient-to-br from-red-500 to-rose-600", <Plus className="h-6 w-6" aria-hidden />)}
+       </nav>
+     </TooltipProvider>
+   );
+diff --git a/src/components/dashboard/insights/BranchPipeline.tsx b/src/components/dashboard/insights/BranchPipeline.tsx
+new file mode 100644
+index 0000000..87995c5
+--- /dev/null
++++ b/src/components/dashboard/insights/BranchPipeline.tsx
+@@ -0,0 +1,75 @@
++import { useMemo } from "react";
++import { Layers } from "lucide-react";
++import type { Job } from "@/pages/Index";
++import { Card } from "@/components/ui/card";
++import { cn } from "@/lib/utils";
++
++const STAGES = [
++  { label: "Pending", statuses: ["pending"], soft: "bg-amber-100 text-amber-900 dark:bg-amber-400/15 dark:text-amber-200", hot: "bg-amber-400 text-amber-950" },
++  { label: "Designing", statuses: ["designing"], soft: "bg-violet-100 text-violet-900 dark:bg-violet-400/15 dark:text-violet-200", hot: "bg-violet-600 text-white" },
++  { label: "In production", statuses: ["in-progress", "out", "foc_sample"], soft: "bg-sky-100 text-sky-900 dark:bg-sky-400/15 dark:text-sky-200", hot: "bg-sky-500 text-sky-950" },
++  { label: "Ready to bill", statuses: ["completed", "finished"], soft: "bg-emerald-100 text-emerald-900 dark:bg-emerald-400/15 dark:text-emerald-200", hot: "bg-emerald-500 text-emerald-950" },
++];
++
++/** Open jobs per branch and stage. The busiest stage of each branch is highlighted. */
++export function BranchPipeline({ jobs, className }: { jobs: Job[]; className?: string }) {
++  const rows = useMemo(() => {
++    const byBranch = new Map<string, number[]>();
++    for (const job of jobs) {
++      const stage = STAGES.findIndex((s) => s.statuses.includes(job.status));
++      if (stage < 0) continue;
++      const key = job.branch || "No branch";
++      const counts = byBranch.get(key) ?? STAGES.map(() => 0);
++      counts[stage]++;
++      byBranch.set(key, counts);
++    }
++    return [...byBranch.entries()]
++      .map(([branch, counts]) => ({ branch, counts, open: counts.reduce((a, b) => a + b, 0) }))
++      .sort((a, b) => b.open - a.open)
++      .slice(0, 5);
++  }, [jobs]);
++
++  return (
++    <Card className={cn("min-w-0 p-5", className)}>
++      <div className="mb-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
++        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white"><Layers className="h-4 w-4" aria-hidden /></span>
++        Pipeline by branch
++      </div>
++      {rows.length === 0 ? (
++        <p className="py-6 text-center text-sm text-muted-foreground">No open jobs right now.</p>
++      ) : (
++        <div className="overflow-x-auto" role="region" aria-label="Pipeline by branch, scrollable" tabIndex={0}>
++          <table className="w-full min-w-[34rem] border-separate border-spacing-1.5 text-sm">
++            <thead>
++              <tr className="text-xs text-muted-foreground">
++                <th scope="col" className="w-40 px-1 text-start font-medium">Branch</th>
++                {STAGES.map((s) => <th key={s.label} scope="col" className="px-1 text-start font-medium">{s.label}</th>)}
++              </tr>
++            </thead>
++            <tbody>
++              {rows.map((row) => {
++                const peak = Math.max(...row.counts);
++                return (
++                  <tr key={row.branch}>
++                    <th scope="row" className="px-1 text-start font-medium">
++                      <div className="truncate">{row.branch}</div>
++                      <div className="text-xs font-normal text-muted-foreground">{row.open} open</div>
++                    </th>
++                    {row.counts.map((count, i) => (
++                      <td
++                        key={STAGES[i].label}
++                        className={cn("h-12 rounded-2xl px-3 text-start font-semibold tabular-nums", count === 0 ? "bg-muted/60 text-muted-foreground" : count === peak ? STAGES[i].hot : STAGES[i].soft)}
++                      >
++                        {count === 0 ? "–" : <>{count}<span className="ms-1 text-xs font-normal opacity-80">jobs</span></>}
++                      </td>
++                    ))}
++                  </tr>
++                );
++              })}
++            </tbody>
++          </table>
++        </div>
++      )}
++    </Card>
++  );
++}
+diff --git a/src/components/dashboard/insights/JobSummaryGauge.tsx b/src/components/dashboard/insights/JobSummaryGauge.tsx
+new file mode 100644
+index 0000000..142d61d
+--- /dev/null
++++ b/src/components/dashboard/insights/JobSummaryGauge.tsx
+@@ -0,0 +1,78 @@
++import { useMemo, useRef } from "react";
++import { Gauge } from "lucide-react";
++import type { Job } from "@/pages/Index";
++import { Card } from "@/components/ui/card";
++import { cn } from "@/lib/utils";
++import { gsap, useCountUp, useGSAP, useMotionOK } from "@/lib/motion";
++
++const GROUPS = [
++  { label: "Pending", color: "#f59e0b", statuses: ["pending"] },
++  { label: "Designing", color: "#8b5cf6", statuses: ["designing"] },
++  { label: "In progress", color: "#0ea5e9", statuses: ["in-progress"] },
++  { label: "Out / FOC", color: "#f97316", statuses: ["out", "foc_sample"] },
++  { label: "Ready to bill", color: "#10b981", statuses: ["completed", "finished"] },
++];
++
++const CX = 100, CY = 100, R = 78;
++const point = (a: number) => [CX + R * Math.cos(a), CY + R * Math.sin(a)];
++const arc = (from: number, to: number) => {
++  const [x0, y0] = point(from);
++  const [x1, y1] = point(to);
++  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${R} ${R} 0 ${to - from > Math.PI ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
++};
++
++/** Semicircle gauge of open jobs by status. Hand-built SVG, drawn in by GSAP. */
++export function JobSummaryGauge({ jobs, className }: { jobs: Job[]; className?: string }) {
++  const rows = useMemo(() => GROUPS.map((g) => ({ ...g, count: jobs.filter((j) => g.statuses.includes(j.status)).length })), [jobs]);
++  const total = rows.reduce((a, r) => a + r.count, 0);
++
++  const segments = useMemo(() => {
++    let cursor = Math.PI;
++    return rows.filter((r) => r.count > 0).map((r) => {
++      const span = (r.count / total) * Math.PI;
++      const gap = Math.min(0.05, span / 3);
++      const seg = { color: r.color, d: arc(cursor + gap / 2, cursor + span - gap / 2) };
++      cursor += span;
++      return seg;
++    });
++  }, [rows, total]);
++
++  const svg = useRef<SVGSVGElement>(null);
++  const num = useRef<HTMLDivElement>(null);
++  const ok = useMotionOK();
++  useCountUp(num, total, (n) => String(Math.round(n)));
++  useGSAP(() => {
++    if (!ok.current || !svg.current) return;
++    gsap.fromTo(svg.current.querySelectorAll("path[data-seg]"), { strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.9, ease: "power2.out", stagger: 0.1 });
++  }, { scope: svg, dependencies: [total] });
++
++  return (
++    <Card className={cn("flex min-w-0 flex-col gap-3 p-5", className)}>
++      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
++        <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-blue-600 text-white"><Gauge className="h-4 w-4" aria-hidden /></span>
++        Open jobs by status
++      </div>
++      <div className="relative mx-auto w-full max-w-[16rem]">
++        <svg ref={svg} viewBox="0 0 200 108" role="img" aria-label={`${total} open jobs: ${rows.map((r) => `${r.count} ${r.label}`).join(", ")}`} className="w-full overflow-visible">
++          <path d={arc(Math.PI, 2 * Math.PI)} fill="none" stroke="currentColor" strokeOpacity={0.1} strokeWidth={20} strokeLinecap="round" />
++          {segments.map((s) => (
++            <path key={s.color} data-seg d={s.d} pathLength={1} strokeDasharray={1} strokeDashoffset={0} fill="none" stroke={s.color} strokeWidth={20} strokeLinecap="round" />
++          ))}
++        </svg>
++        <div className="absolute inset-x-0 bottom-0 text-center">
++          <div ref={num} className="text-3xl font-bold tabular-nums leading-none tracking-tight">{total}</div>
++          <div className="mt-1 text-xs text-muted-foreground">open jobs</div>
++        </div>
++      </div>
++      <ul className="space-y-1.5 text-sm">
++        {rows.map((r) => (
++          <li key={r.label} className="flex items-center gap-2">
++            <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: r.color }} />
++            <span className="text-muted-foreground">{r.label}</span>
++            <span className="ms-auto font-semibold tabular-nums">{r.count}</span>
++          </li>
++        ))}
++      </ul>
++    </Card>
++  );
++}
+diff --git a/src/components/dashboard/insights/RevenueTrend.tsx b/src/components/dashboard/insights/RevenueTrend.tsx
+new file mode 100644
+index 0000000..ed7e919
+--- /dev/null
++++ b/src/components/dashboard/insights/RevenueTrend.tsx
+@@ -0,0 +1,91 @@
++import { useMemo, useRef } from "react";
++import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
++import { ArrowDownRight, ArrowUpRight, TrendingUp } from "lucide-react";
++import type { Job } from "@/pages/Index";
++import { Card } from "@/components/ui/card";
++import { cn } from "@/lib/utils";
++import { formatOmaniRial } from "@/utils/currency";
++import { gsap, useCountUp, useGSAP, useMotionOK } from "@/lib/motion";
++
++const DAY = 86_400_000;
++const DAYS = 30;
++const fmtDay = (t: number) => new Date(t).toLocaleDateString(undefined, { month: "short", day: "numeric" });
++
++/** Invoiced value per day for the last 30 days, with the change against the 30 days before. */
++export function RevenueTrend({ jobs, className }: { jobs: Job[]; className?: string }) {
++  const { data, total, delta } = useMemo(() => {
++    const now = Date.now();
++    const startOfToday = new Date(new Date(now).setHours(0, 0, 0, 0)).getTime();
++    const days = Array.from({ length: DAYS }, (_, i) => ({ t: startOfToday - (DAYS - 1 - i) * DAY, value: 0 }));
++    let previous = 0;
++    for (const job of jobs) {
++      if (job.status !== "invoiced") continue;
++      const time = new Date(job.invoicedAt ?? job.createdAt).getTime();
++      if (!Number.isFinite(time)) continue;
++      const value = Number(job.totalValue) || 0;
++      const index = Math.floor((time - days[0].t) / DAY);
++      if (index >= 0 && index < DAYS) days[index].value += value;
++      else if (index < 0 && index >= -DAYS) previous += value;
++    }
++    const sum = days.reduce((a, d) => a + d.value, 0);
++    return { data: days.map((d) => ({ label: fmtDay(d.t), value: d.value })), total: sum, delta: previous > 0 ? ((sum - previous) / previous) * 100 : null };
++  }, [jobs]);
++
++  const num = useRef<HTMLDivElement>(null);
++  const box = useRef<HTMLDivElement>(null);
++  const ok = useMotionOK();
++  useCountUp(num, total, formatOmaniRial);
++  useGSAP(() => {
++    if (!ok.current || !box.current) return;
++    const rtl = getComputedStyle(box.current).direction === "rtl";
++    gsap.from(box.current, { clipPath: rtl ? "inset(0 0 0 100%)" : "inset(0 100% 0 0)", duration: 1.1, ease: "power2.out", clearProps: "clipPath" });
++  }, { scope: box });
++
++  const up = (delta ?? 0) >= 0;
++  return (
++    <Card className={cn("flex min-w-0 flex-col gap-3 p-5", className)}>
++      <div className="flex flex-wrap items-start justify-between gap-2">
++        <div>
++          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
++            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 text-white"><TrendingUp className="h-4 w-4" aria-hidden /></span>
++            Invoiced, last 30 days
++          </div>
++          <div ref={num} className="mt-2 text-3xl font-bold tabular-nums tracking-tight">{formatOmaniRial(total)}</div>
++        </div>
++        {delta != null && Number.isFinite(delta) && (
++          <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold", up ? "bg-mint text-mint-foreground" : "bg-rose text-rose-foreground")}>
++            {up ? <ArrowUpRight className="h-3.5 w-3.5" aria-hidden /> : <ArrowDownRight className="h-3.5 w-3.5" aria-hidden />}
++            {Math.abs(Math.round(delta))}% <span className="sr-only">{up ? "up" : "down"} on the previous 30 days</span><span aria-hidden className="font-normal opacity-80">vs previous 30 days</span>
++          </span>
++        )}
++      </div>
++      <div ref={box} role="img" aria-label={`Invoiced value per day for the last 30 days, total ${formatOmaniRial(total)}`} className="h-48 w-full">
++        <ResponsiveContainer width="100%" height="100%">
++          <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
++            <defs>
++              <linearGradient id="rev-fill" x1="0" y1="0" x2="0" y2="1">
++                <stop offset="0%" stopColor="#a855f7" stopOpacity={0.5} />
++                <stop offset="100%" stopColor="#f472b6" stopOpacity={0} />
++              </linearGradient>
++              <linearGradient id="rev-line" x1="0" y1="0" x2="1" y2="0">
++                <stop offset="0%" stopColor="#6366f1" />
++                <stop offset="100%" stopColor="#ec4899" />
++              </linearGradient>
++            </defs>
++            <XAxis dataKey="label" interval={4} padding={{ left: 14, right: 14 }} tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
++            <Tooltip
++              cursor={{ stroke: "#a855f7", strokeOpacity: 0.4 }}
++              content={({ active, payload, label }) => active && payload?.length ? (
++                <div className="rounded-xl border bg-popover px-3 py-2 text-xs text-popover-foreground shadow-lg">
++                  <div className="text-muted-foreground">{label}</div>
++                  <div className="font-semibold">{formatOmaniRial(Number(payload[0].value))}</div>
++                </div>
++              ) : null}
++            />
++            <Area type="monotone" dataKey="value" stroke="url(#rev-line)" strokeWidth={3} fill="url(#rev-fill)" dot={false} activeDot={{ r: 5, fill: "#fff", stroke: "#a855f7", strokeWidth: 2 }} isAnimationActive={false} />
++          </AreaChart>
++        </ResponsiveContainer>
++      </div>
++    </Card>
++  );
++}
+diff --git a/src/components/hero/AmbientScene.tsx b/src/components/hero/AmbientScene.tsx
+index 63d76a0..9944d08 100644
+--- a/src/components/hero/AmbientScene.tsx
++++ b/src/components/hero/AmbientScene.tsx
+@@ -31,7 +31,7 @@ function Particles({ count = 110 }: { count?: number }) {
+       <bufferGeometry>
+         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
+       </bufferGeometry>
+-      <pointsMaterial size={0.09} map={dot} alphaTest={0.3} color="#8b7cf6" transparent opacity={0.7} sizeAttenuation depthWrite={false} />
++      <pointsMaterial size={0.09} map={dot} alphaTest={0.3} color="#ffffff" transparent opacity={0.75} sizeAttenuation depthWrite={false} />
+     </points>
+   );
+ }
+diff --git a/src/components/hero/HeroPanel.tsx b/src/components/hero/HeroPanel.tsx
+index 9435023..be855af 100644
+--- a/src/components/hero/HeroPanel.tsx
++++ b/src/components/hero/HeroPanel.tsx
+@@ -1,12 +1,11 @@
+ import { useRef } from "react";
+-import { ArrowRight } from "lucide-react";
+-import { Button } from "@/components/ui/button";
++import { ArrowRight, Sparkles } from "lucide-react";
+ import { HeroAmbient } from "./HeroAmbient";
+ import { gsap, useGSAP, useMotionOK } from "@/lib/motion";
+ 
+ interface Props { title: string; subtitle: string; actionLabel: string; onAction: () => void }
+ 
+-/** One clear insight and one primary action. Pastel base, optional ambient WebGL layer behind. */
++/** One clear insight and one primary action. Vivid gradient, optional ambient WebGL layer behind. */
+ export function HeroPanel({ title, subtitle, actionLabel, onAction }: Props) {
+   const root = useRef<HTMLElement>(null);
+   const ok = useMotionOK();
+@@ -16,17 +15,19 @@ export function HeroPanel({ title, subtitle, actionLabel, onAction }: Props) {
+   }, { scope: root, dependencies: [title] });
+ 
+   return (
+-    <section ref={root} aria-label="Today" className="relative isolate shrink-0 overflow-hidden rounded-3xl bg-gradient-to-br from-lavender via-sky to-mint p-3 shadow-card sm:p-5">
++    <section ref={root} aria-label="Today" className="relative isolate shrink-0 overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-purple-600 to-fuchsia-600 p-5 text-white shadow-glass sm:p-7">
+       <HeroAmbient className="absolute inset-0 -z-10" />
+-      <div className="glass flex flex-wrap items-center justify-between gap-3 rounded-2xl px-4 py-3">
++      <span aria-hidden className="pointer-events-none absolute -end-10 -top-16 -z-10 h-56 w-56 rounded-full bg-orange-400/50 blur-3xl" />
++      <span aria-hidden className="pointer-events-none absolute -bottom-20 start-1/3 -z-10 h-48 w-48 rounded-full bg-sky-400/40 blur-3xl" />
++      <div className="flex flex-wrap items-center justify-between gap-4">
+         <div className="min-w-0">
+-          <p data-hero-in className="hidden text-xs font-medium text-muted-foreground sm:block">Today</p>
+-          <h2 data-hero-in className="text-h2 text-foreground">{title}</h2>
+-          <p data-hero-in className="hidden text-sm text-muted-foreground sm:block">{subtitle}</p>
++          <p data-hero-in className="mb-1 hidden items-center gap-1.5 text-xs font-semibold text-white/90 sm:flex"><Sparkles className="h-3.5 w-3.5" aria-hidden />Today</p>
++          <h2 data-hero-in className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h2>
++          <p data-hero-in className="mt-1 hidden text-sm text-white/90 sm:block">{subtitle}</p>
+         </div>
+-        <Button data-hero-in type="button" onClick={onAction} className="h-11 rounded-xl px-5">
+-          {actionLabel}<ArrowRight className="h-4 w-4 rtl:-scale-x-100" />
+-        </Button>
++        <button data-hero-in type="button" onClick={onAction} className="inline-flex h-11 items-center gap-2 rounded-xl bg-white px-5 text-sm font-semibold text-violet-800 shadow-lg transition-transform hover:scale-[1.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-violet-700 active:scale-[0.98]">
++          {actionLabel}<ArrowRight className="h-4 w-4 rtl:-scale-x-100" aria-hidden />
++        </button>
+       </div>
+     </section>
+   );
+diff --git a/src/components/job-management/ApprovedJobsSlider.tsx b/src/components/job-management/ApprovedJobsSlider.tsx
+index edea463..b0fd465 100644
+--- a/src/components/job-management/ApprovedJobsSlider.tsx
++++ b/src/components/job-management/ApprovedJobsSlider.tsx
+@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
+ import { Job } from "@/pages/Index";
+ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+ import { Button } from "@/components/ui/button";
+-import { Badge } from "@/components/ui/badge";
++import { StatusBadge } from "@/components/ui/status-badge";
+ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+ import { Input } from "@/components/ui/input";
+ import { JobDetails } from "@/components/JobDetails";
+@@ -40,22 +40,6 @@ const STATUS_OPTIONS = [
+   { value: "cancelled", label: "Cancelled" },
+ ];
+ 
+-const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+-  switch (status) {
+-    case "completed":
+-    case "finished":
+-    case "invoiced":
+-      return "default";
+-    case "cancelled":
+-      return "destructive";
+-    case "pending":
+-    case "in-progress":
+-    case "designing":
+-      return "secondary";
+-    default:
+-      return "outline";
+-  }
+-};
+ 
+ function DetailItem({ icon: Icon, label, value, sub }: {
+   icon: any;
+@@ -268,23 +252,18 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
+                     className={cn(
+                       "w-full text-start p-3 rounded-md border transition-colors",
+                       isActive
+-                        ? "bg-primary text-primary-foreground border-primary"
++                        ? "border-transparent bg-gradient-to-r from-lavender to-peach text-foreground shadow-glow"
+                         : "bg-card hover:bg-muted border-border"
+                     )}
+                   >
+                     <div className="flex items-center justify-between mb-1">
+                       <span className="font-semibold text-sm">{job.jobOrderNumber}</span>
+-                      <Badge
+-                        variant={isActive ? "outline" : getStatusVariant(job.status)}
+-                        className={cn("text-[10px]", isActive && "border-primary-foreground/40 text-primary-foreground")}
+-                      >
+-                        {job.status}
+-                      </Badge>
++                      <StatusBadge status={job.status} />
+                     </div>
+-                    <p className={cn("text-xs truncate", isActive ? "text-primary-foreground/80" : "text-muted-foreground")}>
++                    <p className={cn("text-xs truncate", "text-muted-foreground")}>
+                       {job.title}
+                     </p>
+-                    <p className={cn("text-xs truncate mt-0.5", isActive ? "text-primary-foreground/70" : "text-muted-foreground")}>
++                    <p className={cn("text-xs truncate mt-0.5", "text-muted-foreground")}>
+                       {job.customer}
+                     </p>
+                   </button>
+@@ -304,9 +283,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
+                 <p className="text-sm text-muted-foreground mt-1">{currentJob?.title}</p>
+               </div>
+               <div className="flex items-center gap-2">
+-                <Badge variant={getStatusVariant(currentJob?.status || "")}>
+-                  {currentJob?.status}
+-                </Badge>
++                {currentJob && <StatusBadge status={currentJob.status} />}
+                 <Button variant="outline" size="sm" onClick={() => currentJob && handleViewDetails(currentJob)}>
+                   <Eye className="w-4 h-4 me-1" /> View
+                 </Button>
+diff --git a/src/components/kpi/KpiCard.tsx b/src/components/kpi/KpiCard.tsx
+index 73c53c0..5e9875c 100644
+--- a/src/components/kpi/KpiCard.tsx
++++ b/src/components/kpi/KpiCard.tsx
+@@ -3,6 +3,9 @@ import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+ import { cn } from "@/lib/utils";
+ import { useCountUp } from "@/lib/motion";
+ import { toneSurface, type Tone } from "@/components/ui/tones";
++
++const toneFrom: Record<Tone, string> = { lavender: "from-lavender", mint: "from-mint", peach: "from-peach", sky: "from-sky", rose: "from-rose" };
++const toneTo: Record<Tone, string> = { lavender: "to-card", mint: "to-card", peach: "to-card", sky: "to-card", rose: "to-card" };
+ import { Sparkline } from "./Sparkline";
+ import { Ring } from "./Ring";
+ 
+@@ -27,11 +30,11 @@ export function KpiCard({ label, value, format, hint, icon: Icon, tone, delta, s
+   const up = (delta ?? 0) >= 0;
+ 
+   return (
+-    <div data-kpi className={cn("flex min-w-0 flex-col justify-between gap-2 rounded-2xl p-3.5 shadow-card", toneSurface[tone])}>
++    <div data-kpi className={cn("flex min-w-0 flex-col justify-between gap-2 rounded-3xl bg-gradient-to-br p-4 shadow-card", toneSurface[tone], toneFrom[tone], toneTo[tone])}>
+       <div className="flex items-start justify-between gap-2">
+         <div className="min-w-0">
+           <div className="flex items-center gap-1.5 text-xs font-medium opacity-90"><Icon className="h-3.5 w-3.5 shrink-0" aria-hidden /><span className="truncate">{label}</span></div>
+-          <div ref={num} className="mt-1.5 whitespace-nowrap text-lg font-semibold tabular-nums tracking-tight sm:text-2xl">{format(value)}</div>
++          <div ref={num} className="mt-1.5 whitespace-nowrap text-xl font-bold tabular-nums tracking-tight sm:text-3xl">{format(value)}</div>
+         </div>
+         {ring && <div className="hidden min-[440px]:block"><Ring value={ring.value} label={ring.label} /></div>}
+       </div>
+diff --git a/src/components/shell/AppShell.tsx b/src/components/shell/AppShell.tsx
+index 64c4247..4290836 100644
+--- a/src/components/shell/AppShell.tsx
++++ b/src/components/shell/AppShell.tsx
+@@ -1,5 +1,4 @@
+ import type { ReactNode } from "react";
+-import { AppSidebar } from "./AppSidebar";
+ import { TopBar } from "./TopBar";
+ import { TabStrip } from "./TabStrip";
+ import { FloatingDock } from "@/components/command/FloatingDock";
+@@ -23,16 +22,14 @@ interface Props {
+   onReorder: (fromId: string, toId: string) => void;
+ }
+ 
++/** Top bar, tab strip and content over a soft wallpaper. Navigation lives in the bottom dock. */
+ export function AppShell({ children, currentView, userRole, tabs, activeId, bounce, onNavigate, onOpenPalette, onQuickInvoice, onActivateTab, onCloseTab, onCloseOthers, onTogglePin, onReorder }: Props) {
+   const openViews = new Set(tabs.filter((t) => t.kind === "view" && t.view).map((t) => t.view as string));
+   return (
+-    <div className="flex h-dvh overflow-hidden bg-background">
+-      <AppSidebar currentView={currentView} openViews={openViews} userRole={userRole} onNavigate={onNavigate} />
+-      <div className="flex min-w-0 flex-1 flex-col">
+-        <TopBar onOpenPalette={onOpenPalette} onCreateJob={() => onNavigate("create")} />
+-        <TabStrip tabs={tabs} activeId={activeId} onActivate={onActivateTab} onClose={onCloseTab} onCloseOthers={onCloseOthers} onTogglePin={onTogglePin} onReorder={onReorder} onNew={onOpenPalette} />
+-        <main id="main" className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{children}</main>
+-      </div>
++    <div className="app-wallpaper flex h-dvh flex-col overflow-hidden">
++      <TopBar onOpenPalette={onOpenPalette} onCreateJob={() => onNavigate("create")} />
++      <TabStrip tabs={tabs} activeId={activeId} onActivate={onActivateTab} onClose={onCloseTab} onCloseOthers={onCloseOthers} onTogglePin={onTogglePin} onReorder={onReorder} onNew={onOpenPalette} />
++      <main id="main" className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{children}</main>
+       <FloatingDock currentView={currentView} onNavigate={onNavigate} onOpenPalette={onOpenPalette} onQuickInvoice={onQuickInvoice} userRole={userRole} openViews={openViews} bounce={bounce} />
+     </div>
+   );
+diff --git a/src/components/shell/AppSidebar.tsx b/src/components/shell/AppSidebar.tsx
+deleted file mode 100644
+index 4002878..0000000
+--- a/src/components/shell/AppSidebar.tsx
++++ /dev/null
+@@ -1,40 +0,0 @@
+-import { JobFlowLogo } from "@/components/brand/JobFlowMark";
+-import { cn } from "@/lib/utils";
+-import { visibleNav, type ViewId } from "./navItems";
+-
+-interface Props {
+-  currentView: ViewId;
+-  openViews: Set<string>;
+-  userRole: string;
+-  onNavigate: (view: ViewId) => void;
+-}
+-
+-/** Dark glass navigation rail for large screens. Smaller screens use the dock. */
+-export function AppSidebar({ currentView, openViews, userRole, onNavigate }: Props) {
+-  return (
+-    <aside aria-label="Primary" className="glass glass-dark hidden w-60 shrink-0 flex-col border-y-0 border-s-0 px-3 py-4 lg:flex">
+-      <div className="px-2 pb-5 text-white"><JobFlowLogo /></div>
+-      <nav className="flex flex-1 flex-col gap-1">
+-        {visibleNav(userRole).map(({ id, label, icon: Icon }) => {
+-          const active = currentView === id;
+-          return (
+-            <button
+-              key={id}
+-              type="button"
+-              aria-current={active ? "page" : undefined}
+-              onClick={() => onNavigate(id)}
+-              className={cn(
+-                "relative flex h-11 items-center gap-3 rounded-xl px-3 text-start text-sm font-medium outline-none transition-[background-color,color,box-shadow] duration-200 focus-visible:ring-2 focus-visible:ring-ring",
+-                active ? "nav-glow bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
+-              )}
+-            >
+-              <Icon className="h-[18px] w-[18px] shrink-0" aria-hidden />
+-              <span className="truncate">{label}</span>
+-              {openViews.has(id) && !active && <span aria-label="Open in a tab" className="ms-auto h-1.5 w-1.5 rounded-full bg-sidebar-foreground/70" />}
+-            </button>
+-          );
+-        })}
+-      </nav>
+-    </aside>
+-  );
+-}
+diff --git a/src/components/shell/TabStrip.tsx b/src/components/shell/TabStrip.tsx
+index d116631..8bbddf5 100644
+--- a/src/components/shell/TabStrip.tsx
++++ b/src/components/shell/TabStrip.tsx
+@@ -49,7 +49,7 @@ function SortableTab({ tab, active, tabIndex, register, onActivate, onClose, onC
+           className={cn(
+             "group relative flex shrink-0 animate-tab-in items-center rounded-xl border border-transparent text-sm transition-[background-color,box-shadow,color] duration-150",
+             active
+-              ? "bg-card text-foreground shadow-[0_0_0_1px_hsl(var(--brand)/0.30),0_8px_18px_-8px_hsl(var(--brand)/0.5)]"
++              ? "bg-gradient-to-r from-lavender to-peach text-foreground shadow-[0_8px_20px_-8px_hsl(var(--brand)/0.55)]"
+               : "text-muted-foreground hover:bg-card/60 hover:text-foreground",
+             isDragging && "z-10 opacity-90 shadow-lg",
+           )}
+@@ -149,7 +149,7 @@ export function TabStrip({ tabs, activeId, onActivate, onClose, onCloseOthers, o
+   };
+ 
+   return (
+-    <div className="glass flex shrink-0 items-center gap-1 border-x-0 border-t-0 px-2 py-1.5 shadow-none">
++    <div className="glass m-2 mb-0 flex shrink-0 items-center gap-1 rounded-2xl px-2 py-1.5 md:mx-4">
+       <div className="relative min-w-0 flex-1">
+         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+           <SortableContext items={tabs.map((t) => t.id)} strategy={horizontalListSortingStrategy}>
+diff --git a/src/components/shell/TopBar.tsx b/src/components/shell/TopBar.tsx
+index 3ce9be9..b5e4d38 100644
+--- a/src/components/shell/TopBar.tsx
++++ b/src/components/shell/TopBar.tsx
+@@ -1,6 +1,6 @@
+ import { Plus, Search } from "lucide-react";
+ import { Button } from "@/components/ui/button";
+-import { JobFlowMark } from "@/components/brand/JobFlowMark";
++import { JobFlowLogo } from "@/components/brand/JobFlowMark";
+ import { SyncStatusIndicator } from "@/components/ui/SyncStatusIndicator";
+ import { NotificationTray } from "@/components/NotificationTray";
+ import { UserProfileDropdown } from "@/components/user-profile/UserProfileDropdown";
+@@ -11,14 +11,14 @@ interface Props { onOpenPalette: () => void; onCreateJob: () => void }
+ export function TopBar({ onOpenPalette, onCreateJob }: Props) {
+   const profile = useProfileHeader();
+   return (
+-    <header className="glass relative z-30 flex h-14 shrink-0 items-center gap-2 border-x-0 border-t-0 px-3 shadow-none md:px-5">
+-      <div className="lg:hidden"><JobFlowMark className="h-8 w-8" /></div>
++    <header className="glass relative z-30 m-2 mb-0 flex h-14 shrink-0 items-center gap-2 rounded-2xl px-3 md:mx-4 md:mt-3 md:px-4">
++      <div className="hidden shrink-0 sm:block"><JobFlowLogo /></div>
+       <Button
+         type="button"
+         variant="ghost"
+         onClick={onOpenPalette}
+         aria-label="Search or run a command"
+-        className="h-10 min-w-0 flex-1 justify-start gap-2 rounded-xl bg-muted/70 px-3 text-sm font-normal text-muted-foreground hover:bg-muted sm:max-w-md sm:flex-none sm:basis-96"
++        className="h-10 min-w-0 flex-1 justify-start gap-2 rounded-xl bg-muted/70 px-3 text-sm font-normal text-muted-foreground hover:bg-muted sm:max-w-md sm:flex-none sm:basis-96 md:ms-3"
+       >
+         <Search className="h-4 w-4 shrink-0" />
+         <span className="truncate">Search jobs, pages, actions</span>
+diff --git a/src/components/shell/navItems.ts b/src/components/shell/navItems.ts
+index 01aac68..22d7767 100644
+--- a/src/components/shell/navItems.ts
++++ b/src/components/shell/navItems.ts
+@@ -12,16 +12,16 @@ export const VIEW_META: Record<ViewId, { title: string; path: string }> = {
+   settings: { title: "Settings", path: "/settings" },
+ };
+ 
+-export interface NavItem { id: ViewId; label: string; icon: LucideIcon; roles?: string[] }
++export interface NavItem { id: ViewId; label: string; icon: LucideIcon; roles?: string[]; tile: string }
+ 
+ export const NAV_ITEMS: NavItem[] = [
+-  { id: "dashboard", label: "Dashboard", icon: Home },
+-  { id: "approved-jobs", label: "Approved jobs", icon: CheckCircle },
+-  { id: "admin", label: "Job administration", icon: Shield, roles: ["admin", "manager"] },
+-  { id: "reports", label: "Reports & analytics", icon: BarChart3, roles: ["admin", "manager", "salesman"] },
+-  { id: "admin-management", label: "User management", icon: UsersRound, roles: ["admin", "manager"] },
+-  { id: "user-access", label: "User access control", icon: UserCheck, roles: ["admin"] },
+-  { id: "settings", label: "Settings", icon: Settings },
++  { id: "dashboard", label: "Dashboard", icon: Home, tile: "from-violet-500 to-fuchsia-500" },
++  { id: "approved-jobs", label: "Approved jobs", icon: CheckCircle, tile: "from-emerald-400 to-teal-600" },
++  { id: "admin", label: "Job administration", icon: Shield, roles: ["admin", "manager"], tile: "from-amber-400 to-orange-600" },
++  { id: "reports", label: "Reports & analytics", icon: BarChart3, roles: ["admin", "manager", "salesman"], tile: "from-sky-400 to-blue-600" },
++  { id: "admin-management", label: "User management", icon: UsersRound, roles: ["admin", "manager"], tile: "from-pink-400 to-rose-600" },
++  { id: "user-access", label: "User access control", icon: UserCheck, roles: ["admin"], tile: "from-indigo-400 to-violet-700" },
++  { id: "settings", label: "Settings", icon: Settings, tile: "from-slate-400 to-slate-700" },
+ ];
+ 
+ export function pathToView(pathname: string): ViewId {
+diff --git a/src/components/ui/card.tsx b/src/components/ui/card.tsx
+index 23029d7..2207d7f 100644
+--- a/src/components/ui/card.tsx
++++ b/src/components/ui/card.tsx
+@@ -10,7 +10,7 @@ const Card = React.forwardRef<
+   <div
+     ref={ref}
+     className={cn(
+-      "rounded-2xl border border-border/70 bg-card text-card-foreground shadow-card",
++      "rounded-3xl border border-border/60 bg-card text-card-foreground shadow-card",
+       className
+     )}
+     {...props}
+diff --git a/src/components/ui/chip.tsx b/src/components/ui/chip.tsx
+index 282b4e4..e69de29 100644
+--- a/src/components/ui/chip.tsx
++++ b/src/components/ui/chip.tsx
+@@ -1,7 +0,0 @@
+-import * as React from "react";
+-import { cn } from "@/lib/utils";
+-import { toneSurface, type Tone } from "./tones";
+-
+-export function Chip({ tone = "lavender", className, ...props }: React.HTMLAttributes<HTMLSpanElement> & { tone?: Tone }) {
+-  return <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium", toneSurface[tone], className)} {...props} />;
+-}
+diff --git a/src/components/ui/tones.ts b/src/components/ui/tones.ts
+index 95660a8..34da9c5 100644
+--- a/src/components/ui/tones.ts
++++ b/src/components/ui/tones.ts
+@@ -1,9 +1,9 @@
+ export type Tone = "lavender" | "mint" | "peach" | "sky" | "rose";
+ 
+ export const toneSurface: Record<Tone, string> = {
+-  lavender: "bg-lavender text-lavender-foreground",
+-  mint: "bg-mint text-mint-foreground",
+-  peach: "bg-peach text-peach-foreground",
+-  sky: "bg-sky text-sky-foreground",
+-  rose: "bg-rose text-rose-foreground",
++  lavender: "text-lavender-foreground",
++  mint: "text-mint-foreground",
++  peach: "text-peach-foreground",
++  sky: "text-sky-foreground",
++  rose: "text-rose-foreground",
+ };
+diff --git a/src/index.css b/src/index.css
+index 81024b2..888eb5e 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -59,7 +59,7 @@
+     --shadow-lg: 0 16px 36px -10px rgb(24 24 60 / 0.18);
+     --shadow-card: 0 1px 2px rgb(24 24 60 / 0.04), 0 6px 18px -8px rgb(24 24 60 / 0.10);
+     --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 10px 30px -12px rgb(24 24 60 / 0.25);
+-    --shadow-glow: 0 0 0 1px hsl(var(--brand) / 0.45), 0 8px 22px -6px hsl(var(--brand) / 0.55);
++    --shadow-glow: 0 0 0 1px hsl(var(--brand) / 0.45), 0 8px 22px -6px hsl(var(--brand) / 0.65);
+   }
+ 
+   .dark {
+@@ -108,7 +108,7 @@
+     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+     --shadow-md: 0 4px 14px -4px rgb(0 0 0 / 0.5);
+     --shadow-lg: 0 16px 36px -10px rgb(0 0 0 / 0.6);
+-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 22px -10px rgb(0 0 0 / 0.55);
++    --shadow-card: 0 0 0 1px hsl(0 0% 100% / 0.06), 0 16px 44px -16px hsl(222 95% 58% / 0.42);
+     --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 12px 32px -12px rgb(0 0 0 / 0.7);
+   }
+ }
+@@ -128,11 +128,27 @@
+ @media (prefers-reduced-motion: reduce) { .dashboard-card-enter { animation: none; } }
+ 
+ @layer components {
+-  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); }
++  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)); }
++
++  /* Soft pastel wallpaper (light) and neon-glow night (dark). Cards stay solid on top of it. */
++  .app-wallpaper {
++    background-color: hsl(var(--background));
++    background-image:
++      radial-gradient(52rem 36rem at 6% -8%, hsl(330 90% 87% / 0.95), transparent 62%),
++      radial-gradient(56rem 38rem at 96% 2%, hsl(262 92% 87% / 0.95), transparent 62%),
++      radial-gradient(50rem 40rem at 72% 108%, hsl(24 96% 87% / 0.85), transparent 62%),
++      radial-gradient(42rem 32rem at 0% 100%, hsl(205 92% 87% / 0.85), transparent 62%);
++  }
++  .dark .app-wallpaper {
++    background-image:
++      radial-gradient(48rem 34rem at 0% 0%, hsl(358 85% 38% / 0.38), transparent 62%),
++      radial-gradient(54rem 40rem at 100% 8%, hsl(222 95% 50% / 0.36), transparent 62%),
++      radial-gradient(46rem 36rem at 62% 112%, hsl(268 85% 45% / 0.30), transparent 62%);
++  }
+   .dashboard-workspace {
+-    flex: 1;
++    flex: none;
+     min-height: 0;
+-    overflow: auto;
++    overflow: visible;
+     overscroll-behavior: contain;
+     scrollbar-width: thin;
+     -webkit-overflow-scrolling: touch;
+diff --git a/src/pages/Index.tsx b/src/pages/Index.tsx
+index 763d24f..6730bb2 100644
+--- a/src/pages/Index.tsx
++++ b/src/pages/Index.tsx
+@@ -235,7 +235,7 @@ const Index = () => {
+               : "Synchronizing the latest job data..."}
+           </div>
+         )}
+-        <div className={fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-24"}>
++        <div className={fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-32"}>
+           <Suspense fallback={<PageSkeleton />}>
+             <EnterStagger key={jobParam ?? currentView} className="flex min-h-0 flex-1 flex-col">
+               {renderContent()}

@@ -31,7 +31,7 @@ function Particles({ count = 110 }: { count?: number }) {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" count={count} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.09} map={dot} alphaTest={0.3} color="#8b7cf6" transparent opacity={0.7} sizeAttenuation depthWrite={false} />
+      <pointsMaterial size={0.09} map={dot} alphaTest={0.3} color="#ffffff" transparent opacity={0.75} sizeAttenuation depthWrite={false} />
     </points>
   );
 }

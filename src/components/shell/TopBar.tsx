@@ -1,6 +1,6 @@
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JobFlowMark } from "@/components/brand/JobFlowMark";
+import { JobFlowLogo } from "@/components/brand/JobFlowMark";
 import { SyncStatusIndicator } from "@/components/ui/SyncStatusIndicator";
 import { NotificationTray } from "@/components/NotificationTray";
 import { UserProfileDropdown } from "@/components/user-profile/UserProfileDropdown";
@@ -11,14 +11,14 @@ interface Props { onOpenPalette: () => void; onCreateJob: () => void }
 export function TopBar({ onOpenPalette, onCreateJob }: Props) {
   const profile = useProfileHeader();
   return (
-    <header className="glass relative z-30 flex h-14 shrink-0 items-center gap-2 border-x-0 border-t-0 px-3 shadow-none md:px-5">
-      <div className="lg:hidden"><JobFlowMark className="h-8 w-8" /></div>
+    <header className="glass relative z-30 m-2 mb-0 flex h-14 shrink-0 items-center gap-2 rounded-2xl px-3 md:mx-4 md:mt-3 md:px-4">
+      <div className="hidden shrink-0 sm:block"><JobFlowLogo /></div>
       <Button
         type="button"
         variant="ghost"
         onClick={onOpenPalette}
         aria-label="Search or run a command"
-        className="h-10 min-w-0 flex-1 justify-start gap-2 rounded-xl bg-muted/70 px-3 text-sm font-normal text-muted-foreground hover:bg-muted sm:max-w-md sm:flex-none sm:basis-96"
+        className="h-10 min-w-0 flex-1 justify-start gap-2 rounded-xl bg-muted/70 px-3 text-sm font-normal text-muted-foreground hover:bg-muted sm:max-w-md sm:flex-none sm:basis-96 md:ms-3"
       >
         <Search className="h-4 w-4 shrink-0" />
         <span className="truncate">Search jobs, pages, actions</span>

@@ -192,7 +192,7 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
   if (!isAdmin) return <div className="p-6">Access Denied</div>;
 
   return (
-    <div className="space-y-6 p-6 bg-background min-h-screen">
+    <div className="space-y-6 p-6 min-h-screen">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Admin Job Management</h1>
         <SyncStatusIndicator />

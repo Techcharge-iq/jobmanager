@@ -59,7 +59,7 @@
     --shadow-lg: 0 16px 36px -10px rgb(24 24 60 / 0.18);
     --shadow-card: 0 1px 2px rgb(24 24 60 / 0.04), 0 6px 18px -8px rgb(24 24 60 / 0.10);
     --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 10px 30px -12px rgb(24 24 60 / 0.25);
-    --shadow-glow: 0 0 0 1px hsl(var(--brand) / 0.45), 0 8px 22px -6px hsl(var(--brand) / 0.55);
+    --shadow-glow: 0 0 0 1px hsl(var(--brand) / 0.45), 0 8px 22px -6px hsl(var(--brand) / 0.65);
   }
 
   .dark {
@@ -108,7 +108,7 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
     --shadow-md: 0 4px 14px -4px rgb(0 0 0 / 0.5);
     --shadow-lg: 0 16px 36px -10px rgb(0 0 0 / 0.6);
-    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 8px 22px -10px rgb(0 0 0 / 0.55);
+    --shadow-card: 0 0 0 1px hsl(0 0% 100% / 0.06), 0 16px 44px -16px hsl(222 95% 58% / 0.42);
     --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 12px 32px -12px rgb(0 0 0 / 0.7);
   }
 }
@@ -128,11 +128,27 @@
 @media (prefers-reduced-motion: reduce) { .dashboard-card-enter { animation: none; } }
 
 @layer components {
-  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); }
+  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)); }
+
+  /* Soft pastel wallpaper (light) and neon-glow night (dark). Cards stay solid on top of it. */
+  .app-wallpaper {
+    background-color: hsl(var(--background));
+    background-image:
+      radial-gradient(52rem 36rem at 6% -8%, hsl(330 90% 87% / 0.95), transparent 62%),
+      radial-gradient(56rem 38rem at 96% 2%, hsl(262 92% 87% / 0.95), transparent 62%),
+      radial-gradient(50rem 40rem at 72% 108%, hsl(24 96% 87% / 0.85), transparent 62%),
+      radial-gradient(42rem 32rem at 0% 100%, hsl(205 92% 87% / 0.85), transparent 62%);
+  }
+  .dark .app-wallpaper {
+    background-image:
+      radial-gradient(48rem 34rem at 0% 0%, hsl(358 85% 38% / 0.38), transparent 62%),
+      radial-gradient(54rem 40rem at 100% 8%, hsl(222 95% 50% / 0.36), transparent 62%),
+      radial-gradient(46rem 36rem at 62% 112%, hsl(268 85% 45% / 0.30), transparent 62%);
+  }
   .dashboard-workspace {
-    flex: 1;
+    flex: none;
     min-height: 0;
-    overflow: auto;
+    overflow: visible;
     overscroll-behavior: contain;
     scrollbar-width: thin;
     -webkit-overflow-scrolling: touch;

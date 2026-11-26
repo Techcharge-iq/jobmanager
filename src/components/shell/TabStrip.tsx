@@ -49,7 +49,7 @@ function SortableTab({ tab, active, tabIndex, register, onActivate, onClose, onC
           className={cn(
             "group relative flex shrink-0 animate-tab-in items-center rounded-xl border border-transparent text-sm transition-[background-color,box-shadow,color] duration-150",
             active
-              ? "bg-card text-foreground shadow-[0_0_0_1px_hsl(var(--brand)/0.30),0_8px_18px_-8px_hsl(var(--brand)/0.5)]"
+              ? "bg-gradient-to-r from-lavender to-peach text-foreground shadow-[0_8px_20px_-8px_hsl(var(--brand)/0.55)]"
               : "text-muted-foreground hover:bg-card/60 hover:text-foreground",
             isDragging && "z-10 opacity-90 shadow-lg",
           )}
@@ -149,7 +149,7 @@ export function TabStrip({ tabs, activeId, onActivate, onClose, onCloseOthers, o
   };
 
   return (
-    <div className="glass flex shrink-0 items-center gap-1 border-x-0 border-t-0 px-2 py-1.5 shadow-none">
+    <div className="glass m-2 mb-0 flex shrink-0 items-center gap-1 rounded-2xl px-2 py-1.5 md:mx-4">
       <div className="relative min-w-0 flex-1">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={tabs.map((t) => t.id)} strategy={horizontalListSortingStrategy}>

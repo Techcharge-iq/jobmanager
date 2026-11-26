@@ -58,12 +58,12 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-lavender via-sky to-mint lg:flex lg:flex-col lg:justify-end lg:p-12">
+      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-violet-700 via-purple-600 to-fuchsia-600 text-white lg:flex lg:flex-col lg:justify-end lg:p-12">
         <HeroAmbient className="absolute inset-0" />
         <div className="relative max-w-md space-y-3">
           <JobFlowMark className="h-12 w-12" />
-          <h2 className="text-h1 text-foreground">Every job, from quote to invoice, in one calm place.</h2>
-          <p className="text-muted-foreground">Approvals, designers, production and billing, all in step.</p>
+          <h2 className="text-h1 text-white">Every job, from quote to invoice, in one calm place.</h2>
+          <p className="text-white/90">Approvals, designers, production and billing, all in step.</p>
         </div>
       </aside>
       <div className="flex items-center justify-center bg-background p-4">

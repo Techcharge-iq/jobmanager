@@ -3,6 +3,9 @@ import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCountUp } from "@/lib/motion";
 import { toneSurface, type Tone } from "@/components/ui/tones";
+
+const toneFrom: Record<Tone, string> = { lavender: "from-lavender", mint: "from-mint", peach: "from-peach", sky: "from-sky", rose: "from-rose" };
+const toneTo: Record<Tone, string> = { lavender: "to-card", mint: "to-card", peach: "to-card", sky: "to-card", rose: "to-card" };
 import { Sparkline } from "./Sparkline";
 import { Ring } from "./Ring";
 
@@ -27,11 +30,11 @@ export function KpiCard({ label, value, format, hint, icon: Icon, tone, delta, s
   const up = (delta ?? 0) >= 0;
 
   return (
-    <div data-kpi className={cn("flex min-w-0 flex-col justify-between gap-2 rounded-2xl p-3.5 shadow-card", toneSurface[tone])}>
+    <div data-kpi className={cn("flex min-w-0 flex-col justify-between gap-2 rounded-3xl bg-gradient-to-br p-4 shadow-card", toneSurface[tone], toneFrom[tone], toneTo[tone])}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 text-xs font-medium opacity-90"><Icon className="h-3.5 w-3.5 shrink-0" aria-hidden /><span className="truncate">{label}</span></div>
-          <div ref={num} className="mt-1.5 whitespace-nowrap text-lg font-semibold tabular-nums tracking-tight sm:text-2xl">{format(value)}</div>
+          <div ref={num} className="mt-1.5 whitespace-nowrap text-xl font-bold tabular-nums tracking-tight sm:text-3xl">{format(value)}</div>
         </div>
         {ring && <div className="hidden min-[440px]:block"><Ring value={ring.value} label={ring.label} /></div>}
       </div>

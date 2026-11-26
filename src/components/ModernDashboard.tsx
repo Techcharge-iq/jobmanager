@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { KpiStrip } from "@/components/command/KpiStrip";
 import { HeroPanel } from "@/components/hero/HeroPanel";
+import { RevenueTrend } from "@/components/dashboard/insights/RevenueTrend";
+import { JobSummaryGauge } from "@/components/dashboard/insights/JobSummaryGauge";
+import { BranchPipeline } from "@/components/dashboard/insights/BranchPipeline";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ReactNode } from "react";
 import { useScrollDepth } from "@/hooks/useScrollDepth";
@@ -297,7 +300,7 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
   };
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto bg-background px-3 py-3 text-sm md:overflow-hidden md:px-5">
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-3 text-sm md:px-5">
       <div className="flex shrink-0 items-center justify-between gap-2">
         <div>
           <h1 className="flex items-center gap-2 text-base font-semibold text-foreground"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />Dashboard</h1>
@@ -388,8 +391,14 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
         <KpiStrip jobs={jobs} />
       </div>
 
-      <Tabs defaultValue="work" value={tab} onValueChange={setTab} className="flex min-h-[26rem] shrink-0 flex-col md:min-h-0 md:flex-1 md:shrink">
-        <TabsList aria-label="Dashboard panels" className="grid h-11 shrink-0 grid-cols-4 gap-0 p-1">
+      <div className="grid shrink-0 gap-3 lg:grid-cols-3">
+        <RevenueTrend jobs={jobs} className="lg:col-span-2" />
+        <JobSummaryGauge jobs={jobs} />
+      </div>
+      <BranchPipeline jobs={jobs} className="shrink-0" />
+
+      <Tabs defaultValue="work" value={tab} onValueChange={setTab} className="flex shrink-0 flex-col">
+        <TabsList aria-label="Dashboard panels" className="grid h-12 shrink-0 grid-cols-4 gap-0 rounded-2xl bg-card/70 p-1.5 shadow-card">
           <TabsTrigger value="work" className="h-full px-1 text-xs">Work</TabsTrigger>
           <TabsTrigger value="status" className="h-full px-1 text-xs">Status</TabsTrigger>
           <TabsTrigger value="invoice" className="h-full px-1 text-xs">Invoice</TabsTrigger>

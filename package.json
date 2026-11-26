@@ -112,8 +112,8 @@
     "esbuild@0.28.2": true,
     "esbuild@0.25.12": true,
     "@swc/core@1.16.2": true,
+    "core-js@3.50.0": true,
     "workerd@1.20261101.1": true,
-    "workerd@1.20261102.1": true,
-    "core-js@3.50.0": true
+    "workerd@1.20261102.1": true
   }
 }
