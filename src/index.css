@@ -2,114 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-/* JobFlow tokens: HSL. Solid cards for data, glass only on shell chrome (see .glass). */
+/* JobFlow "Midnight Command Center" tokens (HSL). Violet primary, teal success, amber warning, sky info.
+   Solid cards for data; glass only on the top bar and dock. */
 @layer base {
   :root {
-    --background: 225 33% 97%;
-    --foreground: 224 40% 11%;
+    --background: 220 20% 96.5%;
+    --foreground: 224 32% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 224 40% 11%;
+    --card-foreground: 224 32% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 224 40% 11%;
+    --popover-foreground: 224 32% 12%;
 
-    --primary: 0 72% 51%;               /* JobFlow red, AA with white text */
+    --primary: 262 83% 58%;             /* violet, AA with white text */
     --primary-foreground: 0 0% 100%;
-    --brand: 358 75% 59%;               /* brighter red for glow and accents only */
+    --brand: 262 83% 58%;
 
-    --secondary: 225 30% 95%;
-    --secondary-foreground: 224 40% 11%;
-    --muted: 225 30% 95%;
-    --muted-foreground: 220 14% 42%;
-    --accent: 255 60% 96%;
-    --accent-foreground: 224 40% 11%;
+    --secondary: 220 16% 94%;
+    --secondary-foreground: 224 32% 12%;
+    --muted: 220 16% 94%;
+    --muted-foreground: 220 9% 38%;
+    --accent: 262 60% 96%;
+    --accent-foreground: 224 32% 12%;
 
-    --destructive: 0 74% 42%;
+    --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 224 28% 90%;
-    --input: 224 28% 88%;
-    --ring: 0 84% 60%;
-    --radius: 0.875rem;                 /* lg 14px, md 12px, sm 10px */
+    --border: 220 16% 88%;
+    --input: 220 16% 85%;
+    --ring: 262 83% 58%;
+    --radius: 0.5rem;                   /* lg 8px, md 6px, sm 4px; cards use rounded-xl */
 
-    /* pastel secondary palette: background + readable foreground */
-    --tone-lavender: 255 92% 95%;  --tone-lavender-fg: 255 52% 36%;
-    --tone-mint:     152 62% 91%;  --tone-mint-fg:     162 78% 21%;
-    --tone-peach:    24 96% 92%;   --tone-peach-fg:    18 78% 29%;
-    --tone-sky:      205 95% 92%;  --tone-sky-fg:      212 78% 28%;
-    --tone-rose:     350 92% 94%;  --tone-rose-fg:     350 66% 31%;
+    /* restrained tints: violet, teal, amber, sky, rose */
+    --tone-lavender: 262 70% 96%;  --tone-lavender-fg: 262 55% 36%;
+    --tone-mint:     172 55% 92%;  --tone-mint-fg:     174 80% 20%;
+    --tone-peach:    38 92% 92%;   --tone-peach-fg:    30 85% 26%;
+    --tone-sky:      204 90% 93%;  --tone-sky-fg:      209 80% 27%;
+    --tone-rose:     350 85% 95%;  --tone-rose-fg:     350 66% 31%;
 
-    /* glass recipe (light) */
     --glass-bg: 0 0% 100%;
-    --glass-alpha: 0.72;
-    --glass-border: 224 30% 30% / 0.14;
-    --glass-blur: 22px;
+    --glass-alpha: 0.78;
+    --glass-border: 224 20% 30% / 0.14;
+    --glass-blur: 12px;
 
-    /* dark glass sidebar (used in both themes) */
-    --sidebar-background: 252 32% 11%;
-    --sidebar-foreground: 225 22% 80%;
-    --sidebar-primary: 358 75% 59%;
+    --sidebar-background: 224 30% 11%;
+    --sidebar-foreground: 220 20% 80%;
+    --sidebar-primary: 262 83% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 252 24% 19%;
+    --sidebar-accent: 224 24% 18%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 252 22% 22%;
-    --sidebar-ring: 358 75% 59%;
+    --sidebar-border: 224 20% 22%;
+    --sidebar-ring: 262 83% 66%;
 
-    --shadow-sm: 0 1px 2px 0 rgb(24 24 60 / 0.05);
-    --shadow-md: 0 4px 14px -4px rgb(24 24 60 / 0.10);
-    --shadow-lg: 0 16px 36px -10px rgb(24 24 60 / 0.18);
-    --shadow-card: 0 1px 2px rgb(24 24 60 / 0.04), 0 6px 18px -8px rgb(24 24 60 / 0.10);
-    --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.6) inset, 0 10px 30px -12px rgb(24 24 60 / 0.25);
-    --shadow-glow: 0 0 0 1px hsl(var(--brand) / 0.45), 0 8px 22px -6px hsl(var(--brand) / 0.65);
+    --shadow-sm: 0 1px 2px 0 rgb(16 24 40 / 0.05);
+    --shadow-md: 0 4px 12px -4px rgb(16 24 40 / 0.10);
+    --shadow-lg: 0 12px 28px -10px rgb(16 24 40 / 0.18);
+    --shadow-card: 0 1px 2px rgb(16 24 40 / 0.04);
+    --shadow-glass: 0 1px 2px rgb(16 24 40 / 0.06);
+    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.35);
   }
 
   .dark {
     color-scheme: dark;
-    --background: 232 40% 7%;
-    --foreground: 225 40% 97%;
-    --card: 232 34% 11%;
-    --card-foreground: 225 40% 97%;
-    --popover: 232 34% 11%;
-    --popover-foreground: 225 40% 97%;
+    --background: 226 34% 7%;           /* deep navy */
+    --foreground: 220 25% 94%;
+    --card: 226 28% 10.5%;              /* layered surfaces */
+    --card-foreground: 220 25% 94%;
+    --popover: 226 28% 12%;
+    --popover-foreground: 220 25% 94%;
 
-    --primary: 0 72% 51%;
+    --primary: 262 83% 62%;
     --primary-foreground: 0 0% 100%;
-    --brand: 358 80% 62%;
+    --brand: 262 90% 72%;
 
-    --secondary: 232 28% 17%;
-    --secondary-foreground: 225 40% 97%;
-    --muted: 232 28% 17%;
-    --muted-foreground: 224 18% 68%;
-    --accent: 250 28% 20%;
-    --accent-foreground: 225 40% 97%;
+    --secondary: 226 22% 16%;
+    --secondary-foreground: 220 25% 94%;
+    --muted: 226 22% 15%;
+    --muted-foreground: 220 12% 67%;
+    --accent: 262 30% 20%;
+    --accent-foreground: 220 25% 94%;
 
-    --destructive: 0 63% 45%;
+    --destructive: 0 68% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 232 24% 20%;
-    --input: 232 24% 22%;
-    --ring: 0 84% 60%;
+    --border: 226 20% 19%;
+    --input: 226 20% 22%;
+    --ring: 262 90% 72%;
 
-    --tone-lavender: 255 34% 20%;  --tone-lavender-fg: 255 90% 86%;
-    --tone-mint:     160 40% 15%;  --tone-mint-fg:     152 60% 78%;
-    --tone-peach:    22 42% 17%;   --tone-peach-fg:    24 92% 82%;
-    --tone-sky:      208 46% 17%;  --tone-sky-fg:      205 92% 82%;
-    --tone-rose:     350 40% 18%;  --tone-rose-fg:     350 92% 85%;
+    --tone-lavender: 262 32% 20%;  --tone-lavender-fg: 262 90% 85%;
+    --tone-mint:     174 38% 15%;  --tone-mint-fg:     172 62% 76%;
+    --tone-peach:    36 40% 16%;   --tone-peach-fg:    38 92% 76%;
+    --tone-sky:      207 42% 17%;  --tone-sky-fg:      204 92% 80%;
+    --tone-rose:     350 36% 18%;  --tone-rose-fg:     350 92% 84%;
 
-    /* glass recipe (dark): darker fill, lighter border, lower blur */
-    --glass-bg: 232 40% 10%;
-    --glass-alpha: 0.62;
-    --glass-border: 0 0% 100% / 0.10;
-    --glass-blur: 14px;
+    --glass-bg: 226 34% 9%;
+    --glass-alpha: 0.72;
+    --glass-border: 0 0% 100% / 0.09;
+    --glass-blur: 12px;
 
-    --sidebar-background: 252 36% 8%;
-    --sidebar-accent: 252 26% 16%;
-    --sidebar-border: 252 22% 17%;
+    --sidebar-background: 226 34% 8%;
+    --sidebar-accent: 226 24% 15%;
+    --sidebar-border: 226 20% 17%;
 
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
-    --shadow-md: 0 4px 14px -4px rgb(0 0 0 / 0.5);
-    --shadow-lg: 0 16px 36px -10px rgb(0 0 0 / 0.6);
-    --shadow-card: 0 0 0 1px hsl(0 0% 100% / 0.06), 0 16px 44px -16px hsl(222 95% 58% / 0.42);
-    --shadow-glass: 0 1px 0 rgb(255 255 255 / 0.06) inset, 0 12px 32px -12px rgb(0 0 0 / 0.7);
+    --shadow-md: 0 4px 12px -4px rgb(0 0 0 / 0.5);
+    --shadow-lg: 0 12px 28px -10px rgb(0 0 0 / 0.6);
+    --shadow-card: 0 0 0 1px hsl(0 0% 100% / 0.03);
+    --shadow-glass: 0 1px 0 hsl(0 0% 100% / 0.04) inset;
+    --shadow-glow: 0 0 0 1px hsl(var(--primary) / 0.5);
   }
 }
 
@@ -128,22 +127,15 @@
 @media (prefers-reduced-motion: reduce) { .dashboard-card-enter { animation: none; } }
 
 @layer components {
-  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px)); }
+  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px)); }
 
-  /* Soft pastel wallpaper (light) and neon-glow night (dark). Cards stay solid on top of it. */
+  /* One quiet violet wash at the top; everything else is flat. */
   .app-wallpaper {
     background-color: hsl(var(--background));
-    background-image:
-      radial-gradient(52rem 36rem at 6% -8%, hsl(330 90% 87% / 0.95), transparent 62%),
-      radial-gradient(56rem 38rem at 96% 2%, hsl(262 92% 87% / 0.95), transparent 62%),
-      radial-gradient(50rem 40rem at 72% 108%, hsl(24 96% 87% / 0.85), transparent 62%),
-      radial-gradient(42rem 32rem at 0% 100%, hsl(205 92% 87% / 0.85), transparent 62%);
+    background-image: radial-gradient(70rem 22rem at 50% -14rem, hsl(262 80% 93% / 0.9), transparent 70%);
   }
   .dark .app-wallpaper {
-    background-image:
-      radial-gradient(48rem 34rem at 0% 0%, hsl(358 85% 38% / 0.38), transparent 62%),
-      radial-gradient(54rem 40rem at 100% 8%, hsl(222 95% 50% / 0.36), transparent 62%),
-      radial-gradient(46rem 36rem at 62% 112%, hsl(268 85% 45% / 0.30), transparent 62%);
+    background-image: radial-gradient(70rem 24rem at 50% -14rem, hsl(262 60% 24% / 0.55), transparent 70%);
   }
   .dashboard-workspace {
     flex: none;

@@ -259,7 +259,7 @@ export function AdvancedUserPermissions() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Users List */}
               <Card className="bg-card  border-0 shadow-xl">
-                <CardHeader className="bg-primary text-white">
+                <CardHeader className="border-b bg-muted/40 text-foreground">
                   <CardTitle className="flex items-center gap-2">
                     <UserCheck className="w-5 h-5" />
                     System Users ({users.length})
@@ -335,7 +335,7 @@ export function AdvancedUserPermissions() {
 
               {/* Permissions Panel */}
               <Card className="bg-card  border-0 shadow-xl">
-                <CardHeader className="bg-primary text-white">
+                <CardHeader className="border-b bg-muted/40 text-foreground">
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="w-5 h-5" />
                     Permissions & Access Control
@@ -426,7 +426,7 @@ export function AdvancedUserPermissions() {
 
           <TabsContent value="permissions">
             <Card className="bg-card  border-0 shadow-xl">
-              <CardHeader className="bg-primary text-white">
+              <CardHeader className="border-b bg-muted/40 text-foreground">
                 <CardTitle className="flex items-center gap-2">
                   <Shield className="w-5 h-5" />
                   Permission Reference Guide
@@ -469,7 +469,7 @@ export function AdvancedUserPermissions() {
 
           <TabsContent value="bulk">
             <Card className="bg-card  border-0 shadow-xl">
-              <CardHeader className="bg-primary text-white">
+              <CardHeader className="border-b bg-muted/40 text-foreground">
                 <CardTitle className="flex items-center gap-2">
                   <Crown className="w-5 h-5" />
                   Bulk Operations

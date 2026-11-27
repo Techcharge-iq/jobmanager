@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { TopBar } from "./TopBar";
-import { TabStrip } from "./TabStrip";
 import { FloatingDock } from "@/components/command/FloatingDock";
 import type { AppTab } from "@/hooks/useTabs";
 import type { ViewId } from "./navItems";
@@ -11,7 +10,6 @@ interface Props {
   userRole: string;
   tabs: AppTab[];
   activeId: string;
-  bounce: { view: string; n: number } | null;
   onNavigate: (view: string) => void;
   onOpenPalette: () => void;
   onQuickInvoice: () => void;
@@ -22,15 +20,18 @@ interface Props {
   onReorder: (fromId: string, toId: string) => void;
 }
 
-/** Top bar, tab strip and content over a soft wallpaper. Navigation lives in the bottom dock. */
-export function AppShell({ children, currentView, userRole, tabs, activeId, bounce, onNavigate, onOpenPalette, onQuickInvoice, onActivateTab, onCloseTab, onCloseOthers, onTogglePin, onReorder }: Props) {
+/** One compact top bar (tabs, search, actions), content, and a small primary-navigation dock. */
+export function AppShell({ children, currentView, userRole, tabs, activeId, onNavigate, onOpenPalette, onQuickInvoice, onActivateTab, onCloseTab, onCloseOthers, onTogglePin, onReorder }: Props) {
   const openViews = new Set(tabs.filter((t) => t.kind === "view" && t.view).map((t) => t.view as string));
   return (
     <div className="app-wallpaper flex h-dvh flex-col overflow-hidden">
-      <TopBar onOpenPalette={onOpenPalette} onCreateJob={() => onNavigate("create")} />
-      <TabStrip tabs={tabs} activeId={activeId} onActivate={onActivateTab} onClose={onCloseTab} onCloseOthers={onCloseOthers} onTogglePin={onTogglePin} onReorder={onReorder} onNew={onOpenPalette} />
+      <TopBar
+        tabs={tabs} activeId={activeId}
+        onActivateTab={onActivateTab} onCloseTab={onCloseTab} onCloseOthers={onCloseOthers} onTogglePin={onTogglePin} onReorder={onReorder}
+        onOpenPalette={onOpenPalette} onCreateJob={() => onNavigate("create")} onQuickInvoice={onQuickInvoice}
+      />
       <main id="main" className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">{children}</main>
-      <FloatingDock currentView={currentView} onNavigate={onNavigate} onOpenPalette={onOpenPalette} onQuickInvoice={onQuickInvoice} userRole={userRole} openViews={openViews} bounce={bounce} />
+      <FloatingDock currentView={currentView} onNavigate={onNavigate} userRole={userRole} openViews={openViews} />
     </div>
   );
 }

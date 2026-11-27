@@ -69,8 +69,8 @@ export function AdminPasswordReset() {
 
   return (
     <Card className="bg-card  border-0 shadow-xl">
-      <CardHeader className="bg-primary text-white rounded-t-lg">
-        <CardTitle className="flex items-center gap-2 text-white">
+      <CardHeader className="border-b bg-muted/40 text-foreground">
+        <CardTitle className="flex items-center gap-2">
           <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
             <Shield className="w-4 h-4" />
           </div>

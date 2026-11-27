@@ -51,7 +51,7 @@ export function UserProfileDropdown({ userProfile }: UserProfileDropdownProps) {
           variant="ghost"
           size="icon"
           aria-label="Account menu"
-          className="relative h-10 w-10 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="relative h-8 w-8 rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <User className="w-5 h-5" />
           {isOpen ? (

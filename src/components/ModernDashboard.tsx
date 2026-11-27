@@ -2,23 +2,21 @@ import { useEffect, useRef, useState, type ComponentType, type PointerEvent as R
 import { Job } from "@/pages/Index";
 import { JobDetails } from "@/components/JobDetails";
 import { JobStatusModal } from "@/components/JobStatusModal";
-import { DashboardNotifications } from "@/components/dashboard/DashboardNotifications";
 import { JobStatusOverview } from "@/components/dashboard/JobStatusOverview";
 import { ApprovalBox } from "@/components/dashboard/ApprovalBox";
 import { HighPriorityReminder } from "@/components/dashboard/HighPriorityReminder";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { KpiStrip } from "@/components/command/KpiStrip";
-import { HeroPanel } from "@/components/hero/HeroPanel";
 import { RevenueTrend } from "@/components/dashboard/insights/RevenueTrend";
 import { JobSummaryGauge } from "@/components/dashboard/insights/JobSummaryGauge";
-import { BranchPipeline } from "@/components/dashboard/insights/BranchPipeline";
+import { ProductionPipeline } from "@/components/dashboard/insights/ProductionPipeline";
+import { PriorityJobs, RecentJobs, ActivityFeed } from "@/components/dashboard/insights/JobLists";
+import { useProfileHeader } from "@/components/shell/useProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ReactNode } from "react";
-import { useScrollDepth } from "@/hooks/useScrollDepth";
 import { useSlideDirection } from "@/hooks/useSlideDirection";
-import { Search, Eye, Palette, Cog, Receipt, UserRound, ChevronLeft, ChevronRight } from "lucide-react";
+import { AlertCircle, ArrowRight, Palette, Cog, Receipt, UserRound, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ModernDashboardProps {
   jobs: Job[];
@@ -229,12 +227,11 @@ function WorkflowBucket({
   );
 }
 
+const pillBase = "inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
 export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: ModernDashboardProps) {
   const [tab, setTab] = useState("work");
-  const workRef = useRef<HTMLDivElement>(null);
-  useScrollDepth(workRef, tab === "work");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+  const profile = useProfileHeader();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isJobDetailsOpen, setIsJobDetailsOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
@@ -242,12 +239,6 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
     status: 'pending' | 'in-progress' | 'designing' | 'completed' | 'invoiced' | 'total' | 'active' | 'cancelled';
     title: string;
   } | null>(null);
-
-  const searchFilteredJobs = jobs.filter(job =>
-    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.jobOrderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.customer.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const stats = {
     total: jobs.length,
@@ -271,16 +262,10 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
     [job.assignee, job.designer, job.salesman].find((name) => name && name !== "Unassigned") || "Unassigned";
 
   const pendingApprovals = jobs.filter(job => job.approval_status === "pending_approval").length;
-  const urgentCount = jobs.filter(job => job.priority === "high" && !["completed", "invoiced", "cancelled", "finished"].includes(job.status)).length;
   const toInvoice = pendingInvoiceJobs.length;
-  const heroTitle = pendingApprovals > 0
-    ? `${pendingApprovals} job${pendingApprovals === 1 ? "" : "s"} need${pendingApprovals === 1 ? "s" : ""} approval today`
-    : urgentCount > 0
-      ? `${urgentCount} high priority job${urgentCount === 1 ? " is" : "s are"} in progress`
-      : "You’re all caught up";
-  const heroSubtitle = toInvoice > 0
-    ? `${toInvoice} completed job${toInvoice === 1 ? " is" : "s are"} waiting for an invoice.`
-    : "Nothing is waiting on you right now.";
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = profile?.full_name?.split(" ")[0];
 
   const handleViewDetails = (job: Job) => {
     if (onOpenJob) {
@@ -299,162 +284,84 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
     setStatusModalOpen(true);
   };
 
+  const goTo = (nextTab: string, anchor: string) => {
+    setTab(nextTab);
+    requestAnimationFrame(() => document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 py-3 text-sm md:px-5">
-      <div className="flex shrink-0 items-center justify-between gap-2">
-        <div>
-          <h1 className="flex items-center gap-2 text-base font-semibold text-foreground"><span className="h-2 w-2 rounded-full bg-primary" aria-hidden="true" />Dashboard</h1>
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-2 text-sm md:px-4">
+      <div className="flex min-h-8 shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
+        <p className="text-sm">
+          <span className="font-semibold">{greeting}{firstName ? `, ${firstName}` : ""}</span>
+          <span className="ms-2 hidden text-muted-foreground sm:inline">{new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</span>
+        </p>
+        <div className="ms-auto flex flex-wrap items-center gap-2">
+          {pendingApprovals > 0 ? (
+            <button type="button" onClick={() => goTo("work", "approvals-section")} className={`${pillBase} border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20`}>
+              <AlertCircle className="h-3.5 w-3.5" aria-hidden />
+              {pendingApprovals} job{pendingApprovals === 1 ? "" : "s"} awaiting approval
+              <span className="inline-flex items-center gap-0.5 font-semibold underline-offset-2 hover:underline">Review<ArrowRight className="h-3 w-3 rtl:-scale-x-100" aria-hidden /></span>
+            </button>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span aria-hidden className="h-1.5 w-1.5 rounded-full bg-teal-500" />Nothing awaiting approval</span>
+          )}
+          {toInvoice > 0 && (
+            <button type="button" onClick={() => goTo("invoice", "dashboard-workspace")} className={`${pillBase} bg-card hover:bg-muted`}>
+              <Receipt className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />{toInvoice} ready to invoice
+            </button>
+          )}
         </div>
-        <div className="flex min-w-0 items-center gap-1">
-          <div className="relative min-w-0">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search jobs..."
-              aria-label="Search jobs"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowSearchDropdown(e.target.value.length > 0);
-              }}
-              onFocus={() => searchQuery && setShowSearchDropdown(true)}
-              onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
-              className="ps-9 h-10 w-36 text-sm bg-card sm:w-56"
-            />
-            {showSearchDropdown && searchFilteredJobs.length > 0 && (
-              <div className="absolute top-full mt-2 w-full rounded-md border bg-popover text-popover-foreground shadow-lg z-50 max-h-80 overflow-y-auto">
-                <div className="p-2">
-                  <div className="text-xs text-muted-foreground mb-2 px-2">
-                    Found {searchFilteredJobs.length} job{searchFilteredJobs.length !== 1 ? 's' : ''}
-                  </div>
-                  <div className="space-y-1">
-                    {searchFilteredJobs.slice(0, 10).map((job) => (
-                      <div
-                        key={job.id}
-                        className="flex items-center justify-between p-3 rounded-md hover:bg-muted border border-transparent hover:border-border cursor-pointer"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate text-foreground">{job.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{job.jobOrderNumber}</p>
-                          <p className="text-xs text-muted-foreground truncate">{job.customer}</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            handleViewDetails(job);
-                            setShowSearchDropdown(false);
-                            setSearchQuery("");
-                          }}
-                          className="ms-2 h-8 w-8 p-0"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                  {searchFilteredJobs.length > 10 && (
-                    <div className="text-xs text-center text-muted-foreground mt-2 pb-1">
-                      And {searchFilteredJobs.length - 10} more...
-                    </div>
-                  )}
-                </div>
+      </div>
+
+      <div className="shrink-0"><KpiStrip jobs={jobs} /></div>
+
+      <div className="grid shrink-0 gap-2 lg:h-[clamp(15rem,30vh,22rem)] lg:grid-cols-12 lg:grid-rows-1">
+        <RevenueTrend jobs={jobs} className="h-64 lg:col-span-5 lg:h-auto" />
+        <JobSummaryGauge jobs={jobs} className="h-auto lg:col-span-3 lg:h-auto" />
+        <ProductionPipeline jobs={jobs} className="h-auto lg:col-span-4 lg:h-auto" />
+      </div>
+      <div className="grid shrink-0 gap-2 lg:h-[clamp(15rem,30vh,22rem)] lg:grid-cols-12 lg:grid-rows-1">
+        <PriorityJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-4 lg:max-h-none" />
+        <RecentJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-5 lg:max-h-none" />
+        <ActivityFeed className="max-h-72 lg:col-span-3 lg:max-h-none" />
+      </div>
+
+      <section id="dashboard-workspace" aria-label="Workspace" className="shrink-0 scroll-mt-2">
+        <Tabs value={tab} onValueChange={setTab} className="flex flex-col">
+          <TabsList aria-label="Dashboard panels" className="mb-2 grid h-9 w-full max-w-md grid-cols-4 gap-0 p-1">
+            <TabsTrigger value="work" className="h-full px-1 text-xs">Work</TabsTrigger>
+            <TabsTrigger value="status" className="h-full px-1 text-xs">Status</TabsTrigger>
+            <TabsTrigger value="invoice" className="h-full px-1 text-xs">Invoice</TabsTrigger>
+            <TabsTrigger value="priority" className="h-full px-1 text-xs">Priority</TabsTrigger>
+          </TabsList>
+          <TabsContent value="work" className="dashboard-workspace mt-0 space-y-4">
+            <section aria-label="Uncompleted work and bottlenecks" className="space-y-2">
+              <div>
+                <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">Uncompleted work</h2>
+                <p className="sr-only">Current workflow queues and the person or team responsible.</p>
               </div>
-            )}
-            {showSearchDropdown && searchQuery && searchFilteredJobs.length === 0 && (
-              <div className="absolute top-full mt-2 w-full rounded-md border bg-popover text-popover-foreground shadow-lg z-50 p-4">
-                <div className="text-center text-sm text-muted-foreground">
-                  <Search className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                  No jobs found matching "{searchQuery}"
-                </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <WorkflowBucket title="Pending Design" jobs={pendingDesignJobs} icon={Palette} assigneeFor={(job) => job.designer && job.designer !== "Unassigned" ? job.designer : assignedTo(job)} onSelect={handleViewDetails} animationDelay={0} />
+                <WorkflowBucket title="In Production / Execution" jobs={executionJobs} icon={Cog} assigneeFor={assignedTo} onSelect={handleViewDetails} animationDelay={0} />
+                <WorkflowBucket title="Pending Invoicing" jobs={pendingInvoiceJobs} icon={Receipt} assigneeFor={(job) => job.assignee && job.assignee !== "Unassigned" ? job.assignee : "Admin"} onSelect={handleViewDetails} animationDelay={0} />
               </div>
-            )}
-          </div>
-          <DashboardNotifications />
-        </div>
-      </div>
-
-      <HeroPanel
-        title={heroTitle}
-        subtitle={heroSubtitle}
-        actionLabel={pendingApprovals > 0 ? "Review approvals" : "Create job order"}
-        onAction={() => {
-          if (pendingApprovals > 0) {
-            setTab("work");
-            requestAnimationFrame(() => document.getElementById("approvals-section")?.scrollIntoView({ behavior: "smooth", block: "start" }));
-          } else {
-            onViewChange?.("create");
-          }
-        }}
-      />
-
-      <div className="dashboard-kpis shrink-0">
-        <KpiStrip jobs={jobs} />
-      </div>
-
-      <div className="grid shrink-0 gap-3 lg:grid-cols-3">
-        <RevenueTrend jobs={jobs} className="lg:col-span-2" />
-        <JobSummaryGauge jobs={jobs} />
-      </div>
-      <BranchPipeline jobs={jobs} className="shrink-0" />
-
-      <Tabs defaultValue="work" value={tab} onValueChange={setTab} className="flex shrink-0 flex-col">
-        <TabsList aria-label="Dashboard panels" className="grid h-12 shrink-0 grid-cols-4 gap-0 rounded-2xl bg-card/70 p-1.5 shadow-card">
-          <TabsTrigger value="work" className="h-full px-1 text-xs">Work</TabsTrigger>
-          <TabsTrigger value="status" className="h-full px-1 text-xs">Status</TabsTrigger>
-          <TabsTrigger value="invoice" className="h-full px-1 text-xs">Invoice</TabsTrigger>
-          <TabsTrigger value="priority" className="h-full px-1 text-xs">Priority</TabsTrigger>
-        </TabsList>
-        <TabsContent value="work" ref={workRef} className="dashboard-workspace space-y-4">
-      <section
-        aria-label="Uncompleted work and bottlenecks"
-        className="dashboard-card-enter space-y-2"
-        style={{ animationDelay: "140ms" }}
-      >
-        <div>
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Uncompleted Work</h2>
-          <p className="sr-only">Current workflow queues and the person or team responsible.</p>
-        </div>
-        <div data-scroll-card className="grid grid-cols-1 gap-3 md:grid-cols-3">
-          <WorkflowBucket
-            title="Pending Design"
-            jobs={pendingDesignJobs}
-            icon={Palette}
-            assigneeFor={(job) => job.designer && job.designer !== "Unassigned" ? job.designer : assignedTo(job)}
-            onSelect={handleViewDetails}
-            animationDelay={180}
-          />
-          <WorkflowBucket
-            title="In Production / Execution"
-            jobs={executionJobs}
-            icon={Cog}
-            assigneeFor={assignedTo}
-            onSelect={handleViewDetails}
-            animationDelay={240}
-          />
-          <WorkflowBucket
-            title="Pending Invoicing"
-            jobs={pendingInvoiceJobs}
-            icon={Receipt}
-            assigneeFor={(job) => job.assignee && job.assignee !== "Unassigned" ? job.assignee : "Admin"}
-            onSelect={handleViewDetails}
-            animationDelay={300}
-          />
-        </div>
+            </section>
+            <section id="approvals-section" aria-label="Approvals" className="scroll-mt-2 space-y-2">
+              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">Approvals</h2>
+              <ApprovalBox />
+            </section>
+          </TabsContent>
+          <TabsContent value="status" className="dashboard-workspace mt-0">
+            <JobStatusOverview stats={stats} onStatusClick={handleStatusClick} />
+          </TabsContent>
+          <TabsContent value="invoice" className="dashboard-workspace mt-0">{quickWidget}</TabsContent>
+          <TabsContent value="priority" className="dashboard-workspace mt-0">
+            <HighPriorityReminder jobs={jobs} onViewJob={handleViewDetails} />
+            {!jobs.some(job => job.priority === "high" && !["completed", "invoiced", "cancelled"].includes(job.status)) && <p className="p-3 text-sm text-muted-foreground">No high priority jobs pending.</p>}
+          </TabsContent>
+        </Tabs>
       </section>
-      <section id="approvals-section" aria-label="Approvals" data-scroll-card className="space-y-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Approvals</h2>
-        <ApprovalBox />
-      </section>
-        </TabsContent>
-        <TabsContent value="status" className="dashboard-workspace">
-          <JobStatusOverview stats={stats} onStatusClick={handleStatusClick} />
-        </TabsContent>
-        <TabsContent value="invoice" className="dashboard-workspace">{quickWidget}</TabsContent>
-        <TabsContent value="priority" className="dashboard-workspace">
-          <HighPriorityReminder jobs={jobs} onViewJob={handleViewDetails} />
-          {!jobs.some(job => job.priority === "high" && !["completed", "invoiced", "cancelled"].includes(job.status)) && <p className="p-3 text-sm text-muted-foreground">No high priority jobs pending.</p>}
-        </TabsContent>
-      </Tabs>
 
       <JobDetails
         isOpen={isJobDetailsOpen}

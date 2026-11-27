@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect, useCallback, useRef } from "react";
+import { useState, lazy, Suspense, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDexieJobs } from "@/hooks/useDexieJobs";
 import { useAuth } from "@/hooks/useAuth";
@@ -24,6 +24,7 @@ const ModernDashboard = lazy(() => import("@/components/ModernDashboard").then(m
 const SettingsView = lazy(() => import("@/components/SettingsView").then(m => ({ default: m.SettingsView })));
 const AdminJobManagement = lazy(() => import("@/components/AdminJobManagement").then(m => ({ default: m.AdminJobManagement })));
 const AdminManagement = lazy(() => import("@/components/AdminManagement").then(m => ({ default: m.AdminManagement })));
+const JobsWorkspace = lazy(() => import("@/components/jobs/JobsWorkspace").then(m => ({ default: m.JobsWorkspace })));
 const ReportsPage = lazy(() => import("@/components/ReportsPage").then(m => ({ default: m.ReportsPage })));
 const ApprovedJobsList = lazy(() => import("@/components/job-management/ApprovedJobsList").then(m => ({ default: m.ApprovedJobsList })));
 const UserAccessManagement = lazy(() => import("@/components/UserAccessManagement").then(m => ({ default: m.default })));
@@ -51,8 +52,6 @@ const Index = () => {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [invoiceSheetOpen, setInvoiceSheetOpen] = useState(false);
   const [invoiceJobId, setInvoiceJobId] = useState<string | null>(null);
-  const [bounce, setBounce] = useState<{ view: string; n: number } | null>(null);
-  const bounceCount = useRef(0);
   const { user } = useAuth();
   const userId = user?.id;
 
@@ -123,8 +122,6 @@ const Index = () => {
     }
     const target = (view in VIEW_META ? view : "dashboard") as ViewId;
     openView(target);
-    bounceCount.current += 1;
-    setBounce({ view: target, n: bounceCount.current });
     go(VIEW_META[target].path);
   }, [openView, go]);
 
@@ -165,6 +162,8 @@ const Index = () => {
             quickWidget={<QuickInvoiceWidget jobs={transformedJobs} isAdmin={userRole === "admin"} onSaved={refresh} />}
           />
         );
+      case "jobs":
+        return <JobsWorkspace jobs={transformedJobs} loading={isLoading} onOpenJob={handleViewJob} />;
       case "approved-jobs":
         return (
           <ApprovedJobsList
@@ -199,7 +198,7 @@ const Index = () => {
     return <Unauthorized />;
   }
 
-  const fillsViewport = effectiveView === "dashboard" && !jobParam;
+  const fillsViewport = (effectiveView === "dashboard" || effectiveView === "jobs") && !jobParam;
 
   return (
     <>
@@ -211,7 +210,6 @@ const Index = () => {
         userRole={userRole}
         tabs={tabs}
         activeId={activeId}
-        bounce={bounce}
         onNavigate={handleViewChange}
         onOpenPalette={() => setPaletteOpen(true)}
         onQuickInvoice={() => { setInvoiceJobId(null); setInvoiceSheetOpen(true); }}
@@ -235,7 +233,7 @@ const Index = () => {
               : "Synchronizing the latest job data..."}
           </div>
         )}
-        <div className={fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-32"}>
+        <div className={fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-16"}>
           <Suspense fallback={<PageSkeleton />}>
             <EnterStagger key={jobParam ?? currentView} className="flex min-h-0 flex-1 flex-col">
               {renderContent()}

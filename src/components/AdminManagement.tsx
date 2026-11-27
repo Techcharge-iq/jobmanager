@@ -46,39 +46,39 @@ export function AdminManagement() {
         {/* Admin Tabs */}
         <div className="bg-card  rounded-2xl border-0 shadow-xl overflow-hidden">
           <Tabs defaultValue="customers" className="w-full">
-            <div className="bg-primary p-1">
+            <div className="border-b bg-muted/40 p-1.5">
               <TabsList className="grid w-full grid-cols-5 bg-white/20  rounded-xl border-0 p-1">
                 <TabsTrigger 
                   value="customers" 
-                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-white/90 font-medium transition-all duration-200"
+                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-muted-foreground font-medium transition-all duration-200"
                 >
                   <Building2 className="w-4 h-4" />
                   Customers
                 </TabsTrigger>
                 <TabsTrigger 
                   value="job-titles" 
-                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-white/90 font-medium transition-all duration-200"
+                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-muted-foreground font-medium transition-all duration-200"
                 >
                   <FileText className="w-4 h-4" />
                   Job Titles
                 </TabsTrigger>
                 <TabsTrigger 
                   value="users" 
-                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-white/90 font-medium transition-all duration-200"
+                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-muted-foreground font-medium transition-all duration-200"
                 >
                   <UserPlus className="w-4 h-4" />
                   Users
                 </TabsTrigger>
                 <TabsTrigger 
                   value="permissions" 
-                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-white/90 font-medium transition-all duration-200"
+                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-muted-foreground font-medium transition-all duration-200"
                 >
                   <Crown className="w-4 h-4" />
                   Access Control
                 </TabsTrigger>
                 <TabsTrigger 
                   value="communications" 
-                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-white/90 font-medium transition-all duration-200"
+                  className="flex items-center gap-2 data-[state=active]:bg-card data-[state=active]:text-foreground data-[state=active]:shadow-lg text-muted-foreground font-medium transition-all duration-200"
                 >
                   <MessageSquare className="w-4 h-4" />
                   Communications

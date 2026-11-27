@@ -1,4 +1,4 @@
-import { AlertTriangle, Bell, Check, Clock } from "lucide-react";
+import { AlertTriangle, Bell, Check, Clock, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,18 @@ export function NotificationTray({ className }: { className?: string } = {}) {
     acknowledgeNotification,
     notificationSyncError,
   } = useServerNotifications();
-  const { notifications: localNotifications, markAsRead } = useLocalNotifications();
+  const { notifications: localNotifications, markAsRead, clearNotifications } = useLocalNotifications();
+  const [desktopPermission, setDesktopPermission] = useState(
+    typeof Notification === "undefined" ? ("unsupported" as const) : Notification.permission,
+  );
+  const enableDesktopAlerts = async () => {
+    if (typeof Notification === "undefined") return;
+    try {
+      setDesktopPermission(await Notification.requestPermission());
+    } catch (error) {
+      console.error("Failed to request desktop notification permission:", error);
+    }
+  };
   const { toast } = useToast();
   const serverEntries = allNotifications.map((notification) => ({
     id: notification.id,
@@ -94,7 +105,11 @@ export function NotificationTray({ className }: { className?: string } = {}) {
               {unreadCount ? `${unreadCount} unread` : "You're all caught up"}
             </p>
           </div>
-          <Bell className="h-4 w-4 text-muted-foreground" />
+          {localNotifications.length > 0 && (
+            <Button type="button" variant="ghost" size="sm" onClick={clearNotifications} className="h-7 px-2 text-xs">
+              <Trash2 className="me-1 h-3 w-3" />Clear
+            </Button>
+          )}
         </div>
         {notificationSyncError && (
           <p role="status" className="border-b bg-destructive/10 px-4 py-2 text-xs text-destructive">
@@ -171,6 +186,17 @@ export function NotificationTray({ className }: { className?: string } = {}) {
             </div>
           </ScrollArea>
         )}
+        <div className="border-t p-3 text-xs text-muted-foreground">
+          {desktopPermission === "default" && (
+            <>
+              <Button type="button" variant="outline" size="sm" className="w-full" onClick={enableDesktopAlerts}>Enable desktop alerts</Button>
+              <p className="mt-2">Show job updates when this tab is in the background.</p>
+            </>
+          )}
+          {desktopPermission === "granted" && <p>Desktop alerts are enabled.</p>}
+          {desktopPermission === "denied" && <p role="status">Desktop alerts are blocked. Allow notifications for this site in your browser settings, then reload.</p>}
+          {desktopPermission === "unsupported" && <p role="status">Desktop alerts are not supported by this browser. In-app alerts still work while the portal is open.</p>}
+        </div>
       </PopoverContent>
     </Popover>
   );

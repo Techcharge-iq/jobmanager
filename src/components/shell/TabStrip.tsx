@@ -47,11 +47,11 @@ function SortableTab({ tab, active, tabIndex, register, onActivate, onClose, onC
           role="presentation"
           style={{ transform: CSS.Transform.toString(transform ? { ...transform, y: 0, scaleX: 1, scaleY: 1 } : null), transition }}
           className={cn(
-            "group relative flex shrink-0 animate-tab-in items-center rounded-xl border border-transparent text-sm transition-[background-color,box-shadow,color] duration-150",
+            "group relative flex shrink-0 animate-tab-in items-center rounded-md text-[13px] transition-colors duration-150",
             active
-              ? "bg-gradient-to-r from-lavender to-peach text-foreground shadow-[0_8px_20px_-8px_hsl(var(--brand)/0.55)]"
-              : "text-muted-foreground hover:bg-card/60 hover:text-foreground",
-            isDragging && "z-10 opacity-90 shadow-lg",
+              ? "bg-muted text-foreground"
+              : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+            isDragging && "z-10 opacity-90 shadow-md",
           )}
         >
           <button
@@ -67,7 +67,7 @@ function SortableTab({ tab, active, tabIndex, register, onActivate, onClose, onC
             aria-keyshortcuts="Delete"
             onKeyDown={(e) => { if (e.key === "Delete") { e.preventDefault(); onClose(tab.id); } }}
             onAuxClick={(e) => { if (e.button === 1) { e.preventDefault(); onClose(tab.id); } }}
-            className={cn("flex h-9 min-w-0 items-center gap-2 rounded-xl ps-3 outline-none focus-visible:ring-2 focus-visible:ring-ring", tab.pinned ? "pe-3" : "pe-1", tab.pinned ? "w-11 justify-center ps-0 pe-0" : "max-w-[11rem]")}
+            className={cn("flex h-8 min-w-0 items-center gap-1.5 rounded-md ps-2.5 outline-none focus-visible:ring-2 focus-visible:ring-ring", tab.pinned ? "pe-3" : "pe-1", tab.pinned ? "w-9 justify-center ps-0 pe-0" : "max-w-[10rem]")}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden />
             {!tab.pinned && <span className="truncate font-medium">{tab.title}</span>}
@@ -79,7 +79,7 @@ function SortableTab({ tab, active, tabIndex, register, onActivate, onClose, onC
               aria-hidden="true"
               tabIndex={-1}
               onClick={() => onClose(tab.id)}
-              className="me-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-70 hover:bg-muted hover:text-foreground hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-100"
+              className="me-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-muted-foreground opacity-70 hover:bg-muted hover:text-foreground hover:opacity-100 focus-visible:opacity-100 group-hover:opacity-100"
             >
               <X className="h-3.5 w-3.5" aria-hidden />
             </button>
@@ -102,6 +102,7 @@ export function TabStrip({ tabs, activeId, onActivate, onClose, onCloseOthers, o
   const els = useRef(new Map<string, HTMLElement>());
   const motionOK = useMotionOK();
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const activeTab = tabs.find((x) => x.id === activeId);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -149,8 +150,8 @@ export function TabStrip({ tabs, activeId, onActivate, onClose, onCloseOthers, o
   };
 
   return (
-    <div className="glass m-2 mb-0 flex shrink-0 items-center gap-1 rounded-2xl px-2 py-1.5 md:mx-4">
-      <div className="relative min-w-0 flex-1">
+    <div className="flex h-full min-w-0 flex-1 items-center gap-1">
+      <div className="relative hidden h-full min-w-0 flex-1 md:block">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={tabs.map((t) => t.id)} strategy={horizontalListSortingStrategy}>
             <div
@@ -158,7 +159,7 @@ export function TabStrip({ tabs, activeId, onActivate, onClose, onCloseOthers, o
               role="tablist"
               aria-label="Open tabs"
               onKeyDown={onKeyDown}
-              className="relative flex items-center gap-1 overflow-x-auto pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              className="relative flex h-full items-center gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
             >
               {tabs.map((tab) => (
                 <SortableTab
@@ -179,16 +180,22 @@ export function TabStrip({ tabs, activeId, onActivate, onClose, onCloseOthers, o
           </SortableContext>
         </DndContext>
       </div>
-      <Button type="button" variant="ghost" size="icon" className="h-9 w-9 shrink-0 rounded-xl" aria-label="New tab (Ctrl+T or Alt+T)" onClick={onNew}>
+      <Button type="button" variant="ghost" size="icon" className="hidden h-8 w-8 shrink-0 rounded-md md:inline-flex" aria-label="New tab (Ctrl+T or Alt+T)" onClick={onNew}>
         <Plus className="h-4 w-4" />
       </Button>
-      <Button type="button" variant="ghost" size="icon" className="relative h-9 w-9 shrink-0 rounded-xl md:hidden" aria-label={`Switch tabs, ${tabs.length} open`} onClick={() => setSwitcherOpen(true)}>
-        <LayoutGrid className="h-4 w-4" />
-        <span className="absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">{tabs.length}</span>
-      </Button>
+      <button
+        type="button"
+        aria-label={`${activeTab?.title ?? "Tabs"}, ${tabs.length} open. Switch tabs`}
+        onClick={() => setSwitcherOpen(true)}
+        className="flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 text-start text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+      >
+        <LayoutGrid className="h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+        <span className="truncate">{activeTab?.title}</span>
+        <span className="ms-auto rounded bg-muted px-1.5 text-xs text-muted-foreground">{tabs.length}</span>
+      </button>
 
       <Sheet open={switcherOpen} onOpenChange={setSwitcherOpen}>
-        <SheetContent side="bottom" className="max-h-[80dvh] overflow-y-auto rounded-t-3xl">
+        <SheetContent side="bottom" className="max-h-[80dvh] overflow-y-auto rounded-t-xl">
           <SheetHeader><SheetTitle>Open tabs</SheetTitle></SheetHeader>
           <ul className="mt-4 space-y-2">
             {tabs.map((tab) => {

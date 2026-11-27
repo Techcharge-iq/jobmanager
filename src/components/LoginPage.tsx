@@ -8,7 +8,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { JobFlowMark } from "@/components/brand/JobFlowMark";
-import { HeroAmbient } from "@/components/hero/HeroAmbient";
 
 export function LoginPage() {
   const { signIn, signUp } = useAuth();
@@ -58,12 +57,13 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-violet-700 via-purple-600 to-fuchsia-600 text-white lg:flex lg:flex-col lg:justify-end lg:p-12">
-        <HeroAmbient className="absolute inset-0" />
+      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-slate-950 via-[#14122e] to-violet-900 text-white lg:flex lg:flex-col lg:justify-end lg:p-12">
+        <div aria-hidden className="pointer-events-none absolute -end-24 -top-24 h-96 w-96 rounded-full bg-violet-500/30 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -start-24 h-96 w-96 rounded-full bg-teal-500/20 blur-3xl" />
         <div className="relative max-w-md space-y-3">
           <JobFlowMark className="h-12 w-12" />
           <h2 className="text-h1 text-white">Every job, from quote to invoice, in one calm place.</h2>
-          <p className="text-white/90">Approvals, designers, production and billing, all in step.</p>
+          <p className="text-white/80">Approvals, designers, production and billing, all in step.</p>
         </div>
       </aside>
       <div className="flex items-center justify-center bg-background p-4">

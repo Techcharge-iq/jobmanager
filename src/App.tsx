@@ -97,6 +97,11 @@ function App() {
                       <Index />
                     </ProtectedRoute>
                   } />
+                  <Route path="/jobs" element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/jobs/approved" element={
                     <ProtectedRoute>
                       <Index />

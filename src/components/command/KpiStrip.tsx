@@ -49,13 +49,13 @@ export function KpiStrip({ jobs }: { jobs: Job[] }) {
   const share = data.billedValue + data.waitingValue;
 
   return (
-    <div className="grid min-w-0 grid-cols-2 gap-3 lg:grid-cols-4">
+    <div className="grid min-w-0 grid-cols-2 gap-2 lg:grid-cols-4">
       <KpiCard tone="mint" icon={Wallet} label="Invoiced this month" value={data.billedValue} format={formatOmaniRial}
         hint={`${data.invoicedMonth.length} jobs`} delta={data.money.delta} series={data.money.series} />
       <KpiCard tone="lavender" icon={Receipt} label="Waiting for invoice" value={data.waitingValue} format={formatOmaniRial}
         hint={`${data.toBill.length} jobs ready to bill`} ring={{ value: share ? data.billedValue / share : 0, label: "Share of this month already invoiced" }} />
       <KpiCard tone="sky" icon={Activity} label="Active on the floor" value={data.active.length} format={(n) => String(Math.round(n))}
-        hint="new jobs, last 14 days" delta={data.intake.delta} series={data.intake.series} />
+        hint="new, last 14 days" delta={data.intake.delta} series={data.intake.series} />
       <KpiCard tone={data.urgent.length ? "rose" : "peach"} icon={AlertTriangle} label="High priority" value={data.urgent.length} format={(n) => String(Math.round(n))}
         hint={data.urgent.length ? "need attention" : "nothing urgent"} ring={{ value: data.active.length ? data.urgent.length / data.active.length : 0, label: "Share of active jobs that are high priority" }} />
     </div>
