@@ -51,8 +51,8 @@ export function RecentJobs({ jobs, onOpenJob, onViewAll, className }: ListProps)
   );
 }
 
-export function ActivityFeed({ className }: { className?: string }) {
-  const { activities, isLoading } = useActivities();
+export function ActivityFeed({ className, active = true }: { className?: string; active?: boolean }) {
+  const { activities, isLoading } = useActivities(active);
   return (
     <DashPanel title="Activity" className={className}>
       {isLoading ? <Empty>Loading activity…</Empty> : activities.length === 0 ? <Empty>No recent activity.</Empty> : (

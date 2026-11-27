@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Job } from "@/pages/Index";
 import { getProfileRole } from "@/data/profiles";
 import { useToast } from "@/hooks/use-toast";
@@ -23,6 +23,8 @@ export function useJobDetails({ job, isEditMode, onClose, isOpen = true }: UseJo
   const [isExporting, setIsExporting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
   const [userRole, setUserRole] = useState<string>('');
+  const roleLoadedFor = useRef<string | null>(null);
+  const initializedJobId = useRef<string | null>(null);
   const { toast } = useToast();
   const { user } = useAuth();
   const { addNotification } = useNotifications();
@@ -42,36 +44,40 @@ export function useJobDetails({ job, isEditMode, onClose, isOpen = true }: UseJo
   };
 
   useEffect(() => {
-    if (job) {
-      setEditData({
-        title: job.title,
-        priority: job.priority,
-        dueDate: job.dueDate,
-        estimatedHours: job.estimatedHours,
-        branch: job.branch,
-        jobOrderDetails: job.jobOrderDetails,
-        customer_id: job.customer_id,
-        job_title_id: job.job_title_id,
-        deliveredAt: job.deliveredAt
-      });
-      
-      // Always set invoice number - either the job's existing number or empty string
-      setInvoiceNumber(job.invoiceNumber || '');
-    }
+    if (!job || initializedJobId.current === job.id) return;
+    initializedJobId.current = job.id;
+    setEditData({
+      title: job.title,
+      priority: job.priority,
+      dueDate: job.dueDate,
+      estimatedHours: job.estimatedHours,
+      branch: job.branch,
+      jobOrderDetails: job.jobOrderDetails,
+      customer_id: job.customer_id,
+      job_title_id: job.job_title_id,
+      deliveredAt: job.deliveredAt
+    });
+
+    setInvoiceNumber(job.invoiceNumber || '');
   }, [job]);
 
   useEffect(() => {
-    if (!user?.id || !job || !isOpen) {
+    if (!user?.id) {
       setUserRole('');
+      roleLoadedFor.current = null;
       return;
     }
+    if (roleLoadedFor.current !== user.id) setUserRole('');
+    if (!job?.id || !isOpen || roleLoadedFor.current === user.id) return;
     let active = true;
-    setUserRole('');
 
     const loadRole = async () => {
       try {
         const role = await getProfileRole(user.id);
-        if (active && role) setUserRole(role);
+        if (active && role) {
+          roleLoadedFor.current = user.id;
+          setUserRole(role);
+        }
       } catch (error) {
         console.error('Error fetching user role:', error);
       }

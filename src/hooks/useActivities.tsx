@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import { getActivityUserName, listRecentActivities, type ActivityRecord } from '@/data/activities';
 import { subscribeToActivityInserts } from '@/data/realtime';
 
-export function useActivities() {
+export function useActivities(active = true) {
   const [activities, setActivities] = useState<ActivityRecord[]>([]);
 
   const { data: initialActivities = [], isLoading } = useQuery({
     queryKey: ['activities'],
     queryFn: listRecentActivities,
     staleTime: 60_000,
+    enabled: active,
   });
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export function useActivities() {
   }, [initialActivities]);
 
   useEffect(() => {
+    if (!active) return;
     const unsubscribe = subscribeToActivityInserts((activity) => {
       void getActivityUserName(activity.user_id).then((userName) => {
           // Fetch user details for the new activity
@@ -35,7 +37,7 @@ export function useActivities() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [active]);
 
   return {
     activities,

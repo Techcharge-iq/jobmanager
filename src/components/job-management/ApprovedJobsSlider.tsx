@@ -28,6 +28,7 @@ interface ApprovedJobsSliderProps {
   isSyncing?: boolean;
   isLoading?: boolean;
   onRefresh?: () => void;
+  isActive?: boolean;
 }
 
 const STATUS_OPTIONS = [
@@ -61,7 +62,7 @@ function DetailItem({ icon: Icon, label, value, sub }: {
   );
 }
 
-export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading, onRefresh }: ApprovedJobsSliderProps) {
+export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading, onRefresh, isActive = true }: ApprovedJobsSliderProps) {
   const [selectedBranch, setSelectedBranch] = useState<string>("all");
   const [selectedSalesman, setSelectedSalesman] = useState<string>("all");
   const [selectedDesigner, setSelectedDesigner] = useState<string>("all");
@@ -133,13 +134,17 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
   }, [filteredJobs.length]);
 
   useEffect(() => {
+    if (!isActive) {
+      setIsJobDetailsOpen(false);
+      return;
+    }
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowUp") { e.preventDefault(); handlePrevious(); }
       if (e.key === "ArrowDown") { e.preventDefault(); handleNext(); }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [handleNext, handlePrevious]);
+  }, [handleNext, handlePrevious, isActive]);
 
   const filterControls = (
     <div className="flex flex-wrap items-center gap-2">
@@ -335,7 +340,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
       </div>
 
       <JobDetails
-        isOpen={isJobDetailsOpen}
+        isOpen={isActive && isJobDetailsOpen}
         onClose={() => setIsJobDetailsOpen(false)}
         job={selectedJob}
         isEditMode={isEditMode}

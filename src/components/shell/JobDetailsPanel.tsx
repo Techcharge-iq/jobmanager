@@ -17,7 +17,7 @@ import { formatOmaniRial } from "@/utils/currency";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/pages/Index";
 
-interface Props { job: Job | null; loading: boolean; isEditMode?: boolean; onClose: () => void }
+interface Props { job: Job | null; loading: boolean; isEditMode?: boolean; isActive?: boolean; onClose: () => void }
 
 const SECTIONS = ["Overview", "Brief", "Design", "Approvals", "Production", "Quality check", "Delivery", "Invoice", "Notes", "History"] as const;
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
@@ -39,8 +39,8 @@ const Panel = ({ title, children, className }: { title?: string; children: React
 const fmtDate = (v?: string | null) => { const d = v ? new Date(v) : null; return d && !Number.isNaN(d.getTime()) ? format(d, "d MMM yyyy") : undefined; };
 
 /** Job workspace shown inside a job tab. Same hook, same data calls, same writes as the dialog. */
-export function JobDetailsPanel({ job, loading, isEditMode = false, onClose }: Props) {
-  const d = useJobDetails({ job, isEditMode, onClose });
+export function JobDetailsPanel({ job, loading, isEditMode = false, isActive = true, onClose }: Props) {
+  const d = useJobDetails({ job, isEditMode, onClose, isOpen: isActive });
 
   if (!job) {
     return (

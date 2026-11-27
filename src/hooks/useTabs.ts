@@ -18,23 +18,57 @@ const jobTab = (jobId: string, title = "Job order"): AppTab => ({ id: `job:${job
 const normalize = (tabs: AppTab[]) => [...tabs.filter((t) => t.pinned), ...tabs.filter((t) => !t.pinned)];
 const initial = (): TabState => ({ tabs: [viewTab("dashboard")], activeId: "view:dashboard" });
 
-const isValid = (t: unknown): t is AppTab => {
-  const tab = t as AppTab;
-  if (!tab || typeof tab.id !== "string" || typeof tab.title !== "string") return false;
-  if (tab.kind === "view") return Boolean(tab.view && VIEW_META[tab.view]);
-  return tab.kind === "job" && typeof tab.jobId === "string";
+const isValid = (value: unknown): value is AppTab => {
+  if (!value || typeof value !== "object") return false;
+  const tab = value as Partial<AppTab>;
+  if (
+    typeof tab.id !== "string" ||
+    typeof tab.title !== "string" ||
+    (tab.pinned !== undefined && typeof tab.pinned !== "boolean")
+  ) return false;
+  if (tab.kind === "view") {
+    return typeof tab.view === "string" &&
+      Object.prototype.hasOwnProperty.call(VIEW_META, tab.view) &&
+      tab.id === `view:${tab.view}`;
+  }
+  return tab.kind === "job" &&
+    typeof tab.jobId === "string" &&
+    tab.jobId.length > 0 &&
+    tab.id === `job:${tab.jobId}`;
 };
 
-function load(key: string): TabState | null {
+interface LoadedTabs {
+  state: TabState;
+  persist: boolean;
+}
+
+function load(key: string): LoadedTabs {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as TabState;
-    const tabs = Array.isArray(parsed?.tabs) ? parsed.tabs.filter(isValid) : [];
-    if (!tabs.length) return null;
-    return { tabs: normalize(tabs), activeId: tabs.some((t) => t.id === parsed.activeId) ? parsed.activeId : tabs[0].id };
+    if (!raw) return { state: initial(), persist: true };
+    const parsed: unknown = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return { state: initial(), persist: false };
+
+    const data = parsed as { tabs?: unknown; activeId?: unknown };
+    if (!Array.isArray(data.tabs)) return { state: initial(), persist: false };
+    const seen = new Set<string>();
+    const tabs = data.tabs.filter((tab): tab is AppTab => {
+      if (!isValid(tab) || seen.has(tab.id)) return false;
+      seen.add(tab.id);
+      return true;
+    });
+    if (!tabs.length) return { state: initial(), persist: false };
+    return {
+      state: {
+        tabs: normalize(tabs),
+        activeId: typeof data.activeId === "string" && tabs.some((t) => t.id === data.activeId)
+          ? data.activeId
+          : tabs[0].id,
+      },
+      persist: true,
+    };
   } catch {
-    return null;
+    return { state: initial(), persist: false };
   }
 }
 
@@ -44,20 +78,28 @@ export const tabUrl = (tab: AppTab) =>
 /** Open tabs live in localStorage only (per signed-in user). Nothing is sent to the server. */
 export function useTabs(userId?: string) {
   const key = `jobflow:tabs:v1:${userId ?? "anon"}`;
-  const [state, setState] = useState<TabState>(() => load(key) ?? initial());
+  const initialLoad = useRef<LoadedTabs | null>(null);
+  if (!initialLoad.current) initialLoad.current = load(key);
+  const [state, setState] = useState<TabState>(initialLoad.current.state);
   const ref = useRef(state);
   const loadedKey = useRef(key);
+  const canPersist = useRef(initialLoad.current.persist);
 
-  const commit = useCallback((next: TabState) => { ref.current = next; setState(next); }, []);
+  const commit = useCallback((next: TabState, persist = true) => {
+    ref.current = next;
+    canPersist.current = persist;
+    setState(next);
+  }, []);
 
   useEffect(() => {
     if (loadedKey.current === key) return;
     loadedKey.current = key;
-    commit(load(key) ?? initial());
+    const loaded = load(key);
+    commit(loaded.state, loaded.persist);
   }, [key, commit]);
 
   useEffect(() => {
-    if (loadedKey.current !== key) return;
+    if (loadedKey.current !== key || !canPersist.current || ref.current !== state) return;
     try { localStorage.setItem(key, JSON.stringify(state)); } catch { /* storage unavailable */ }
   }, [key, state]);
 

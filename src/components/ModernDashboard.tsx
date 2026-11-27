@@ -20,6 +20,7 @@ import { AlertCircle, ArrowRight, Palette, Cog, Receipt, UserRound, ChevronLeft,
 
 interface ModernDashboardProps {
   jobs: Job[];
+  isActive?: boolean;
   onViewChange?: (view: string) => void;
   /** When provided, jobs open in their own tab instead of the dialog. */
   onOpenJob?: (job: Job) => void;
@@ -229,7 +230,7 @@ function WorkflowBucket({
 
 const pillBase = "inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: ModernDashboardProps) {
+export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, isActive = true }: ModernDashboardProps) {
   const [tab, setTab] = useState("work");
   const profile = useProfileHeader();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -239,6 +240,13 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
     status: 'pending' | 'in-progress' | 'designing' | 'completed' | 'invoiced' | 'total' | 'active' | 'cancelled';
     title: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (!isActive) {
+      setIsJobDetailsOpen(false);
+      setStatusModalOpen(false);
+    }
+  }, [isActive]);
 
   const stats = {
     total: jobs.length,
@@ -324,7 +332,7 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
       <div className="grid shrink-0 gap-2 lg:h-[clamp(15rem,30vh,22rem)] lg:grid-cols-12 lg:grid-rows-1">
         <PriorityJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-4 lg:max-h-none" />
         <RecentJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-5 lg:max-h-none" />
-        <ActivityFeed className="max-h-72 lg:col-span-3 lg:max-h-none" />
+        <ActivityFeed active={isActive} className="max-h-72 lg:col-span-3 lg:max-h-none" />
       </div>
 
       <section id="dashboard-workspace" aria-label="Workspace" className="shrink-0 scroll-mt-2">
@@ -349,7 +357,7 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
             </section>
             <section id="approvals-section" aria-label="Approvals" className="scroll-mt-2 space-y-2">
               <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">Approvals</h2>
-              <ApprovalBox />
+              <ApprovalBox isActive={isActive} />
             </section>
           </TabsContent>
           <TabsContent value="status" className="dashboard-workspace mt-0">
@@ -364,13 +372,13 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: 
       </section>
 
       <JobDetails
-        isOpen={isJobDetailsOpen}
+        isOpen={isActive && isJobDetailsOpen}
         onClose={() => setIsJobDetailsOpen(false)}
         job={selectedJob}
       />
 
       <JobStatusModal
-        isOpen={statusModalOpen}
+        isOpen={isActive && statusModalOpen}
         onClose={() => setStatusModalOpen(false)}
         jobs={jobs}
         status={selectedStatus?.status || 'total'}

@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useEffect, useCallback } from "react";
+import { memo, useState, lazy, Suspense, useEffect, useLayoutEffect, useCallback, useMemo, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDexieJobs } from "@/hooks/useDexieJobs";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,6 +40,59 @@ const PageSkeleton = () => (
   </div>
 );
 
+interface WorkspaceTabProps {
+  tab: AppTab;
+  active: boolean;
+  jobs: Job[];
+  isLoading: boolean;
+  isSyncing: boolean;
+  userRole: string;
+  onViewChange: (view: string) => void;
+  onOpenJob: (job: Pick<Job, "id" | "jobOrderNumber">) => void;
+  onStatusUpdate: (jobId: string, status: JobStatus) => Promise<void>;
+  onRefresh: () => Promise<void>;
+  onClose: (id: string) => void;
+}
+
+const WorkspaceTabContent = memo(function WorkspaceTabContent({
+  tab, active, jobs, isLoading, isSyncing, userRole,
+  onViewChange, onOpenJob, onStatusUpdate, onRefresh, onClose,
+}: WorkspaceTabProps) {
+  if (tab.kind === "job") {
+    const job = jobs.find((item) => item.id === tab.jobId) ?? null;
+    return <JobDetailsPanel job={job} loading={isLoading} isActive={active} onClose={() => onClose(tab.id)} />;
+  }
+
+  if (isLoading) return <PageSkeleton />;
+
+  switch (tab.view) {
+    case "dashboard":
+      return <ModernDashboard
+        jobs={jobs}
+        isActive={active}
+        onViewChange={onViewChange}
+        onOpenJob={onOpenJob}
+        quickWidget={<QuickInvoiceWidget jobs={jobs} isAdmin={userRole === "admin"} onSaved={onRefresh} />}
+      />;
+    case "jobs":
+      return <JobsWorkspace jobs={jobs} loading={isLoading} onOpenJob={onOpenJob} />;
+    case "approved-jobs":
+      return <ApprovedJobsList jobs={jobs} onStatusUpdate={onStatusUpdate} isSyncing={isSyncing} isLoading={isLoading} onRefresh={onRefresh} isActive={active} />;
+    case "settings":
+      return <SettingsView />;
+    case "admin":
+      return <AdminJobManagement onStatusUpdate={onStatusUpdate} />;
+    case "admin-management":
+      return <AdminManagement />;
+    case "reports":
+      return <ReportsPage />;
+    case "user-access":
+      return <UserAccessManagement />;
+    default:
+      return <ModernDashboard jobs={jobs} isActive={active} onViewChange={onViewChange} onOpenJob={onOpenJob} />;
+  }
+});
+
 const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -56,6 +109,7 @@ const Index = () => {
   const userId = user?.id;
 
   const { tabs, activeId, activeTab, openView, openJob, activate, close, closeOthers, togglePin, reorder, syncJobTitles } = useTabs(userId);
+  const [mountedTabIds, setMountedTabIds] = useState<Set<string>>(() => new Set());
 
   // Use Dexie for offline-first job data
   // Pass true for returnAllJobs to get all jobs for dashboard stats
@@ -89,26 +143,35 @@ const Index = () => {
     fetchUserRole();
   }, [userId]);
 
-  const transformedJobs: Job[] = (dexieJobs || []).map(transformDexieJobOrder);
+  const transformedJobs: Job[] = useMemo(
+    () => (dexieJobs || []).map(transformDexieJobOrder),
+    [dexieJobs],
+  );
 
   // The URL is the source of truth: make sure a tab exists for whatever the URL shows.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (jobParam) openJob(jobParam);
     else openView(currentView);
   }, [jobParam, currentView, openJob, openView]);
+
+  useLayoutEffect(() => {
+    setMountedTabIds((current) => new Set(current).add(`${userId ?? "anon"}:${activeId}`));
+  }, [userId, activeId]);
 
   // Give job tabs their job order number once the cache has loaded.
   useEffect(() => {
     if (dexieJobs?.length) syncJobTitles(dexieJobs.map((j) => ({ id: j.id, jobOrderNumber: j.job_order_number })));
   }, [dexieJobs, syncJobTitles]);
 
+  const locationRef = useRef(location);
+  locationRef.current = location;
   const go = useCallback((url: string) => {
-    if (url !== location.pathname + location.search) navigate(url);
-  }, [location.pathname, location.search, navigate]);
+    if (url !== locationRef.current.pathname + locationRef.current.search) navigate(url);
+  }, [navigate]);
 
-  const handleStatusUpdate = async (jobId: string, status: JobStatus) => {
+  const handleStatusUpdate = useCallback(async (jobId: string, status: JobStatus) => {
     await setJobStatus(jobId, status);
-  };
+  }, [setJobStatus]);
 
   const handleViewJob = useCallback((job: Pick<Job, "id" | "jobOrderNumber">) => {
     openJob(job.id, job.jobOrderNumber);
@@ -144,52 +207,7 @@ const Index = () => {
     onJump: useCallback((index: number) => { const tab = tabs[index]; if (tab) activateTab(tab); }, [tabs, activateTab]),
   });
 
-  const renderContent = () => {
-    if (isLoading && !jobParam) return <PageSkeleton />;
-
-    if (jobParam) {
-      const job = transformedJobs.find((j) => j.id === jobParam) ?? null;
-      return <JobDetailsPanel key={jobParam} job={job} loading={isLoading} onClose={() => closeTab(`job:${jobParam}`)} />;
-    }
-
-    switch (currentView) {
-      case "dashboard":
-        return (
-          <ModernDashboard
-            jobs={transformedJobs}
-            onViewChange={handleViewChange}
-            onOpenJob={handleViewJob}
-            quickWidget={<QuickInvoiceWidget jobs={transformedJobs} isAdmin={userRole === "admin"} onSaved={refresh} />}
-          />
-        );
-      case "jobs":
-        return <JobsWorkspace jobs={transformedJobs} loading={isLoading} onOpenJob={handleViewJob} />;
-      case "approved-jobs":
-        return (
-          <ApprovedJobsList
-            jobs={transformedJobs}
-            onStatusUpdate={handleStatusUpdate}
-            isSyncing={isSyncing}
-            isLoading={isLoading}
-            onRefresh={refresh}
-          />
-        );
-      case "settings":
-        return <SettingsView />;
-      case "admin":
-        return <AdminJobManagement onStatusUpdate={handleStatusUpdate} />;
-      case "admin-management":
-        return <AdminManagement />;
-      case "reports":
-        return <ReportsPage />;
-      case "user-access":
-        return <UserAccessManagement />;
-      default:
-        return <ModernDashboard jobs={transformedJobs} onViewChange={handleViewChange} onOpenJob={handleViewJob} />;
-    }
-  };
-
-  const effectiveView: ViewId = jobParam ? "dashboard" : currentView;
+  const effectiveView: ViewId = activeTab.kind === "job" ? "dashboard" : activeTab.view ?? currentView;
   const requiredRoles = restrictedRoles[effectiveView];
   if (userRoleLoading) {
     return <PageSkeleton />;
@@ -197,8 +215,6 @@ const Index = () => {
   if (requiredRoles && !requiredRoles.includes(userRole)) {
     return <Unauthorized />;
   }
-
-  const fillsViewport = (effectiveView === "dashboard" || effectiveView === "jobs") && !jobParam;
 
   return (
     <>
@@ -219,27 +235,42 @@ const Index = () => {
         onTogglePin={togglePin}
         onReorder={reorder}
       >
-        {(isSyncing || syncError) && (
-          <div
-            role="status"
-            className={`px-4 py-2 text-sm ${
-              syncError
-                ? "bg-destructive/10 text-destructive"
-                : "bg-muted text-muted-foreground"
-            }`}
-          >
-            {syncError
-              ? `Data sync failed: ${syncError}. Retry with Refresh.`
-              : "Synchronizing the latest job data..."}
-          </div>
-        )}
-        <div className={fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-16"}>
-          <Suspense fallback={<PageSkeleton />}>
-            <EnterStagger key={jobParam ?? currentView} className="flex min-h-0 flex-1 flex-col">
-              {renderContent()}
-            </EnterStagger>
-          </Suspense>
-        </div>
+        {tabs.map((tab) => {
+          const active = tab.id === activeId;
+          if (!active && !mountedTabIds.has(`${userId ?? "anon"}:${tab.id}`)) return null;
+          const fillsViewport = tab.kind === "view" && (tab.view === "dashboard" || tab.view === "jobs");
+          return (
+            <div
+              key={tab.id}
+              hidden={!active}
+              aria-hidden={!active}
+              className={active ? (fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-16") : "hidden"}
+            >
+              {(isSyncing || syncError) && (
+                <div role="status" className={`px-4 py-2 text-sm ${syncError ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}`}>
+                  {syncError ? `Data sync failed: ${syncError}. Retry with Refresh.` : "Synchronizing the latest job data..."}
+                </div>
+              )}
+              <Suspense fallback={<PageSkeleton />}>
+                <EnterStagger className="flex min-h-0 flex-1 flex-col">
+                  <WorkspaceTabContent
+                    tab={tab}
+                    active={active}
+                    jobs={transformedJobs}
+                    isLoading={isLoading}
+                    isSyncing={isSyncing}
+                    userRole={userRole}
+                    onViewChange={handleViewChange}
+                    onOpenJob={handleViewJob}
+                    onStatusUpdate={handleStatusUpdate}
+                    onRefresh={refresh}
+                    onClose={closeTab}
+                  />
+                </EnterStagger>
+              </Suspense>
+            </div>
+          );
+        })}
       </AppShell>
 
       <CommandPalette
