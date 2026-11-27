@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { JobDetails } from "@/components/JobDetails";
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
 import { updateJobInCache } from "@/services/syncService";
 import {
   getJobOrderDetails,
@@ -16,12 +16,15 @@ import {
   type PendingApprovalJob,
 } from "@/data/jobs";
 import { subscribeToJobOrderChanges } from "@/data/realtime";
+import type { DashboardJob } from "@/types/jobOrder";
 
 export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
   const { user } = useAuth();
+  const userId = user?.id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedJob, setSelectedJob] = useState<any>(null);
+  const pendingApprovalsKey = useMemo(() => ["pending-approvals", userId] as const, [userId]);
+  const [selectedJob, setSelectedJob] = useState<DashboardJob | null>(null);
   const [isJobDetailsOpen, setIsJobDetailsOpen] = useState(false);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
@@ -32,34 +35,35 @@ export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
   const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!user || !isActive) return;
+    if (!userId || !isActive) return;
 
-    const unsubscribe = subscribeToJobOrderChanges(user.id, (payload) => {
-          const affectsPendingApprovals = payload.eventType === 'INSERT'
-            ? payload.new.approval_status === 'pending_approval'
-            : payload.eventType === 'UPDATE'
-              ? payload.new.approval_status === 'pending_approval' ||
-                payload.old.approval_status === 'pending_approval'
-              : payload.old.approval_status === 'pending_approval';
-          if (affectsPendingApprovals) {
-            void queryClient.invalidateQueries({ queryKey: ['pending-approvals'] });
-          }
-          void queryClient.invalidateQueries({ queryKey: ['job-orders'] });
-        }, (status, error) => {
-          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-            console.error('Approval realtime subscription failed:', error);
-          }
-        });
+    const unsubscribe = subscribeToJobOrderChanges(userId, (payload) => {
+      const affectsPendingApprovals = payload.eventType === 'INSERT'
+        ? payload.new.approval_status === 'pending_approval'
+        : payload.eventType === 'UPDATE'
+          ? payload.new.approval_status === 'pending_approval' ||
+            payload.old.approval_status === 'pending_approval'
+          : payload.old.approval_status === 'pending_approval';
+      if (affectsPendingApprovals) {
+        void queryClient.invalidateQueries({ queryKey: pendingApprovalsKey });
+        void queryClient.invalidateQueries({ queryKey: ["job-orders"] });
+      }
+    }, (status, error) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.error('Approval realtime subscription failed:', error);
+      }
+    });
 
     return () => {
       unsubscribe();
     };
-  }, [isActive, queryClient, user]);
+  }, [isActive, pendingApprovalsKey, queryClient, userId]);
 
-  const { data: pendingJobs = [], isLoading } = useQuery({
-    queryKey: ['pending-approvals'],
+  const { data: pendingJobs = [], isLoading, isError, refetch } = useQuery({
+    queryKey: pendingApprovalsKey,
     queryFn: (): Promise<PendingApprovalJob[]> => listPendingApprovalJobs(),
-    enabled: !!user && isActive
+    enabled: !!userId && isActive,
+    staleTime: 30_000,
   });
 
   useEffect(() => {
@@ -68,22 +72,22 @@ export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
 
   const approvalMutation = useMutation({
     mutationFn: async ({ jobId, action }: { jobId: string; action: 'approve' | 'reject' }) => {
-      await updateJobApproval(jobId, action === 'approve' ? 'approved' : 'rejected', user?.id ?? null);
+      await updateJobApproval(jobId, action === 'approve' ? 'approved' : 'rejected', userId ?? null);
       return { jobId, action };
     },
     onMutate: async ({ jobId }) => {
-      await queryClient.cancelQueries({ queryKey: ['pending-approvals'] });
+      await queryClient.cancelQueries({ queryKey: pendingApprovalsKey });
       await queryClient.cancelQueries({ queryKey: ['job-orders'] });
-      const previousPendingJobs = queryClient.getQueryData(['pending-approvals']);
-      queryClient.setQueryData(['pending-approvals'], (old: PendingApprovalJob[] | undefined) =>
+      const previousPendingJobs = queryClient.getQueryData<PendingApprovalJob[]>(pendingApprovalsKey);
+      queryClient.setQueryData<PendingApprovalJob[]>(pendingApprovalsKey, (old) =>
         old ? old.filter(job => job.id !== jobId) : old
       );
       return { previousPendingJobs };
     },
     onSuccess: async ({ jobId }, { action }) => {
       try {
-        if (!user) throw new Error('A signed-in user is required to update the local cache');
-        await updateJobInCache(jobId, user.id);
+        if (!userId) throw new Error('A signed-in user is required to update the local cache');
+        await updateJobInCache(jobId, userId);
       } catch (e) { console.error('Failed to update cache:', e); }
       toast({
         title: action === 'approve' ? "Job Approved" : "Job Rejected",
@@ -91,12 +95,12 @@ export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
       });
     },
     onError: (error, _, context) => {
-      if (context?.previousPendingJobs) queryClient.setQueryData(['pending-approvals'], context.previousPendingJobs);
+      if (context?.previousPendingJobs) queryClient.setQueryData(pendingApprovalsKey, context.previousPendingJobs);
       console.error('Approval error:', error);
       toast({ title: "Error", description: "Failed to process approval. Please try again.", variant: "destructive" });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['pending-approvals'] });
+      queryClient.invalidateQueries({ queryKey: pendingApprovalsKey });
       queryClient.invalidateQueries({ queryKey: ['job-orders'] });
     }
   });
@@ -199,7 +203,7 @@ export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
 
   if (isLoading) {
     return (
-      <Card className="h-full flex flex-col">
+      <Card className="flex h-full flex-col">
         <CardHeader className="p-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <AlertCircle className="w-5 h-5" />
@@ -207,14 +211,33 @@ export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center text-sm text-muted-foreground">Loading approvals...</div>
+          <div role="status" className="text-center text-sm text-muted-foreground">Loading approvals...</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card className="flex h-full flex-col">
+        <CardHeader className="p-3">
+          <CardTitle className="flex items-center gap-2 text-sm">
+            <AlertCircle className="h-4 w-4" aria-hidden />
+            Pending approvals
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col items-center justify-center gap-2 p-4 text-center">
+          <p role="alert" className="text-sm text-destructive">Could not load the approval queue.</p>
+          <Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>
+            Retry
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="flex h-full flex-col">
       <CardHeader className="p-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <AlertCircle className="w-5 h-5" />
@@ -330,7 +353,7 @@ export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
         isEditMode={false}
         onJobUpdated={(updatedJob) => {
           if (updatedJob.approvalStatus === 'approved' || updatedJob.approvalStatus === 'rejected') {
-            queryClient.invalidateQueries({ queryKey: ['pending-approvals'] });
+            queryClient.invalidateQueries({ queryKey: pendingApprovalsKey });
             queryClient.invalidateQueries({ queryKey: ['job-orders'] });
             setIsJobDetailsOpen(false);
             setSelectedJob(null);

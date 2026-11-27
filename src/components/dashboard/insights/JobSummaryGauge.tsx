@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-import type { Job } from "@/pages/Index";
 import { DashPanel } from "@/components/dashboard/DashPanel";
 import { cn } from "@/lib/utils";
 import { gsap, useCountUp, useGSAP, useMotionOK } from "@/lib/motion";
@@ -21,8 +20,14 @@ const arc = (from: number, to: number) => {
 };
 
 /** Semicircle gauge of open jobs by status. Hand-built SVG, drawn in by GSAP. */
-export function JobSummaryGauge({ jobs, className }: { jobs: Job[]; className?: string }) {
-  const rows = useMemo(() => GROUPS.map((g) => ({ ...g, count: jobs.filter((j) => g.statuses.includes(j.status)).length })), [jobs]);
+export function JobSummaryGauge({ counts, className }: { counts: Record<string, number>; className?: string }) {
+  const rows = useMemo(
+    () => GROUPS.map((group) => ({
+      ...group,
+      count: group.statuses.reduce((total, status) => total + (counts[status] ?? 0), 0),
+    })),
+    [counts],
+  );
   const total = rows.reduce((a, r) => a + r.count, 0);
 
   const segments = useMemo(() => {

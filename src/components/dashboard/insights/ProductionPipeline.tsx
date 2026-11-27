@@ -1,21 +1,15 @@
-import { useMemo } from "react";
-import type { Job } from "@/pages/Index";
 import { DashPanel } from "@/components/dashboard/DashPanel";
 import { formatOmaniRial } from "@/utils/currency";
 
-const STAGES = [
-  { label: "Pending", statuses: ["pending"], bar: "bg-amber-500" },
-  { label: "Design", statuses: ["designing"], bar: "bg-violet-500" },
-  { label: "Production", statuses: ["in-progress", "out", "foc_sample"], bar: "bg-sky-500" },
-  { label: "Ready to bill", statuses: ["completed", "finished"], bar: "bg-teal-500" },
-];
+export interface PipelineRow {
+  label: string;
+  bar: string;
+  count: number;
+  value: number;
+}
 
 /** Where open work is sitting, with the value waiting at each stage. */
-export function ProductionPipeline({ jobs, className }: { jobs: Job[]; className?: string }) {
-  const rows = useMemo(() => STAGES.map((s) => {
-    const list = jobs.filter((j) => s.statuses.includes(j.status));
-    return { ...s, count: list.length, value: list.reduce((a, j) => a + (Number(j.totalValue) || 0), 0) };
-  }), [jobs]);
+export function ProductionPipeline({ rows, className }: { rows: PipelineRow[]; className?: string }) {
   const max = Math.max(1, ...rows.map((r) => r.count));
 
   return (
