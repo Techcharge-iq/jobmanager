@@ -20,7 +20,7 @@ export function ProjectDetailsSection({
       <div>
         <Label htmlFor="priority">Priority *</Label>
         <Select value={priority} onValueChange={onPriorityChange}>
-          <SelectTrigger>
+          <SelectTrigger id="priority">
             <SelectValue placeholder="Select priority" />
           </SelectTrigger>
           <SelectContent>
@@ -34,7 +34,7 @@ export function ProjectDetailsSection({
       <div>
         <Label htmlFor="status">Status *</Label>
         <Select value={status} onValueChange={onStatusChange}>
-          <SelectTrigger>
+          <SelectTrigger id="status">
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>

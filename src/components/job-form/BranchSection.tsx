@@ -12,7 +12,7 @@ export function BranchSection({ value, onChange }: BranchSectionProps) {
     <div>
       <Label htmlFor="branch">Branch *</Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger>
+        <SelectTrigger id="branch">
           <SelectValue placeholder="Select branch" />
         </SelectTrigger>
         <SelectContent>
