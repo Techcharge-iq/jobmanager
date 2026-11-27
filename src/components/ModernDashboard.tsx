@@ -1,246 +1,365 @@
-import { useEffect, useRef, useState, type ComponentType, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from "react";
-import { Job } from "@/pages/Index";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import type { Job } from "@/pages/Index";
 import { JobDetails } from "@/components/JobDetails";
 import { JobStatusModal } from "@/components/JobStatusModal";
 import { JobStatusOverview } from "@/components/dashboard/JobStatusOverview";
 import { ApprovalBox } from "@/components/dashboard/ApprovalBox";
-import { HighPriorityReminder } from "@/components/dashboard/HighPriorityReminder";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { KpiStrip } from "@/components/command/KpiStrip";
 import { RevenueTrend } from "@/components/dashboard/insights/RevenueTrend";
 import { JobSummaryGauge } from "@/components/dashboard/insights/JobSummaryGauge";
-import { ProductionPipeline } from "@/components/dashboard/insights/ProductionPipeline";
-import { PriorityJobs, RecentJobs, ActivityFeed } from "@/components/dashboard/insights/JobLists";
+import { ProductionPipeline, type PipelineRow } from "@/components/dashboard/insights/ProductionPipeline";
+import { ActivityFeed, RecentJobs } from "@/components/dashboard/insights/JobLists";
 import { useProfileHeader } from "@/components/shell/useProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { ReactNode } from "react";
-import { useSlideDirection } from "@/hooks/useSlideDirection";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { PageHeader } from "@/components/shell/PageHeader";
-import { AlertCircle, ArrowRight, Palette, Cog, Receipt, UserRound, ChevronLeft, ChevronRight } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { listPendingApprovalJobs } from "@/data/jobs";
+import { AlertCircle, ArrowRight, CalendarClock, Receipt } from "lucide-react";
 
 interface ModernDashboardProps {
   jobs: Job[];
   isActive?: boolean;
   onViewChange?: (view: string) => void;
-  /** When provided, jobs open in their own tab instead of the dialog. */
   onOpenJob?: (job: Job) => void;
   onStatusUpdate?: (jobId: string, status: string) => void;
   quickWidget?: ReactNode;
 }
 
-interface WorkflowBucketProps {
-  title: string;
-  jobs: Job[];
-  icon: ComponentType<{ className?: string }>;
-  assigneeFor: (job: Job) => string;
-  onSelect: (job: Job) => void;
+type DashboardTab = "work" | "status" | "invoice";
+type WorkQueue = "approvals" | "unapproved" | "urgent" | "production" | "invoice";
+
+interface DashboardSummary {
+  stats: {
+    total: number;
+    pending: number;
+    inProgress: number;
+    designing: number;
+    completed: number;
+    invoiced: number;
+    cancelled: number;
+  };
+  statusCounts: Record<string, number>;
+  pipeline: PipelineRow[];
+  waitingInvoiceJobs: Job[];
+  waitingInvoiceCount: number;
+  waitingInvoiceValue: number;
+  activeJobs: number;
+  urgentJobs: Job[];
+  urgentCount: number;
+  highPriorityCount: number;
+  overdueCount: number;
+  unapprovedJobs: Job[];
+  unapprovedCount: number;
+  productionJobs: Job[];
+  productionCount: number;
+  recentJobs: Job[];
 }
 
-function WorkflowBucket({
-  title,
-  jobs: bucketJobs,
-  icon: Icon,
-  assigneeFor,
+const CLOSED_STATUSES = new Set(["completed", "finished", "invoiced", "cancelled"]);
+const ACTIVE_STATUSES = new Set(["pending", "in-progress", "designing", "out", "foc_sample"]);
+const QUEUE_LIMIT = 8;
+const dateKey = (date: Date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const PIPELINE_STAGES: Array<{ label: string; statuses: string[]; bar: string }> = [
+  { label: "Pending", statuses: ["pending"], bar: "bg-amber-500" },
+  { label: "Design", statuses: ["designing"], bar: "bg-violet-500" },
+  { label: "Production", statuses: ["in-progress", "out", "foc_sample"], bar: "bg-sky-500" },
+  { label: "Ready to bill", statuses: ["completed", "finished"], bar: "bg-teal-500" },
+];
+
+function insertSortedLimit(list: Job[], job: Job, compare: (left: Job, right: Job) => number) {
+  const index = list.findIndex((current) => compare(job, current) < 0);
+  list.splice(index < 0 ? list.length : index, 0, job);
+  if (list.length > QUEUE_LIMIT) list.pop();
+}
+
+function isPastDue(value: string, today: string, todayTime: number) {
+  const dateOnly = value.slice(0, 10);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly)) return dateOnly < today;
+  const parsed = new Date(value);
+  if (!Number.isFinite(parsed.getTime())) return false;
+  parsed.setHours(0, 0, 0, 0);
+  return parsed.getTime() < todayTime;
+}
+
+function deriveDashboardSummary(jobs: Job[], now: number): DashboardSummary {
+  const statusCounts: Record<string, number> = {};
+  const pipelineValues = PIPELINE_STAGES.map((stage) => ({ ...stage, count: 0, value: 0 }));
+  const stats: DashboardSummary["stats"] = {
+    total: jobs.length,
+    pending: 0,
+    inProgress: 0,
+    designing: 0,
+    completed: 0,
+    invoiced: 0,
+    cancelled: 0,
+  };
+  const waitingInvoiceJobs: Job[] = [];
+  const urgentJobs: Job[] = [];
+  const unapprovedJobs: Job[] = [];
+  const productionJobs: Job[] = [];
+  const recentJobs: Job[] = [];
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+  const todayKey = dateKey(today);
+  let activeJobs = 0;
+  let waitingInvoiceCount = 0;
+  let waitingInvoiceValue = 0;
+  let urgentCount = 0;
+  let highPriorityCount = 0;
+  let overdueCount = 0;
+  let unapprovedCount = 0;
+  let productionCount = 0;
+
+  const dueDateOrder = (left: Job, right: Job) =>
+    (left.dueDate || "9999-12-31").localeCompare(right.dueDate || "9999-12-31");
+
+  for (const job of jobs) {
+    statusCounts[job.status] = (statusCounts[job.status] ?? 0) + 1;
+    if (job.status === "pending") stats.pending += 1;
+    if (job.status === "in-progress") stats.inProgress += 1;
+    if (job.status === "designing") stats.designing += 1;
+    if (job.status === "completed") stats.completed += 1;
+    if (job.status === "invoiced") stats.invoiced += 1;
+    if (job.status === "cancelled") stats.cancelled += 1;
+    if (ACTIVE_STATUSES.has(job.status)) activeJobs += 1;
+
+    const pipelineStage = pipelineValues.find((stage) => stage.statuses.includes(job.status));
+    if (pipelineStage) {
+      pipelineStage.count += 1;
+      pipelineStage.value += Number(job.totalValue) || 0;
+    }
+
+    if (job.status === "completed" || job.status === "finished") {
+      waitingInvoiceCount += 1;
+      waitingInvoiceValue += Number(job.totalValue) || 0;
+      insertSortedLimit(waitingInvoiceJobs, job, dueDateOrder);
+    }
+
+    const isOpen = !CLOSED_STATUSES.has(job.status);
+    const isOverdue = isOpen && Boolean(job.dueDate) && isPastDue(job.dueDate, todayKey, today.getTime());
+    if (isOverdue) {
+      overdueCount += 1;
+    }
+
+    if (job.priority === "high" && isOpen) {
+      highPriorityCount += 1;
+    }
+    if (isOpen && (job.priority === "high" || isOverdue)) {
+      urgentCount += 1;
+      insertSortedLimit(urgentJobs, job, dueDateOrder);
+    }
+
+    if (job.approval_status === "pending_approval") {
+      unapprovedCount += 1;
+      insertSortedLimit(unapprovedJobs, job, (left, right) => right.createdAt.localeCompare(left.createdAt));
+    }
+
+    const needsDesignAttention =
+      job.approval_status !== "pending_approval" &&
+      (job.status === "pending" || job.status === "designing");
+    const needsExecutionAttention =
+      job.status === "in-progress" || job.status === "out" || job.status === "foc_sample";
+    if (needsDesignAttention || needsExecutionAttention) {
+      productionCount += 1;
+      insertSortedLimit(productionJobs, job, dueDateOrder);
+    }
+
+    insertSortedLimit(recentJobs, job, (left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
+  return {
+    stats,
+    statusCounts,
+    pipeline: pipelineValues,
+    waitingInvoiceJobs,
+    waitingInvoiceCount,
+    waitingInvoiceValue,
+    activeJobs,
+    urgentJobs,
+    urgentCount,
+    highPriorityCount,
+    overdueCount,
+    unapprovedJobs,
+    unapprovedCount,
+    productionJobs,
+    productionCount,
+    recentJobs,
+  };
+}
+
+function QueueList({
+  jobs,
+  total,
+  emptyMessage,
   onSelect,
-  animationDelay,
-}: WorkflowBucketProps & { animationDelay: number }) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartX = useRef<number | null>(null);
-  const activePointerId = useRef<number | null>(null);
-  const suppressClick = useRef(false);
-  const wheelDeltaX = useRef(0);
-  const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    setActiveIndex((index) => Math.min(index, Math.max(0, bucketJobs.length - 1)));
-  }, [bucketJobs.length]);
-
-  useEffect(() => () => {
-    if (wheelTimeout.current) clearTimeout(wheelTimeout.current);
-  }, []);
-
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handlePointerMove = (event: PointerEvent) => {
-      if (event.pointerId !== activePointerId.current || dragStartX.current === null) return;
-      setDragOffset(event.clientX - dragStartX.current);
-    };
-
-    const finishDrag = (event: PointerEvent) => {
-      if (event.pointerId !== activePointerId.current || dragStartX.current === null) return;
-      const distance = event.clientX - dragStartX.current;
-      if (Math.abs(distance) > 60) {
-        setActiveIndex((index) => {
-          const nextIndex = Math.max(0, Math.min(bucketJobs.length - 1, index + (distance < 0 ? 1 : -1)));
-          if (nextIndex !== index) suppressClick.current = true;
-          return nextIndex;
-        });
-      }
-      dragStartX.current = null;
-      activePointerId.current = null;
-      setDragOffset(0);
-      setIsDragging(false);
-    };
-
-    const cancelDrag = (event: PointerEvent) => {
-      if (event.pointerId !== activePointerId.current) return;
-      dragStartX.current = null;
-      activePointerId.current = null;
-      setDragOffset(0);
-      setIsDragging(false);
-    };
-
-    window.addEventListener("pointermove", handlePointerMove);
-    window.addEventListener("pointerup", finishDrag);
-    window.addEventListener("pointercancel", cancelDrag);
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", finishDrag);
-      window.removeEventListener("pointercancel", cancelDrag);
-    };
-  }, [bucketJobs.length, isDragging]);
-
-  const handlePointerDown = (event: ReactPointerEvent<HTMLButtonElement>) => {
-    if (!event.isPrimary) return;
-    dragStartX.current = event.clientX;
-    activePointerId.current = event.pointerId;
-    setIsDragging(true);
-  };
-
-  const handleWheel = (event: ReactWheelEvent<HTMLButtonElement>) => {
-    if (Math.abs(event.deltaX) <= Math.abs(event.deltaY) || Math.abs(event.deltaX) < 5) return;
-    event.preventDefault();
-    wheelDeltaX.current += event.deltaX;
-    if (wheelTimeout.current) clearTimeout(wheelTimeout.current);
-    wheelTimeout.current = setTimeout(() => {
-      if (Math.abs(wheelDeltaX.current) >= 30) {
-        const direction = wheelDeltaX.current < 0 ? 1 : -1;
-        setActiveIndex((index) => Math.max(0, Math.min(bucketJobs.length - 1, index + direction)));
-      }
-      wheelDeltaX.current = 0;
-      wheelTimeout.current = null;
-    }, 80);
-  };
-
-  const activeJob = bucketJobs[activeIndex];
-  const slideDir = useSlideDirection(activeIndex);
+}: {
+  jobs: Job[];
+  total: number;
+  emptyMessage: string;
+  onSelect: (job: Job) => void;
+}) {
+  if (total === 0) {
+    return <p className="px-3 py-8 text-center text-sm text-muted-foreground">{emptyMessage}</p>;
+  }
 
   return (
-    <Card className="dashboard-card-enter min-w-0" style={{ animationDelay: `${animationDelay}ms` }}>
-      <CardHeader className="flex-row items-center justify-between gap-2 space-y-0 p-3 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Icon className="h-4 w-4 text-muted-foreground" />
-          {title}
-        </CardTitle>
-        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold">{bucketJobs.length}</span>
-      </CardHeader>
-      <CardContent className="p-3 pt-0">
-        {bucketJobs.length === 0 ? (
-          <p className="py-3 text-sm text-muted-foreground">Nothing waiting here.</p>
-        ) : (
-          <div className="mx-auto w-full max-w-2xl">
-            <div className="relative h-36">
-              {Array.from({ length: Math.min(3, bucketJobs.length) }, (_, index) => {
-                const depth = Math.min(3, bucketJobs.length) - index - 1;
-                return (
-                  <div
-                    key={`workflow-card-layer-${depth}`}
-                    aria-hidden="true"
-                    className="absolute inset-x-0 top-0 h-full rounded-lg border bg-card shadow-md transition-[transform,opacity] duration-300 ease-out motion-reduce:duration-0"
-                    style={{
-                      zIndex: index,
-                      opacity: 1 - depth * 0.18,
-                      transform: `translateY(${depth * 9}px) scale(${1 - depth * 0.025})`,
-                    }}
-                  />
-                );
-              })}
-              <Button
-                variant="ghost"
-                key={activeJob?.id}
-                type="button"
-                onClick={(event) => {
-                  if (suppressClick.current) {
-                    suppressClick.current = false;
-                    event.preventDefault();
-                    return;
-                  }
-                  if (activeJob) onSelect(activeJob);
-                }}
-                onPointerDown={handlePointerDown}
-                onWheel={handleWheel}
-                className={`job-slide-${slideDir} absolute inset-x-0 top-0 z-10 flex h-full w-full flex-col items-start justify-between gap-2 whitespace-normal rounded-lg border bg-card p-3 text-start shadow-sm transition-[transform,opacity] duration-300 hover:bg-muted/30 motion-reduce:duration-0`}
-                style={{
-                  transform: `translateX(${dragOffset}px) rotate(${dragOffset / 35}deg)`,
-                  transition: isDragging ? "none" : undefined,
-                  touchAction: "pan-y",
-                }}
-              >
-                {activeJob && (
-                  <>
-                    <span className="min-h-0 w-full min-w-0 space-y-1 overflow-y-auto break-words">
-                      <span className="block font-mono text-sm font-semibold">{activeJob.jobOrderNumber}</span>
-                      <span className="block text-sm">{activeJob.title}</span>
-                      <span className="block text-xs text-muted-foreground">{activeJob.customer}</span>
-                    </span>
-                    <span className="flex w-full shrink-0 items-center gap-1 text-xs text-muted-foreground">
-                      <UserRound className="h-3.5 w-3.5 shrink-0" />
-                      <span className="break-words">{assigneeFor(activeJob)}</span>
-                    </span>
-                  </>
-                )}
-              </Button>
-            </div>
-            <div className="mt-3 flex items-center justify-center gap-3">
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={`Previous ${title.toLowerCase()} job`}
-                onClick={() => setActiveIndex((index) => Math.max(0, index - 1))}
-                disabled={activeIndex === 0}
-                className="h-11 w-11"
-              >
-                <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
-              </Button>
-              <span className="min-w-12 text-center text-xs tabular-nums text-muted-foreground" aria-live="polite">
-                {activeIndex + 1} / {bucketJobs.length}
+    <div>
+      <ul className="divide-y">
+        {jobs.map((job) => (
+          <li key={job.id}>
+            <button
+              type="button"
+              onClick={() => onSelect(job)}
+              className="flex min-h-12 w-full min-w-0 items-center gap-2 px-3 py-2 text-start text-sm transition-colors hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+            >
+              <span className="w-16 shrink-0 font-mono text-xs text-muted-foreground">{job.jobOrderNumber}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-medium">{job.title}</span>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {job.customer}{job.assignee && job.assignee !== "Unassigned" ? ` · ${job.assignee}` : ""}
+                </span>
               </span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={`Next ${title.toLowerCase()} job`}
-                onClick={() => setActiveIndex((index) => Math.min(bucketJobs.length - 1, index + 1))}
-                disabled={activeIndex >= bucketJobs.length - 1}
-                className="h-11 w-11"
-              >
-                <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
-              </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+              <StatusBadge status={job.status} className="hidden shrink-0 sm:inline-flex" />
+              {job.dueDate && (
+                <span className="hidden shrink-0 text-xs tabular-nums text-muted-foreground md:inline">
+                  {new Date(`${job.dueDate.slice(0, 10)}T12:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" })}
+                </span>
+              )}
+            </button>
+          </li>
+        ))}
+      </ul>
+      {total > jobs.length && (
+        <p className="border-t px-3 py-2 text-center text-xs text-muted-foreground">
+          Showing {jobs.length} of {total} jobs
+        </p>
+      )}
+    </div>
   );
 }
 
-const pillBase = "inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+function PriorityWorkCenter({
+  active,
+  queue,
+  onQueueChange,
+  summary,
+  onOpenJob,
+  onViewAll,
+}: {
+  active: boolean;
+  queue: WorkQueue;
+  onQueueChange: (queue: WorkQueue) => void;
+  summary: DashboardSummary;
+  onOpenJob: (job: Job) => void;
+  onViewAll: () => void;
+}) {
+  return (
+    <section id="priority-work-center" aria-label="Priority work center" className="scroll-mt-2">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div>
+          <h2 className="text-sm font-semibold">Priority work center</h2>
+          <p className="text-xs text-muted-foreground">Review queues and open a job to take action.</p>
+        </div>
+        <Button type="button" variant="ghost" size="sm" onClick={onViewAll} className="h-8">
+          All jobs <ArrowRight className="ms-1 h-3.5 w-3.5 rtl:-scale-x-100" aria-hidden />
+        </Button>
+      </div>
+
+      <Tabs value={queue} onValueChange={(value) => onQueueChange(value as WorkQueue)}>
+        <TabsList aria-label="Work queues" className="grid h-auto w-full grid-cols-2 gap-1 p-1 sm:grid-cols-5">
+          <TabsTrigger value="approvals" className="min-w-0 px-2 py-1.5 text-xs">Approvals</TabsTrigger>
+          <TabsTrigger value="unapproved" className="min-w-0 px-2 py-1.5 text-xs">Unapproved</TabsTrigger>
+          <TabsTrigger value="urgent" className="min-w-0 px-2 py-1.5 text-xs">Urgent</TabsTrigger>
+          <TabsTrigger value="production" className="min-w-0 px-2 py-1.5 text-xs">Production</TabsTrigger>
+          <TabsTrigger value="invoice" className="min-w-0 px-2 py-1.5 text-xs">Ready to invoice</TabsTrigger>
+        </TabsList>
+        <Card className="mt-2">
+          <TabsContent value="approvals" className="m-0">
+            <ApprovalBox isActive={active} />
+          </TabsContent>
+          <TabsContent value="unapproved" className="m-0">
+            <CardContent className="p-0">
+              <QueueList
+                jobs={summary.unapprovedJobs}
+                total={summary.unapprovedCount}
+                emptyMessage="No jobs are waiting for approval."
+                onSelect={onOpenJob}
+              />
+            </CardContent>
+          </TabsContent>
+          <TabsContent value="urgent" className="m-0">
+            <CardContent className="p-0">
+              <QueueList
+                jobs={summary.urgentJobs}
+                total={summary.urgentCount}
+                emptyMessage="No open high-priority jobs."
+                onSelect={onOpenJob}
+              />
+            </CardContent>
+          </TabsContent>
+          <TabsContent value="production" className="m-0">
+            <CardContent className="p-0">
+              <QueueList
+                jobs={summary.productionJobs}
+                total={summary.productionCount}
+                emptyMessage="No production jobs need attention."
+                onSelect={onOpenJob}
+              />
+            </CardContent>
+          </TabsContent>
+          <TabsContent value="invoice" className="m-0">
+            <CardContent className="p-0">
+              <QueueList
+                jobs={summary.waitingInvoiceJobs}
+                total={summary.waitingInvoiceCount}
+                emptyMessage="No jobs are ready to invoice."
+                onSelect={onOpenJob}
+              />
+            </CardContent>
+          </TabsContent>
+        </Card>
+      </Tabs>
+    </section>
+  );
+}
+
+const alertButton =
+  "inline-flex min-h-8 items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, isActive = true }: ModernDashboardProps) {
-  const [tab, setTab] = useState("work");
+  const [tab, setTab] = useState<DashboardTab>("work");
+  const [queue, setQueue] = useState<WorkQueue>("approvals");
   const profile = useProfileHeader();
+  const { user } = useAuth();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isJobDetailsOpen, setIsJobDetailsOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<{
-    status: 'pending' | 'in-progress' | 'designing' | 'completed' | 'invoiced' | 'total' | 'active' | 'cancelled';
+    status: "pending" | "in-progress" | "designing" | "completed" | "invoiced" | "total" | "active" | "cancelled";
     title: string;
   } | null>(null);
+
+  const dashboard = useMemo(() => deriveDashboardSummary(jobs, Date.now()), [jobs]);
+  const {
+    data: pendingApprovalRecords,
+    isError: approvalCountError,
+    isLoading: approvalCountLoading,
+    refetch: refetchApprovalCount,
+  } = useQuery({
+    queryKey: ["pending-approvals", user?.id],
+    queryFn: listPendingApprovalJobs,
+    enabled: Boolean(user) && isActive,
+    staleTime: 30_000,
+  });
+  const pendingApprovals = pendingApprovalRecords?.length ?? dashboard.unapprovedCount;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = profile?.full_name?.split(" ")[0];
 
   useEffect(() => {
     if (!isActive) {
@@ -248,33 +367,6 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, is
       setStatusModalOpen(false);
     }
   }, [isActive]);
-
-  const stats = {
-    total: jobs.length,
-    pending: jobs.filter(job => job.status === "pending").length,
-    inProgress: jobs.filter(job => job.status === "in-progress").length,
-    designing: jobs.filter(job => job.status === "designing").length,
-    completed: jobs.filter(job => job.status === "completed").length,
-    invoiced: jobs.filter(job => job.status === "invoiced").length,
-    cancelled: jobs.filter(job => job.status === "cancelled").length,
-  };
-
-  const pendingDesignJobs = jobs.filter(
-    job => (job.status === "pending" || job.status === "designing") &&
-      job.approval_status !== "pending_approval",
-  );
-  const executionJobs = jobs.filter(
-    job => job.status === "in-progress" || job.status === "out" || job.status === "foc_sample",
-  );
-  const pendingInvoiceJobs = jobs.filter(job => job.status === "completed" || job.status === "finished");
-  const assignedTo = (job: Job) =>
-    [job.assignee, job.designer, job.salesman].find((name) => name && name !== "Unassigned") || "Unassigned";
-
-  const pendingApprovals = jobs.filter(job => job.approval_status === "pending_approval").length;
-  const toInvoice = pendingInvoiceJobs.length;
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const firstName = profile?.full_name?.split(" ")[0];
 
   const handleViewDetails = (job: Job) => {
     if (onOpenJob) {
@@ -286,16 +378,20 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, is
   };
 
   const handleStatusClick = (
-    status: 'pending' | 'in-progress' | 'designing' | 'completed' | 'invoiced' | 'total' | 'active' | 'cancelled',
-    title: string
+    status: "pending" | "in-progress" | "designing" | "completed" | "invoiced" | "total" | "active" | "cancelled",
+    title: string,
   ) => {
     setSelectedStatus({ status, title });
     setStatusModalOpen(true);
   };
 
-  const goTo = (nextTab: string, anchor: string) => {
-    setTab(nextTab);
-    requestAnimationFrame(() => document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  const goToWorkQueue = (nextQueue: WorkQueue) => {
+    setTab("work");
+    setQueue(nextQueue);
+    const behavior = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+    requestAnimationFrame(() => {
+      document.getElementById("priority-work-center")?.scrollIntoView({ behavior, block: "start" });
+    });
   };
 
   return (
@@ -304,72 +400,110 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, is
         title="Dashboard"
         description={`${greeting}${firstName ? `, ${firstName}` : ""} · ${new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}`}
         className="shrink-0"
-        actions={(
-          <>
-          {pendingApprovals > 0 ? (
-            <button type="button" onClick={() => goTo("work", "approvals-section")} className={`${pillBase} border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20`}>
-              <AlertCircle className="h-3.5 w-3.5" aria-hidden />
-              {pendingApprovals} job{pendingApprovals === 1 ? "" : "s"} awaiting approval
-              <span className="inline-flex items-center gap-0.5 font-semibold underline-offset-2 hover:underline">Review<ArrowRight className="h-3 w-3 rtl:-scale-x-100" aria-hidden /></span>
-            </button>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span aria-hidden className="h-1.5 w-1.5 rounded-full bg-teal-500" />Nothing awaiting approval</span>
-          )}
-          {toInvoice > 0 && (
-            <button type="button" onClick={() => goTo("invoice", "dashboard-workspace")} className={`${pillBase} bg-card hover:bg-muted`}>
-              <Receipt className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />{toInvoice} ready to invoice
-            </button>
-          )}
-          </>
-        )}
       />
 
-      <div className="shrink-0"><KpiStrip jobs={jobs} /></div>
+      <section aria-label="Operational alerts" className="flex shrink-0 flex-wrap items-center gap-1.5">
+        {approvalCountError ? (
+          <button
+            type="button"
+            onClick={() => void refetchApprovalCount()}
+            className={`${alertButton} border-destructive/30 bg-destructive/5 text-destructive`}
+          >
+            <AlertCircle className="h-3.5 w-3.5" aria-hidden />
+            Approval queue unavailable · Retry
+          </button>
+        ) : approvalCountLoading && pendingApprovalRecords === undefined ? (
+          <span role="status" className="text-xs text-muted-foreground">Checking approval queue…</span>
+        ) : pendingApprovals > 0 ? (
+          <button
+            type="button"
+            onClick={() => goToWorkQueue("approvals")}
+            className={`${alertButton} border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20`}
+          >
+            <AlertCircle className="h-3.5 w-3.5" aria-hidden />
+            {pendingApprovals} awaiting approval
+            <span className="font-semibold">Review</span>
+          </button>
+        ) : null}
+        {dashboard.overdueCount > 0 && (
+          <button
+            type="button"
+            onClick={() => goToWorkQueue("urgent")}
+            className={`${alertButton} border-destructive/30 bg-destructive/5 text-destructive hover:bg-destructive/10`}
+          >
+            <CalendarClock className="h-3.5 w-3.5" aria-hidden />
+            {dashboard.overdueCount} overdue jobs
+          </button>
+        )}
+        {dashboard.highPriorityCount > 0 && (
+          <button
+            type="button"
+            onClick={() => goToWorkQueue("urgent")}
+            className={`${alertButton} border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20`}
+          >
+            {dashboard.highPriorityCount} high-priority jobs
+          </button>
+        )}
+        {dashboard.waitingInvoiceCount > 0 && (
+          <button
+            type="button"
+            onClick={() => goToWorkQueue("invoice")}
+            className={`${alertButton} bg-card hover:bg-muted`}
+          >
+            <Receipt className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
+            {dashboard.waitingInvoiceCount} ready to invoice
+          </button>
+        )}
+      </section>
 
-      <div className="grid shrink-0 gap-2 lg:h-[clamp(15rem,30vh,22rem)] lg:grid-cols-12 lg:grid-rows-1">
-        <RevenueTrend jobs={jobs} className="h-64 lg:col-span-5 lg:h-auto" />
-        <JobSummaryGauge jobs={jobs} className="h-auto lg:col-span-3 lg:h-auto" />
-        <ProductionPipeline jobs={jobs} className="h-auto lg:col-span-4 lg:h-auto" />
-      </div>
-      <div className="grid shrink-0 gap-2 lg:grid-cols-12">
-        <PriorityJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="lg:col-span-4" />
-        <RecentJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="lg:col-span-5" />
-        <ActivityFeed active={isActive} className="lg:col-span-3" />
+      <div className="shrink-0">
+        <KpiStrip
+          summary={{
+            totalJobs: dashboard.stats.total,
+            waitingInvoiceCount: dashboard.waitingInvoiceCount,
+            waitingInvoiceValue: dashboard.waitingInvoiceValue,
+            activeJobs: dashboard.activeJobs,
+            urgentJobs: dashboard.highPriorityCount,
+          }}
+        />
       </div>
 
-      <section id="dashboard-workspace" aria-label="Workspace" className="shrink-0 scroll-mt-2">
-        <Tabs value={tab} onValueChange={setTab} className="flex flex-col">
-          <TabsList aria-label="Dashboard panels" className="mb-2 grid h-9 w-full max-w-md grid-cols-4 gap-0 p-1">
+      <section id="dashboard-workspace" aria-label="Dashboard workspace" className="shrink-0 scroll-mt-2">
+        <Tabs value={tab} onValueChange={(value) => setTab(value as DashboardTab)} className="flex flex-col">
+          <TabsList aria-label="Dashboard panels" className="mb-2 grid h-9 w-full max-w-sm grid-cols-3 gap-0 p-1">
             <TabsTrigger value="work" className="h-full px-1 text-xs">Work</TabsTrigger>
             <TabsTrigger value="status" className="h-full px-1 text-xs">Status</TabsTrigger>
             <TabsTrigger value="invoice" className="h-full px-1 text-xs">Invoice</TabsTrigger>
-            <TabsTrigger value="priority" className="h-full px-1 text-xs">Priority</TabsTrigger>
           </TabsList>
-          <TabsContent value="work" className="dashboard-workspace mt-0 space-y-4">
-            <section aria-label="Uncompleted work and bottlenecks" className="space-y-2">
-              <div>
-                <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">Uncompleted work</h2>
-                <p className="sr-only">Current workflow queues and the person or team responsible.</p>
-              </div>
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                <WorkflowBucket title="Pending Design" jobs={pendingDesignJobs} icon={Palette} assigneeFor={(job) => job.designer && job.designer !== "Unassigned" ? job.designer : assignedTo(job)} onSelect={handleViewDetails} animationDelay={0} />
-                <WorkflowBucket title="In Production / Execution" jobs={executionJobs} icon={Cog} assigneeFor={assignedTo} onSelect={handleViewDetails} animationDelay={0} />
-                <WorkflowBucket title="Pending Invoicing" jobs={pendingInvoiceJobs} icon={Receipt} assigneeFor={(job) => job.assignee && job.assignee !== "Unassigned" ? job.assignee : "Admin"} onSelect={handleViewDetails} animationDelay={0} />
-              </div>
-            </section>
-            <section id="approvals-section" aria-label="Approvals" className="scroll-mt-2 space-y-2">
-              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">Approvals</h2>
-              <ApprovalBox isActive={isActive} />
-            </section>
+          <TabsContent value="work" className="dashboard-workspace mt-0 space-y-3">
+            <PriorityWorkCenter
+              active={isActive}
+              queue={queue}
+              onQueueChange={setQueue}
+              summary={dashboard}
+              onOpenJob={handleViewDetails}
+              onViewAll={() => onViewChange?.("jobs")}
+            />
+            <div className="grid min-w-0 gap-2 lg:h-[clamp(14rem,28vh,20rem)] lg:grid-cols-12">
+              <RevenueTrend jobs={jobs} className="h-56 lg:col-span-5 lg:h-auto" />
+              <JobSummaryGauge counts={dashboard.statusCounts} className="h-auto lg:col-span-3 lg:h-auto" />
+              <ProductionPipeline rows={dashboard.pipeline} className="h-auto lg:col-span-4 lg:h-auto" />
+            </div>
+            <div className="grid min-w-0 gap-2 lg:grid-cols-12">
+              <RecentJobs
+                jobs={jobs}
+                recentJobs={dashboard.recentJobs}
+                onOpenJob={handleViewDetails}
+                onViewAll={() => onViewChange?.("jobs")}
+                className="lg:col-span-8"
+              />
+              <ActivityFeed active={isActive} limit={4} className="lg:col-span-4" />
+            </div>
           </TabsContent>
           <TabsContent value="status" className="dashboard-workspace mt-0">
-            <JobStatusOverview stats={stats} onStatusClick={handleStatusClick} />
+            <JobStatusOverview stats={dashboard.stats} onStatusClick={handleStatusClick} />
           </TabsContent>
           <TabsContent value="invoice" className="dashboard-workspace mt-0">{quickWidget}</TabsContent>
-          <TabsContent value="priority" className="dashboard-workspace mt-0">
-            <HighPriorityReminder jobs={jobs} onViewJob={handleViewDetails} />
-            {!jobs.some(job => job.priority === "high" && !["completed", "invoiced", "cancelled"].includes(job.status)) && <p className="p-3 text-sm text-muted-foreground">No high priority jobs pending.</p>}
-          </TabsContent>
         </Tabs>
       </section>
 
@@ -383,8 +517,8 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, is
         isOpen={isActive && statusModalOpen}
         onClose={() => setStatusModalOpen(false)}
         jobs={jobs}
-        status={selectedStatus?.status || 'total'}
-        title={selectedStatus?.title || 'All'}
+        status={selectedStatus?.status || "total"}
+        title={selectedStatus?.title || "All"}
       />
     </div>
   );

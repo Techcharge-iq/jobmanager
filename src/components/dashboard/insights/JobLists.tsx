@@ -3,6 +3,7 @@ import { format, formatDistanceToNow, isBefore, startOfDay } from "date-fns";
 import type { Job } from "@/pages/Index";
 import { DashPanel } from "@/components/dashboard/DashPanel";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { Button } from "@/components/ui/button";
 import { useActivities } from "@/hooks/useActivities";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +37,11 @@ export function PriorityJobs({ jobs, onOpenJob, onViewAll, className }: ListProp
   );
 }
 
-export function RecentJobs({ jobs, onOpenJob, onViewAll, className }: ListProps) {
-  const list = useMemo(() => [...jobs].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8), [jobs]);
+export function RecentJobs({ jobs, recentJobs, onOpenJob, onViewAll, className }: ListProps & { recentJobs?: Job[] }) {
+  const list = useMemo(
+    () => recentJobs ?? [...jobs].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8),
+    [jobs, recentJobs],
+  );
   return (
     <DashPanel title="Recent jobs" className={className} action={viewAll(onViewAll)} bodyClassName="flex-none overflow-visible">
       {list.length === 0 ? <Empty>No jobs yet.</Empty> : list.map((j) => (
@@ -51,13 +55,18 @@ export function RecentJobs({ jobs, onOpenJob, onViewAll, className }: ListProps)
   );
 }
 
-export function ActivityFeed({ className, active = true }: { className?: string; active?: boolean }) {
-  const { activities, isLoading } = useActivities(active);
+export function ActivityFeed({ className, active = true, limit = 10 }: { className?: string; active?: boolean; limit?: number }) {
+  const { activities, isLoading, isError, refetch } = useActivities(active);
   return (
     <DashPanel title="Activity" className={className} bodyClassName="flex-none overflow-visible">
-      {isLoading ? <Empty>Loading activity…</Empty> : activities.length === 0 ? <Empty>No recent activity.</Empty> : (
+      {isLoading ? <Empty>Loading activity…</Empty> : isError ? (
+        <div className="space-y-2 px-3 py-4 text-center">
+          <p role="alert" className="text-xs text-destructive">Could not load recent activity.</p>
+          <Button type="button" variant="outline" size="sm" onClick={() => void refetch()}>Retry</Button>
+        </div>
+      ) : activities.length === 0 ? <Empty>No recent activity.</Empty> : (
         <ul>
-          {activities.map((a) => (
+          {activities.slice(0, limit).map((a) => (
             <li key={a.id} className="flex flex-col gap-0.5 border-b px-3 py-2 text-[13px] last:border-0">
               <span className="leading-snug"><span className="font-medium">{a.user_name}</span> <span className="text-muted-foreground">{a.description}</span></span>
               <time dateTime={a.created_at} className="text-[11px] text-muted-foreground">{formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}</time>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import type { DashboardJob as Job } from "@/types/jobOrder";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -185,6 +185,7 @@ export function ApprovedJobsSlider({
   const [selectedCustomer, setSelectedCustomer] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("approved");
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [selectedJobId, setSelectedJobId] = useState<string | null>(jobs[0]?.id ?? null);
   const [isJobDetailsOpen, setIsJobDetailsOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -197,7 +198,7 @@ export function ApprovedJobsSlider({
   const statuses = useMemo(() => ["all", ...new Set(["approved", ...jobs.map((job) => job.status).filter(Boolean)])], [jobs]);
 
   const filteredJobs = useMemo(() => {
-    const terms = searchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    const terms = deferredSearchQuery.toLowerCase().trim().split(/\s+/).filter(Boolean);
     return jobs.filter((job) => {
       const branchMatch = selectedBranch === "all" || job.branch === selectedBranch;
       const salesmanMatch = selectedSalesman === "all" || job.salesman === selectedSalesman;
@@ -212,7 +213,7 @@ export function ApprovedJobsSlider({
       return branchMatch && salesmanMatch && designerMatch && customerMatch && statusMatch &&
         terms.every((term) => searchable.includes(term));
     });
-  }, [jobs, selectedBranch, selectedSalesman, selectedDesigner, selectedCustomer, selectedStatus, searchQuery]);
+  }, [jobs, selectedBranch, selectedSalesman, selectedDesigner, selectedCustomer, selectedStatus, deferredSearchQuery]);
 
   useEffect(() => {
     if (!filteredJobs.some((job) => job.id === selectedJobId)) {
@@ -288,7 +289,7 @@ export function ApprovedJobsSlider({
       <VirtualJobList
         jobs={filteredJobs}
         selectedId={selectedJobId}
-        resetKey={`${selectedBranch}:${selectedSalesman}:${selectedDesigner}:${selectedCustomer}:${selectedStatus}:${searchQuery}`}
+        resetKey={`${selectedBranch}:${selectedSalesman}:${selectedDesigner}:${selectedCustomer}:${selectedStatus}:${deferredSearchQuery}`}
         onSelect={(job) => { selectJob(job); setMobileDetailOpen(true); }}
       />
       {filteredJobs.length > 1 && (
