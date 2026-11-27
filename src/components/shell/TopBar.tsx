@@ -27,7 +27,7 @@ export function TopBar({ tabs, activeId, onActivateTab, onCloseTab, onCloseOther
   const profile = useProfileHeader();
   return (
     <header className="glass relative z-30 flex h-11 shrink-0 items-center gap-1 rounded-none border-x-0 border-t-0 px-2 md:gap-2 md:px-3">
-      <div className="flex shrink-0 items-center" title="JobFlow"><JobFlowMark className="h-6 w-6" /></div>
+      <div className="flex shrink-0 items-center" title="JobFlow" aria-label="JobFlow"><JobFlowMark className="h-6 w-6" /></div>
       <div aria-hidden className="hidden h-5 w-px shrink-0 bg-border md:block" />
       <TabStrip tabs={tabs} activeId={activeId} onActivate={onActivateTab} onClose={onCloseTab} onCloseOthers={onCloseOthers} onTogglePin={onTogglePin} onReorder={onReorder} onNew={onOpenPalette} />
 
@@ -37,16 +37,14 @@ export function TopBar({ tabs, activeId, onActivateTab, onCloseTab, onCloseOther
           <span className="hidden truncate text-[13px] lg:inline">Search</span>
           <kbd className="ms-auto hidden rounded border bg-background px-1 text-[10px] font-medium lg:inline">Ctrl K</kbd>
         </Button>
-        <div className="hidden xl:block"><SyncStatusIndicator showLabel /></div>
+        <SyncStatusIndicator showLabel={false} className="px-2 py-1" />
         <Button type="button" onClick={onCreateJob} className="hidden h-8 gap-1 rounded-md px-3 text-[13px] sm:inline-flex"><Plus className="h-4 w-4" />New job</Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button type="button" variant="ghost" aria-label="Quick actions" className="h-8 w-8 rounded-md p-0 text-muted-foreground hover:text-foreground"><Zap className="h-4 w-4" /></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onSelect={onCreateJob} className="gap-2"><Plus className="h-4 w-4" />New job order</DropdownMenuItem>
             <DropdownMenuItem onSelect={onQuickInvoice} className="gap-2"><Receipt className="h-4 w-4" />Update invoice no. & value</DropdownMenuItem>
-            <DropdownMenuItem onSelect={onOpenPalette} className="gap-2"><Search className="h-4 w-4" />Command palette</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <NotificationTray className="h-8 w-8 rounded-md" />

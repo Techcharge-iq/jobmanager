@@ -127,7 +127,8 @@
 @media (prefers-reduced-motion: reduce) { .dashboard-card-enter { animation: none; } }
 
 @layer components {
-  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px)); }
+  .dashboard-shell { display: flex; flex: 1; min-height: 0; flex-direction: column; overflow: hidden; padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)); }
+  .workspace-scroll { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior-y: contain; padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px)); scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
 
   /* One quiet violet wash at the top; everything else is flat. */
   .app-wallpaper {

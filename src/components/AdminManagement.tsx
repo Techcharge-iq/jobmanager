@@ -17,6 +17,7 @@ import { JobTitleManagement } from "@/components/admin/JobTitleManagement";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { AdvancedUserPermissions } from "@/components/admin/AdvancedUserPermissions";
 import { CommunicationsManagement } from "@/components/CommunicationsManagement";
+import { PageHeader } from "@/components/shell/PageHeader";
 
 export function AdminManagement() {
   const customerHook = useCustomerManagement();
@@ -24,24 +25,26 @@ export function AdminManagement() {
   const userHook = useUserManagement();
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="min-h-0 p-4 md:p-6">
+      <div className="mx-auto max-w-7xl space-y-6">
         {/* Header Section */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2 flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
-              </div>
+        <PageHeader
+          title={(
+            <span className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                <Users className="h-4 w-4" />
+              </span>
               Admin Management
-            </h1>
-            <p className="text-muted-foreground text-lg">Manage customers, job titles, and users with powerful admin tools</p>
-          </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-card  rounded-xl border-0 shadow-lg">
+            </span>
+          )}
+          description="Manage customers, job titles, and users with admin tools"
+          actions={(
+            <div className="flex items-center gap-2 rounded-lg border bg-card px-3 py-1.5">
             <Sparkles className="w-5 h-5 text-purple-500 dark:text-purple-300" />
             <span className="text-sm font-medium text-foreground">Enhanced Admin Panel</span>
-          </div>
-        </div>
+            </div>
+          )}
+        />
 
         {/* Admin Tabs */}
         <div className="bg-card  rounded-2xl border-0 shadow-xl overflow-hidden">

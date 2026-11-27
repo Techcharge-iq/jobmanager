@@ -12,6 +12,7 @@ import { jobProgress } from "@/lib/jobStages";
 import { STATUS_META } from "@/lib/status";
 import { cn } from "@/lib/utils";
 import { formatOmaniRial } from "@/utils/currency";
+import { PageHeader } from "@/components/shell/PageHeader";
 
 type View = "board" | "table";
 interface Filters { q: string; status: string; priority: string; staff: string; customer: string; deadline: string; sort: string }
@@ -148,6 +149,7 @@ export function JobsWorkspace({ jobs, loading, onOpenJob }: { jobs: Job[]; loadi
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 px-3 pb-2 pt-2 md:px-4">
+      <PageHeader title="Jobs" className="shrink-0" />
       <div className="flex shrink-0 flex-wrap items-end gap-2">
         <div role="group" aria-label="View" className="inline-flex rounded-lg bg-muted p-0.5">
           {([["board", "Board", Columns3], ["table", "Table", Table2]] as const).map(([v, label, Icon]) => (

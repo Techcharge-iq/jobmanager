@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { JobDetails } from "@/components/JobDetails";
 import { cn } from "@/lib/utils";
+import { PageHeader } from "@/components/shell/PageHeader";
 import {
   Building,
   Calendar,
@@ -188,16 +189,8 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
 
   if (filteredJobs.length === 0) {
     return (
-      <div className="p-6 min-h-screen">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Approved Jobs</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {jobs.length} total · 0 matching filters
-            </p>
-          </div>
-          {filterControls}
-        </div>
+      <div className="min-h-0 space-y-6 p-4 md:p-6">
+        <PageHeader title="Approved Jobs" description={`${jobs.length} total · 0 matching filters`} actions={filterControls} />
         <Card>
           <CardContent className="p-12 text-center">
             <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
@@ -209,7 +202,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
   }
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="min-h-0 space-y-6 p-4 md:p-6">
       {(isSyncing || isLoading) && (
         <div className="fixed inset-0 bg-background/70  z-50 flex items-center justify-center">
           <div className="flex items-center gap-3 bg-card border px-5 py-4 rounded-md shadow-lg">
@@ -219,15 +212,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
         </div>
       )}
 
-      <div className="flex items-start justify-between mb-6 gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Approved Jobs</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {filteredJobs.length} of {jobs.length} jobs
-          </p>
-        </div>
-        {filterControls}
-      </div>
+      <PageHeader title="Approved Jobs" description={`${filteredJobs.length} of ${jobs.length} jobs`} actions={filterControls} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Job list */}

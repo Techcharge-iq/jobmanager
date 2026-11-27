@@ -16,6 +16,7 @@ import { useProfileHeader } from "@/components/shell/useProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { ReactNode } from "react";
 import { useSlideDirection } from "@/hooks/useSlideDirection";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { AlertCircle, ArrowRight, Palette, Cog, Receipt, UserRound, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ModernDashboardProps {
@@ -299,12 +300,12 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, is
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-2 text-sm md:px-4">
-      <div className="flex min-h-8 shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
-        <p className="text-sm">
-          <span className="font-semibold">{greeting}{firstName ? `, ${firstName}` : ""}</span>
-          <span className="ms-2 hidden text-muted-foreground sm:inline">{new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</span>
-        </p>
-        <div className="ms-auto flex flex-wrap items-center gap-2">
+      <PageHeader
+        title="Dashboard"
+        description={`${greeting}${firstName ? `, ${firstName}` : ""} · ${new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}`}
+        className="shrink-0"
+        actions={(
+          <>
           {pendingApprovals > 0 ? (
             <button type="button" onClick={() => goTo("work", "approvals-section")} className={`${pillBase} border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20`}>
               <AlertCircle className="h-3.5 w-3.5" aria-hidden />
@@ -319,8 +320,9 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, is
               <Receipt className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />{toInvoice} ready to invoice
             </button>
           )}
-        </div>
-      </div>
+          </>
+        )}
+      />
 
       <div className="shrink-0"><KpiStrip jobs={jobs} /></div>
 
@@ -329,10 +331,10 @@ export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange, is
         <JobSummaryGauge jobs={jobs} className="h-auto lg:col-span-3 lg:h-auto" />
         <ProductionPipeline jobs={jobs} className="h-auto lg:col-span-4 lg:h-auto" />
       </div>
-      <div className="grid shrink-0 gap-2 lg:h-[clamp(15rem,30vh,22rem)] lg:grid-cols-12 lg:grid-rows-1">
-        <PriorityJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-4 lg:max-h-none" />
-        <RecentJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-5 lg:max-h-none" />
-        <ActivityFeed active={isActive} className="max-h-72 lg:col-span-3 lg:max-h-none" />
+      <div className="grid shrink-0 gap-2 lg:grid-cols-12">
+        <PriorityJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="lg:col-span-4" />
+        <RecentJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="lg:col-span-5" />
+        <ActivityFeed active={isActive} className="lg:col-span-3" />
       </div>
 
       <section id="dashboard-workspace" aria-label="Workspace" className="shrink-0 scroll-mt-2">

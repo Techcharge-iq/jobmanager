@@ -19,7 +19,7 @@ export function ProductionPipeline({ jobs, className }: { jobs: Job[]; className
   const max = Math.max(1, ...rows.map((r) => r.count));
 
   return (
-    <DashPanel title="Production pipeline" className={className} action={<span className="text-xs text-muted-foreground">jobs · value</span>} bodyClassName="flex flex-col justify-around gap-2 p-3">
+    <DashPanel title="Production pipeline" className={className} action={<span className="text-xs text-muted-foreground">jobs · value</span>} bodyClassName="flex flex-col justify-around gap-2 overflow-visible p-3">
       {rows.map((r) => (
         <div key={r.label}>
           <div className="mb-1 flex items-baseline justify-between gap-2 text-xs">

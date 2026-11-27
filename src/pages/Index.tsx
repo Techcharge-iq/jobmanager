@@ -244,7 +244,7 @@ const Index = () => {
               key={tab.id}
               hidden={!active}
               aria-hidden={!active}
-              className={active ? (fillsViewport ? "dashboard-shell" : "min-h-0 flex-1 overflow-y-auto pb-16") : "hidden"}
+              className={active ? (fillsViewport ? "dashboard-shell" : "workspace-scroll") : "hidden"}
             >
               {(isSyncing || syncError) && (
                 <div role="status" className={`px-4 py-2 text-sm ${syncError ? "bg-destructive/10 text-destructive" : "bg-muted text-muted-foreground"}`}>
