@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { formatOmaniRial } from "@/utils/currency";
+import { PageHeader } from "@/components/shell/PageHeader";
 
 type ReportType = "customer" | "salesman" | "branch";
 
@@ -210,13 +211,8 @@ export function ReportsPage() {
 
   if (error) {
     return (
-      <div className="space-y-6 p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Reports & Analytics</h1>
-            <p className="text-muted-foreground">Generate detailed reports and analyze business performance</p>
-          </div>
-        </div>
+      <div className="space-y-6 p-4 md:p-6">
+        <PageHeader title="Reports & Analytics" description="Generate detailed reports and analyze business performance" />
         
         <Card className="border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/15">
           <CardContent className="flex items-center p-6">
@@ -239,17 +235,12 @@ export function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Reports & Analytics</h1>
-          <p className="text-muted-foreground">Generate detailed reports and analyze business performance</p>
-        </div>
-        <Button onClick={exportReport} className="flex items-center gap-2" disabled={reportData.length === 0}>
-          <Download className="w-4 h-4" />
-          Export Report
-        </Button>
-      </div>
+    <div className="space-y-6 p-4 md:p-6">
+      <PageHeader
+        title="Reports & Analytics"
+        description="Generate detailed reports and analyze business performance"
+        actions={<Button onClick={exportReport} className="flex items-center gap-2" disabled={reportData.length === 0}><Download className="w-4 h-4" />Export Report</Button>}
+      />
 
       {/* Report Controls */}
       <Card>

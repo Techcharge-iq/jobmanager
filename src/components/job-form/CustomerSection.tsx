@@ -14,9 +14,10 @@ interface CustomerSectionProps {
   customers: Customer[];
   clientName?: string;
   onClientNameChange?: (value: string) => void;
+  onCustomerNameChange?: (value: string) => void;
 }
 
-export function CustomerSection({ value, onChange, customers, clientName, onClientNameChange }: CustomerSectionProps) {
+export function CustomerSection({ value, onChange, customers, clientName, onClientNameChange, onCustomerNameChange }: CustomerSectionProps) {
   const CASH_CUSTOMER_ID = "00000000-0000-0000-0000-000000000001";
   const isCashCustomer = value === CASH_CUSTOMER_ID;
   const [modalOpen, setModalOpen] = useState(false);
@@ -48,6 +49,7 @@ export function CustomerSection({ value, onChange, customers, clientName, onClie
   const handleCreate = async (name: string): Promise<{ id: string; name: string }> => {
     const newCustomer = await createCustomer(name);
     onChange(newCustomer.id);
+    onCustomerNameChange?.(newCustomer.name);
     setSelectedOption({ value: newCustomer.id, label: newCustomer.name });
     return { id: newCustomer.id, name: newCustomer.name };
   };
@@ -80,11 +82,13 @@ export function CustomerSection({ value, onChange, customers, clientName, onClie
         <div className="flex gap-2">
           <AsyncSelect
             className="flex-1"
+            inputId="customer"
             styles={customStyles}
             value={selectedOption}
             loadOptions={loadOptions}
             onChange={(option) => {
               onChange(option?.value || '');
+              onCustomerNameChange?.(option?.label || '');
               setSelectedOption(option);
             }}
             placeholder="Type to search customer..."

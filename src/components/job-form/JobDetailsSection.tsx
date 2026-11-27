@@ -12,16 +12,20 @@ interface JobDetailsSectionProps {
   jobTitle: string;
   assignee: string;
   onJobTitleChange: (value: string) => void;
+  onJobTitleNameChange?: (value: string) => void;
   onAssigneeChange: (value: string) => void;
   jobTitles: JobTitle[];
+  hideAssignee?: boolean;
 }
 
 export function JobDetailsSection({ 
   jobTitle, 
   assignee, 
   onJobTitleChange, 
+  onJobTitleNameChange,
   onAssigneeChange, 
-  jobTitles 
+  jobTitles,
+  hideAssignee = false,
 }: JobDetailsSectionProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<{ value: string; label: string } | null>(null);
@@ -52,6 +56,7 @@ export function JobDetailsSection({
   const handleCreate = async (title: string): Promise<{ id: string; name: string }> => {
     const newTitle = await createJobTitle(title);
     onJobTitleChange(newTitle.id);
+    onJobTitleNameChange?.(newTitle.job_title_id);
     setSelectedOption({ value: newTitle.id, label: newTitle.job_title_id });
     return { id: newTitle.id, name: newTitle.job_title_id };
   };
@@ -84,11 +89,13 @@ export function JobDetailsSection({
         <div className="flex gap-2">
           <AsyncSelect
             className="flex-1"
+            inputId="jobTitle"
             styles={customStyles}
             value={selectedOption}
             loadOptions={loadOptions}
             onChange={(option) => {
               onJobTitleChange(option?.value || '');
+              onJobTitleNameChange?.(option?.label || '');
               setSelectedOption(option);
             }}
             placeholder="Type to search job title..."
@@ -114,16 +121,18 @@ export function JobDetailsSection({
         onSave={handleCreate}
       />
 
-      <div>
-        <Label htmlFor="assignee">Assignee</Label>
-        <Input
-          id="assignee"
-          type="text"
-          placeholder="Assignee"
-          value={assignee}
-          onChange={(e) => onAssigneeChange(e.target.value)}
-        />
-      </div>
+      {!hideAssignee && (
+        <div>
+          <Label htmlFor="assignee">Assignee</Label>
+          <Input
+            id="assignee"
+            type="text"
+            placeholder="Assignee"
+            value={assignee}
+            onChange={(e) => onAssigneeChange(e.target.value)}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -12,12 +12,13 @@ import { JobImageGallery } from "@/components/image-upload/JobImageGallery";
 import { JobWorkflowTimeline } from "@/components/job-details/workspace/JobWorkflowTimeline";
 import { JobNotes } from "@/components/job-details/workspace/JobNotes";
 import { JobHistory } from "@/components/job-details/workspace/JobHistory";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { useJobDetails } from "@/hooks/useJobDetails";
 import { formatOmaniRial } from "@/utils/currency";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/pages/Index";
 
-interface Props { job: Job | null; loading: boolean; isEditMode?: boolean; onClose: () => void }
+interface Props { job: Job | null; loading: boolean; isEditMode?: boolean; isActive?: boolean; onClose: () => void }
 
 const SECTIONS = ["Overview", "Brief", "Design", "Approvals", "Production", "Quality check", "Delivery", "Invoice", "Notes", "History"] as const;
 const slug = (s: string) => s.toLowerCase().replace(/\s+/g, "-");
@@ -39,8 +40,8 @@ const Panel = ({ title, children, className }: { title?: string; children: React
 const fmtDate = (v?: string | null) => { const d = v ? new Date(v) : null; return d && !Number.isNaN(d.getTime()) ? format(d, "d MMM yyyy") : undefined; };
 
 /** Job workspace shown inside a job tab. Same hook, same data calls, same writes as the dialog. */
-export function JobDetailsPanel({ job, loading, isEditMode = false, onClose }: Props) {
-  const d = useJobDetails({ job, isEditMode, onClose });
+export function JobDetailsPanel({ job, loading, isEditMode = false, isActive = true, onClose }: Props) {
+  const d = useJobDetails({ job, isEditMode, onClose, isOpen: isActive });
 
   if (!job) {
     return (
@@ -65,22 +66,23 @@ export function JobDetailsPanel({ job, loading, isEditMode = false, onClose }: P
 
   return (
     <div className="mx-auto w-full max-w-7xl space-y-3 p-3 md:p-4">
-      <header className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="font-mono text-lg font-semibold tracking-tight">{job.jobOrderNumber}</h2>
+      <PageHeader
+        title={<span className="font-mono">{job.jobOrderNumber}</span>}
+        description={(
+          <span className="flex flex-wrap items-center gap-2">
+            <span>{job.title} · {job.customer}</span>
             <StatusBadge status={job.status} />
             {job.priority === "high" && <span className="rounded-md border border-rose-300 px-1.5 text-xs font-semibold text-rose-700 dark:border-rose-400/40 dark:text-rose-300">High priority</span>}
-          </div>
-          <p className="mt-0.5 truncate text-sm font-medium">{job.title}</p>
-          <p className="truncate text-xs text-muted-foreground">{job.customer}</p>
-        </div>
-        <div className="flex shrink-0 items-center gap-1.5">
+          </span>
+        )}
+        actions={(
+          <>
           <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5" onClick={d.handleShareWhatsApp} disabled={d.isSharing}><MessageCircle className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">{d.isSharing ? "Sharing…" : "WhatsApp"}</span><span className="sr-only sm:hidden">Share on WhatsApp</span></Button>
           <Button type="button" variant="outline" size="sm" className="h-8 gap-1.5" onClick={d.handleExportPDF} disabled={d.isExporting}><Download className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">{d.isExporting ? "Exporting…" : "Export PDF"}</span><span className="sr-only sm:hidden">Export PDF</span></Button>
           <Button type="button" variant="ghost" size="sm" className="h-8 gap-1.5" onClick={onClose}><X className="h-4 w-4" aria-hidden /><span className="hidden sm:inline">Close tab</span><span className="sr-only sm:hidden">Close tab</span></Button>
-        </div>
-      </header>
+          </>
+        )}
+      />
 
       <Panel className="py-3"><JobWorkflowTimeline job={job} /></Panel>
 

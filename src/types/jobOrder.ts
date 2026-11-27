@@ -69,6 +69,9 @@ export interface DashboardJob {
   job_title_id?: string;
   created_by?: string;
   approval_status?: string;
+  approval_notes?: string;
+  approved_by?: string;
+  approved_at?: string;
   deliveredAt?: string;
   clientName?: string;
 }

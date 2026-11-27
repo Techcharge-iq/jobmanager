@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { SyncStatusIndicator } from "@/components/ui/SyncStatusIndicator";
+import { PageHeader } from "@/components/shell/PageHeader";
 
 import { hasUserRole } from "@/data/profiles";
 import { updateJobFields } from "@/data/jobs";
@@ -192,11 +192,8 @@ export function AdminJobManagement({ onStatusUpdate, onJobDataUpdate }: AdminJob
   if (!isAdmin) return <div className="p-6">Access Denied</div>;
 
   return (
-    <div className="space-y-6 p-6 min-h-screen">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Admin Job Management</h1>
-        <SyncStatusIndicator />
-      </div>
+    <div className="min-h-0 space-y-6 p-4 md:p-6">
+      <PageHeader title="Admin Job Management" />
       
       {/* Sync Status & Jobs Count */}
       <Card className="mb-4">

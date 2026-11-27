@@ -26,6 +26,7 @@ import { getProfileRole, getProfileSettings, updateProfile } from "@/data/profil
 import { ChangePasswordDialog } from "@/components/user-profile/ChangePasswordDialog";
 import { AdminPasswordReset } from "@/components/admin/AdminPasswordReset";
 import { DataManagement } from "@/components/settings/DataManagement";
+import { PageHeader } from "@/components/shell/PageHeader";
 
 export function SettingsView() {
   const [notifications, setNotifications] = useState(true);
@@ -121,11 +122,8 @@ export function SettingsView() {
 
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-2">Manage your application preferences</p>
-      </div>
+    <div className="space-y-6 p-4 md:p-6">
+      <PageHeader title="Settings" description="Manage your application preferences" />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Profile Settings */}

@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { listProfilesForAdministration, updateProfile } from "@/data/profiles";
 import { useAuth } from "@/hooks/useAuth";
 import { UserCheck, Shield, Eye, Edit, Trash2, Plus, Settings, FileText, BarChart3 } from "lucide-react";
@@ -150,12 +151,9 @@ export default function UserAccessManagement() {
   }
 
   return (
-    <div className="min-h-screen p-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">User Access Management</h1>
-          <p className="text-muted-foreground">Manage user roles and permissions across the system</p>
-        </div>
+    <div className="min-h-0 p-4 md:p-6">
+      <div className="mx-auto max-w-7xl">
+        <PageHeader title="User Access Management" description="Manage user roles and permissions across the system" className="mb-6" />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Users List */}
@@ -176,7 +174,7 @@ export default function UserAccessManagement() {
                 />
               </div>
 
-              <div className="max-h-96 overflow-y-auto">
+              <div className="min-w-0">
                 <Table>
                   <TableHeader>
                     <TableRow>

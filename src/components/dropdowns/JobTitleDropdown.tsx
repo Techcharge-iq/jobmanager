@@ -19,9 +19,10 @@ interface JobTitleDropdownProps {
   value: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
+  id?: string;
 }
 
-export function JobTitleDropdown({ value, onValueChange, placeholder = "Select job title" }: JobTitleDropdownProps) {
+export function JobTitleDropdown({ value, onValueChange, placeholder = "Select job title", id }: JobTitleDropdownProps) {
   const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
   const [newTitle, setNewTitle] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -76,7 +77,7 @@ export function JobTitleDropdown({ value, onValueChange, placeholder = "Select j
   return (
     <div className="flex gap-2">
       <Select value={value} onValueChange={onValueChange}>
-        <SelectTrigger className="flex-1">
+        <SelectTrigger id={id} className="flex-1">
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

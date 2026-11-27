@@ -33,8 +33,8 @@ export function ScheduleSection({
         <Input
           id="estimatedHours"
           type="number"
-          value={estimatedHours}
-          onChange={(e) => onEstimatedHoursChange(parseInt(e.target.value))}
+          value={Number.isFinite(estimatedHours) ? estimatedHours : ""}
+          onChange={(e) => onEstimatedHoursChange(e.target.value === "" ? Number.NaN : parseInt(e.target.value))}
           required
         />
       </div>

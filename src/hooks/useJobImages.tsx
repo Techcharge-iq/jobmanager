@@ -1,5 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import {
   deleteJobImageFile,
@@ -87,9 +88,9 @@ export function useJobImages(jobOrderId: string) {
     }
   });
 
-  const getImageUrl = async (filePath: string): Promise<string> => {
+  const getImageUrl = useCallback(async (filePath: string): Promise<string> => {
     return getJobImageSignedUrl(filePath);
-  };
+  }, []);
 
   return {
     images,

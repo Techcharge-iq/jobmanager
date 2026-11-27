@@ -20,7 +20,7 @@ export function PriorityJobs({ jobs, onOpenJob, onViewAll, className }: ListProp
     .slice(0, 8), [jobs]);
   const today = startOfDay(new Date());
   return (
-    <DashPanel title="Priority jobs" className={className} action={viewAll(onViewAll)}>
+    <DashPanel title="Priority jobs" className={className} action={viewAll(onViewAll)} bodyClassName="flex-none overflow-visible">
       {list.length === 0 ? <Empty>No high priority jobs are open.</Empty> : list.map((j) => {
         const due = j.dueDate ? new Date(j.dueDate) : null;
         const overdue = due && !Number.isNaN(due.getTime()) && isBefore(due, today);
@@ -39,7 +39,7 @@ export function PriorityJobs({ jobs, onOpenJob, onViewAll, className }: ListProp
 export function RecentJobs({ jobs, onOpenJob, onViewAll, className }: ListProps) {
   const list = useMemo(() => [...jobs].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8), [jobs]);
   return (
-    <DashPanel title="Recent jobs" className={className} action={viewAll(onViewAll)}>
+    <DashPanel title="Recent jobs" className={className} action={viewAll(onViewAll)} bodyClassName="flex-none overflow-visible">
       {list.length === 0 ? <Empty>No jobs yet.</Empty> : list.map((j) => (
         <button key={j.id} type="button" onClick={() => onOpenJob(j)} className={row}>
           <span className="w-16 shrink-0 font-mono text-xs text-muted-foreground">{j.jobOrderNumber}</span>
@@ -51,10 +51,10 @@ export function RecentJobs({ jobs, onOpenJob, onViewAll, className }: ListProps)
   );
 }
 
-export function ActivityFeed({ className }: { className?: string }) {
-  const { activities, isLoading } = useActivities();
+export function ActivityFeed({ className, active = true }: { className?: string; active?: boolean }) {
+  const { activities, isLoading } = useActivities(active);
   return (
-    <DashPanel title="Activity" className={className}>
+    <DashPanel title="Activity" className={className} bodyClassName="flex-none overflow-visible">
       {isLoading ? <Empty>Loading activity…</Empty> : activities.length === 0 ? <Empty>No recent activity.</Empty> : (
         <ul>
           {activities.map((a) => (

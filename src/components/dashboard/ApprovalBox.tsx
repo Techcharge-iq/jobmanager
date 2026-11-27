@@ -17,7 +17,7 @@ import {
 } from "@/data/jobs";
 import { subscribeToJobOrderChanges } from "@/data/realtime";
 
-export function ApprovalBox() {
+export function ApprovalBox({ isActive = true }: { isActive?: boolean }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -32,7 +32,7 @@ export function ApprovalBox() {
   const wheelTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !isActive) return;
 
     const unsubscribe = subscribeToJobOrderChanges(user.id, (payload) => {
           const affectsPendingApprovals = payload.eventType === 'INSERT'
@@ -54,13 +54,17 @@ export function ApprovalBox() {
     return () => {
       unsubscribe();
     };
-  }, [queryClient, user]);
+  }, [isActive, queryClient, user]);
 
   const { data: pendingJobs = [], isLoading } = useQuery({
     queryKey: ['pending-approvals'],
     queryFn: (): Promise<PendingApprovalJob[]> => listPendingApprovalJobs(),
-    enabled: !!user
+    enabled: !!user && isActive
   });
+
+  useEffect(() => {
+    if (!isActive) setIsJobDetailsOpen(false);
+  }, [isActive]);
 
   const approvalMutation = useMutation({
     mutationFn: async ({ jobId, action }: { jobId: string; action: 'approve' | 'reject' }) => {
@@ -320,7 +324,7 @@ export function ApprovalBox() {
       </CardContent>
 
       <JobDetails
-        isOpen={isJobDetailsOpen}
+        isOpen={isActive && isJobDetailsOpen}
         onClose={() => { setIsJobDetailsOpen(false); setSelectedJob(null); }}
         job={selectedJob}
         isEditMode={false}

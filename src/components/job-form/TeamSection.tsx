@@ -25,7 +25,7 @@ export function TeamSection({
       <div>
         <Label htmlFor="designer">Designer *</Label>
         <Select value={designer} onValueChange={onDesignerChange}>
-          <SelectTrigger>
+          <SelectTrigger id="designer">
             <SelectValue placeholder="Select designer" />
           </SelectTrigger>
           <SelectContent>
@@ -41,7 +41,7 @@ export function TeamSection({
       <div>
         <Label htmlFor="salesman">Salesman *</Label>
         <Select value={salesman} onValueChange={onSalesmanChange}>
-          <SelectTrigger>
+          <SelectTrigger id="salesman">
             <SelectValue placeholder="Select salesman" />
           </SelectTrigger>
           <SelectContent>

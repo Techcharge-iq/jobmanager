@@ -36,18 +36,23 @@ export function JobImageGallery({ jobOrderId, canEdit = true }: JobImageGalleryP
 
   // Load signed URLs for all images
   useEffect(() => {
+    let cancelled = false;
     const loadImageUrls = async () => {
       const urls: Record<string, string> = {};
       for (const image of images) {
         const url = await getImageUrl(image.file_path);
+        if (cancelled) return;
         urls[image.id] = url;
       }
-      setImageUrls(urls);
+      if (!cancelled) setImageUrls(urls);
     };
     
     if (images.length > 0) {
-      loadImageUrls();
+      void loadImageUrls().catch((error: unknown) => {
+        if (!cancelled) console.error("Failed to load job image URLs:", error);
+      });
     }
+    return () => { cancelled = true; };
   }, [images, getImageUrl]);
 
   if (isLoading) {
