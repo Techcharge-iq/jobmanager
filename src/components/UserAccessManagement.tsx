@@ -150,17 +150,17 @@ export default function UserAccessManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">User Access Management</h1>
-          <p className="text-gray-600">Manage user roles and permissions across the system</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">User Access Management</h1>
+          <p className="text-muted-foreground">Manage user roles and permissions across the system</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Users List */}
-          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white">
+          <Card className="bg-card  border-0 shadow-xl">
+            <CardHeader className="border-b bg-muted/40 text-foreground">
               <CardTitle className="flex items-center gap-2">
                 <UserCheck className="w-5 h-5" />
                 System Users
@@ -190,14 +190,14 @@ export default function UserAccessManagement() {
                       <TableRow 
                         key={u.id}
                         className={`cursor-pointer transition-colors ${
-                          selectedUser?.id === u.id ? 'bg-blue-50' : 'hover:bg-gray-50'
+                          selectedUser?.id === u.id ? 'bg-blue-50 dark:bg-blue-500/15' : 'hover:bg-muted'
                         }`}
                         onClick={() => selectUser(u)}
                       >
                         <TableCell>
                           <div>
                             <div className="font-medium">{u.full_name || 'N/A'}</div>
-                            <div className="text-sm text-gray-500">{u.email}</div>
+                            <div className="text-sm text-muted-foreground">{u.email}</div>
                           </div>
                         </TableCell>
                         <TableCell>
@@ -232,8 +232,8 @@ export default function UserAccessManagement() {
           </Card>
 
           {/* Permissions Panel */}
-          <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-            <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+          <Card className="bg-card  border-0 shadow-xl">
+            <CardHeader className="border-b bg-muted/40 text-foreground">
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
                 Permissions & Access Control
@@ -243,10 +243,10 @@ export default function UserAccessManagement() {
               {selectedUser ? (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h3 className="text-lg font-semibold text-gray-800">
+                    <h3 className="text-lg font-semibold text-foreground">
                       {selectedUser.full_name || 'Unknown User'}
                     </h3>
-                    <p className="text-sm text-gray-600">{selectedUser.email}</p>
+                    <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
                     <Badge variant="outline" className="mt-2 capitalize">
                       {selectedUser.role}
                     </Badge>
@@ -256,18 +256,18 @@ export default function UserAccessManagement() {
 
                   {/* Page Access */}
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
+                    <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
                       <BarChart3 className="w-4 h-4" />
                       Page Access
                     </h4>
                     <div className="space-y-2">
                       {groupedPermissions.page.map((permission) => (
-                        <div key={permission.id} className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                        <div key={permission.id} className="flex items-center justify-between p-2 bg-blue-50 dark:bg-blue-500/15 rounded-lg">
                           <div className="flex items-center gap-2">
                             {permission.icon}
                             <div>
                               <div className="font-medium text-sm">{permission.name}</div>
-                              <div className="text-xs text-gray-600">{permission.description}</div>
+                              <div className="text-xs text-muted-foreground">{permission.description}</div>
                             </div>
                           </div>
                           <Switch
@@ -283,18 +283,18 @@ export default function UserAccessManagement() {
 
                   {/* Action Rights */}
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
+                    <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
                       <Settings className="w-4 h-4" />
                       Action Rights
                     </h4>
                     <div className="space-y-2">
                       {groupedPermissions.action.map((permission) => (
-                        <div key={permission.id} className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
+                        <div key={permission.id} className="flex items-center justify-between p-2 bg-green-50 dark:bg-green-500/15 rounded-lg">
                           <div className="flex items-center gap-2">
                             {permission.icon}
                             <div>
                               <div className="font-medium text-sm">{permission.name}</div>
-                              <div className="text-xs text-gray-600">{permission.description}</div>
+                              <div className="text-xs text-muted-foreground">{permission.description}</div>
                             </div>
                           </div>
                           <Switch
@@ -310,18 +310,18 @@ export default function UserAccessManagement() {
 
                   {/* Data Access */}
                   <div>
-                    <h4 className="font-medium text-gray-800 mb-3 flex items-center gap-2">
+                    <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
                       <Eye className="w-4 h-4" />
                       Data Access
                     </h4>
                     <div className="space-y-2">
                       {groupedPermissions.data.map((permission) => (
-                        <div key={permission.id} className="flex items-center justify-between p-2 bg-purple-50 rounded-lg">
+                        <div key={permission.id} className="flex items-center justify-between p-2 bg-purple-50 dark:bg-purple-500/15 rounded-lg">
                           <div className="flex items-center gap-2">
                             {permission.icon}
                             <div>
                               <div className="font-medium text-sm">{permission.name}</div>
-                              <div className="text-xs text-gray-600">{permission.description}</div>
+                              <div className="text-xs text-muted-foreground">{permission.description}</div>
                             </div>
                           </div>
                           <Switch
@@ -334,7 +334,7 @@ export default function UserAccessManagement() {
                   </div>
 
                   <Button 
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={() => {
                       toast({
                         title: "Success",
@@ -347,8 +347,8 @@ export default function UserAccessManagement() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <UserCheck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-600">Select a user to manage their permissions</p>
+                  <UserCheck className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">Select a user to manage their permissions</p>
                 </div>
               )}
             </CardContent>

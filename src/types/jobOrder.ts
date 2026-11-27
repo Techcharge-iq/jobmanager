@@ -63,6 +63,7 @@ export interface DashboardJob {
   branch?: string;
   jobOrderDetails?: string;
   invoiceNumber?: string;
+  invoicedAt?: string;
   totalValue?: number;
   customer_id?: string;
   job_title_id?: string;

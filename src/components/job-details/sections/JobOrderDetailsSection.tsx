@@ -22,7 +22,7 @@ export function JobOrderDetailsSection({
     <Card className="lg:col-span-2">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Building className="w-5 h-5 text-purple-600" />
+          <Building className="w-5 h-5 text-purple-600 dark:text-purple-300" />
           Job Order Details
         </CardTitle>
       </CardHeader>
@@ -35,8 +35,8 @@ export function JobOrderDetailsSection({
             className="min-h-[120px] resize-none"
           />
         ) : (
-          <div className="bg-gray-50 p-4 rounded-lg border">
-            <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+          <div className="bg-muted p-4 rounded-lg border">
+            <p className="text-sm text-foreground whitespace-pre-wrap leading-relaxed">
               {job.jobOrderDetails || 'No additional details provided.'}
             </p>
           </div>

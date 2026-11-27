@@ -54,7 +54,7 @@ export function JobImageGallery({ jobOrderId, canEdit = true }: JobImageGalleryP
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
+          <div key={i} className="aspect-square bg-muted rounded-lg animate-pulse" />
         ))}
       </div>
     );
@@ -62,7 +62,7 @@ export function JobImageGallery({ jobOrderId, canEdit = true }: JobImageGalleryP
 
   if (images.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-8 text-muted-foreground">
         <p>No images uploaded yet</p>
       </div>
     );
@@ -100,7 +100,7 @@ export function JobImageGallery({ jobOrderId, canEdit = true }: JobImageGalleryP
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.map((image) => (
           <div key={image.id} className="group relative">
-            <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
+            <div className="aspect-square overflow-hidden rounded-lg bg-muted">
               {imageUrls[image.id] ? (
                 <img
                   src={imageUrls[image.id]}
@@ -109,14 +109,14 @@ export function JobImageGallery({ jobOrderId, canEdit = true }: JobImageGalleryP
                 />
               ) : (
                 <div className="h-full w-full flex items-center justify-center">
-                  <div className="w-6 h-6 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-border border-t-blue-500 rounded-full animate-spin" />
                 </div>
               )}
             </div>
             
             {/* Overlay with actions */}
             <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 rounded-lg">
-              <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-2 end-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 {/* View full size */}
                 <Dialog>
                   <DialogTrigger asChild>
@@ -136,7 +136,7 @@ export function JobImageGallery({ jobOrderId, canEdit = true }: JobImageGalleryP
                           className="max-h-[70vh] object-contain"
                         />
                       ) : (
-                        <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-2 border-border border-t-blue-500 rounded-full animate-spin" />
                       )}
                     </div>
                   </DialogContent>
@@ -219,15 +219,15 @@ export function JobImageGallery({ jobOrderId, canEdit = true }: JobImageGalleryP
 
             {/* Image info */}
             <div className="mt-2">
-              <p className="text-xs text-gray-600 truncate">{image.file_name}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground truncate">{image.file_name}</p>
+              <p className="text-xs text-muted-foreground">
                 {image.file_size === null ? 'Unknown size' : `${Math.round(image.file_size / 1024)}KB`}
                 {image.image_width && image.image_height && (
                   <span> • {image.image_width}×{image.image_height}</span>
                 )}
               </p>
               {image.alt_text && (
-                <p className="text-xs text-gray-600 mt-1 italic">{image.alt_text}</p>
+                <p className="text-xs text-muted-foreground mt-1 italic">{image.alt_text}</p>
               )}
             </div>
           </div>

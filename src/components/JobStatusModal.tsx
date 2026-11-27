@@ -4,6 +4,7 @@ import { Job, JobStatus } from "@/pages/Index";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 
 interface JobStatusModalProps {
   isOpen: boolean;
@@ -27,24 +28,6 @@ export function JobStatusModal({ isOpen, onClose, jobs, status, title }: JobStat
 
   const filteredJobs = getFilteredJobs();
 
-  const getStatusColor = (status: JobStatus) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-blue-100 text-blue-800';
-      case 'in-progress':
-        return 'bg-orange-100 text-orange-800';
-      case 'designing':
-        return 'bg-purple-100 text-purple-800';
-      case 'completed':
-        return 'bg-green-100 text-green-800';
-      case 'invoiced':
-        return 'bg-emerald-100 text-emerald-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -55,7 +38,7 @@ export function JobStatusModal({ isOpen, onClose, jobs, status, title }: JobStat
         
         <div className="mt-4">
           {filteredJobs.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No jobs found for this status</p>
+            <p className="text-center text-muted-foreground py-8">No jobs found for this status</p>
           ) : (
             <Table>
               <TableHeader>
@@ -77,9 +60,7 @@ export function JobStatusModal({ isOpen, onClose, jobs, status, title }: JobStat
                     <TableCell>{job.customer}</TableCell>
                     <TableCell>{job.assignee || 'Unassigned'}</TableCell>
                     <TableCell>
-                      <Badge className={getStatusColor(job.status)}>
-                        {job.status === 'in-progress' ? 'In Progress' : job.status}
-                      </Badge>
+                      <StatusBadge status={job.status} />
                     </TableCell>
                     <TableCell>{job.dueDate}</TableCell>
                     <TableCell>

@@ -68,9 +68,9 @@ export function AdminPasswordReset() {
   };
 
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-0 shadow-xl">
-      <CardHeader className="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-t-lg">
-        <CardTitle className="flex items-center gap-2 text-white">
+    <Card className="bg-card  border-0 shadow-xl">
+      <CardHeader className="border-b bg-muted/40 text-foreground">
+        <CardTitle className="flex items-center gap-2">
           <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
             <Shield className="w-4 h-4" />
           </div>
@@ -82,7 +82,7 @@ export function AdminPasswordReset() {
           <div className="space-y-2">
             <Label htmlFor="selectUser">Select User</Label>
             <Select value={selectedUserId} onValueChange={setSelectedUserId} disabled={isLoading}>
-              <SelectTrigger className="bg-white/50 border-gray-200">
+              <SelectTrigger className="bg-card border-border">
                 <SelectValue placeholder="Choose a user..." />
               </SelectTrigger>
               <SelectContent>
@@ -103,7 +103,7 @@ export function AdminPasswordReset() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="Enter new password (min 8 characters)"
-              className="bg-white/50 border-gray-200"
+              className="bg-card border-border"
               required
             />
           </div>
@@ -111,7 +111,7 @@ export function AdminPasswordReset() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {loading ? (
               <div className="flex items-center gap-2">

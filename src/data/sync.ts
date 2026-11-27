@@ -20,7 +20,7 @@ const RECONNECT_SYNC_MIN_INTERVAL_MS = 60_000;
 
 // Egress-optimized column lists (excludes large `description` HTML — fetched on demand in JobDetails)
 export const JOB_LIST_COLUMNS =
-  'id,job_order_number,customer_id,job_title_id,designer_id,salesman_id,status,priority,branch,assignee,due_date,estimated_hours,actual_hours,total_value,invoice_number,job_order_details,client_name,delivered_at,approval_status,approval_notes,approved_by,approved_at,created_by,created_at,updated_at,description_plain';
+  'id,job_order_number,customer_id,job_title_id,designer_id,salesman_id,status,priority,branch,assignee,due_date,estimated_hours,actual_hours,total_value,invoice_number,invoiced_at,job_order_details,client_name,delivered_at,approval_status,approval_notes,approved_by,approved_at,created_by,created_at,updated_at,description_plain';
 type JobOrderSyncRecord = Omit<JobOrderRecord, 'description'>;
 
 let stopRealtimeListener: (() => void) | null = null;
@@ -242,6 +242,7 @@ async function enrichJobOrders(jobOrders: JobOrderSyncRecord[]): Promise<DexieJo
     actual_hours: job.actual_hours,
     total_value: job.total_value,
     invoice_number: job.invoice_number,
+    invoiced_at: job.invoiced_at,
     job_order_details: job.job_order_details,
     client_name: job.client_name,
     delivered_at: job.delivered_at,

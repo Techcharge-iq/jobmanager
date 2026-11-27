@@ -2,19 +2,29 @@ import { useEffect, useRef, useState, type ComponentType, type PointerEvent as R
 import { Job } from "@/pages/Index";
 import { JobDetails } from "@/components/JobDetails";
 import { JobStatusModal } from "@/components/JobStatusModal";
-import { DashboardNotifications } from "@/components/dashboard/DashboardNotifications";
 import { JobStatusOverview } from "@/components/dashboard/JobStatusOverview";
 import { ApprovalBox } from "@/components/dashboard/ApprovalBox";
 import { HighPriorityReminder } from "@/components/dashboard/HighPriorityReminder";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Eye, Palette, Cog, Receipt, UserRound, ChevronLeft, ChevronRight } from "lucide-react";
+import { KpiStrip } from "@/components/command/KpiStrip";
+import { RevenueTrend } from "@/components/dashboard/insights/RevenueTrend";
+import { JobSummaryGauge } from "@/components/dashboard/insights/JobSummaryGauge";
+import { ProductionPipeline } from "@/components/dashboard/insights/ProductionPipeline";
+import { PriorityJobs, RecentJobs, ActivityFeed } from "@/components/dashboard/insights/JobLists";
+import { useProfileHeader } from "@/components/shell/useProfileHeader";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { ReactNode } from "react";
+import { useSlideDirection } from "@/hooks/useSlideDirection";
+import { AlertCircle, ArrowRight, Palette, Cog, Receipt, UserRound, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface ModernDashboardProps {
   jobs: Job[];
-  onViewChange?: (view: "dashboard" | "jobs" | "settings" | "admin" | "admin-management" | "reports") => void;
+  onViewChange?: (view: string) => void;
+  /** When provided, jobs open in their own tab instead of the dialog. */
+  onOpenJob?: (job: Job) => void;
   onStatusUpdate?: (jobId: string, status: string) => void;
+  quickWidget?: ReactNode;
 }
 
 interface WorkflowBucketProps {
@@ -115,22 +125,23 @@ function WorkflowBucket({
   };
 
   const activeJob = bucketJobs[activeIndex];
+  const slideDir = useSlideDirection(activeIndex);
 
   return (
-    <Card className="dashboard-card-enter" style={{ animationDelay: `${animationDelay}ms` }}>
-      <CardHeader className="flex-row items-center justify-between space-y-0 pb-3">
-        <CardTitle className="flex items-center gap-2 text-base">
+    <Card className="dashboard-card-enter min-w-0" style={{ animationDelay: `${animationDelay}ms` }}>
+      <CardHeader className="flex-row items-center justify-between gap-2 space-y-0 p-3 pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm">
           <Icon className="h-4 w-4 text-muted-foreground" />
           {title}
         </CardTitle>
         <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-semibold">{bucketJobs.length}</span>
       </CardHeader>
-      <CardContent className="pt-0">
+      <CardContent className="p-3 pt-0">
         {bucketJobs.length === 0 ? (
           <p className="py-3 text-sm text-muted-foreground">Nothing waiting here.</p>
         ) : (
           <div className="mx-auto w-full max-w-2xl">
-            <div className="relative h-40 sm:h-36">
+            <div className="relative h-36">
               {Array.from({ length: Math.min(3, bucketJobs.length) }, (_, index) => {
                 const depth = Math.min(3, bucketJobs.length) - index - 1;
                 return (
@@ -146,7 +157,8 @@ function WorkflowBucket({
                   />
                 );
               })}
-              <button
+              <Button
+                variant="ghost"
                 key={activeJob?.id}
                 type="button"
                 onClick={(event) => {
@@ -159,7 +171,7 @@ function WorkflowBucket({
                 }}
                 onPointerDown={handlePointerDown}
                 onWheel={handleWheel}
-                className="absolute inset-x-0 top-0 z-10 flex h-full items-start justify-between gap-3 rounded-lg border bg-card p-4 text-left shadow-xl transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-muted/30 motion-reduce:duration-0"
+                className={`job-slide-${slideDir} absolute inset-x-0 top-0 z-10 flex h-full w-full flex-col items-start justify-between gap-2 whitespace-normal rounded-lg border bg-card p-3 text-start shadow-sm transition-[transform,opacity] duration-300 hover:bg-muted/30 motion-reduce:duration-0`}
                 style={{
                   transform: `translateX(${dragOffset}px) rotate(${dragOffset / 35}deg)`,
                   transition: isDragging ? "none" : undefined,
@@ -168,18 +180,18 @@ function WorkflowBucket({
               >
                 {activeJob && (
                   <>
-                    <span className="min-w-0 space-y-1">
-                      <span className="block truncate text-sm font-semibold">{activeJob.jobOrderNumber} · {activeJob.title}</span>
-                      <span className="block truncate text-sm text-muted-foreground">{activeJob.customer}</span>
-                      <span className="block pt-1 text-xs text-muted-foreground">{activeIndex + 1} of {bucketJobs.length} in queue</span>
+                    <span className="min-h-0 w-full min-w-0 space-y-1 overflow-y-auto break-words">
+                      <span className="block font-mono text-sm font-semibold">{activeJob.jobOrderNumber}</span>
+                      <span className="block text-sm">{activeJob.title}</span>
+                      <span className="block text-xs text-muted-foreground">{activeJob.customer}</span>
                     </span>
-                    <span className="flex max-w-[40%] shrink-0 items-center gap-1 text-xs text-muted-foreground">
+                    <span className="flex w-full shrink-0 items-center gap-1 text-xs text-muted-foreground">
                       <UserRound className="h-3.5 w-3.5 shrink-0" />
-                      <span className="truncate">{assigneeFor(activeJob)}</span>
+                      <span className="break-words">{assigneeFor(activeJob)}</span>
                     </span>
                   </>
                 )}
-              </button>
+              </Button>
             </div>
             <div className="mt-3 flex items-center justify-center gap-3">
               <Button
@@ -189,9 +201,9 @@ function WorkflowBucket({
                 aria-label={`Previous ${title.toLowerCase()} job`}
                 onClick={() => setActiveIndex((index) => Math.max(0, index - 1))}
                 disabled={activeIndex === 0}
-                className="h-8 w-8"
+                className="h-11 w-11"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 rtl:-scale-x-100" />
               </Button>
               <span className="min-w-12 text-center text-xs tabular-nums text-muted-foreground" aria-live="polite">
                 {activeIndex + 1} / {bucketJobs.length}
@@ -203,9 +215,9 @@ function WorkflowBucket({
                 aria-label={`Next ${title.toLowerCase()} job`}
                 onClick={() => setActiveIndex((index) => Math.min(bucketJobs.length - 1, index + 1))}
                 disabled={activeIndex >= bucketJobs.length - 1}
-                className="h-8 w-8"
+                className="h-11 w-11"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 rtl:-scale-x-100" />
               </Button>
             </div>
           </div>
@@ -215,9 +227,11 @@ function WorkflowBucket({
   );
 }
 
-export function ModernDashboard({ jobs }: ModernDashboardProps) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+const pillBase = "inline-flex h-7 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
+
+export function ModernDashboard({ jobs, quickWidget, onOpenJob, onViewChange }: ModernDashboardProps) {
+  const [tab, setTab] = useState("work");
+  const profile = useProfileHeader();
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isJobDetailsOpen, setIsJobDetailsOpen] = useState(false);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
@@ -225,12 +239,6 @@ export function ModernDashboard({ jobs }: ModernDashboardProps) {
     status: 'pending' | 'in-progress' | 'designing' | 'completed' | 'invoiced' | 'total' | 'active' | 'cancelled';
     title: string;
   } | null>(null);
-
-  const searchFilteredJobs = jobs.filter(job =>
-    job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.jobOrderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    job.customer.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const stats = {
     total: jobs.length,
@@ -253,7 +261,17 @@ export function ModernDashboard({ jobs }: ModernDashboardProps) {
   const assignedTo = (job: Job) =>
     [job.assignee, job.designer, job.salesman].find((name) => name && name !== "Unassigned") || "Unassigned";
 
+  const pendingApprovals = jobs.filter(job => job.approval_status === "pending_approval").length;
+  const toInvoice = pendingInvoiceJobs.length;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = profile?.full_name?.split(" ")[0];
+
   const handleViewDetails = (job: Job) => {
+    if (onOpenJob) {
+      onOpenJob(job);
+      return;
+    }
     setSelectedJob(job);
     setIsJobDetailsOpen(true);
   };
@@ -266,133 +284,84 @@ export function ModernDashboard({ jobs }: ModernDashboardProps) {
     setStatusModalOpen(true);
   };
 
+  const goTo = (nextTab: string, anchor: string) => {
+    setTab(nextTab);
+    requestAnimationFrame(() => document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" }));
+  };
+
   return (
-    <div className="space-y-6 p-6 min-h-screen">
-      <div className="dashboard-card-enter flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-1">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Overview of your job orders and team activity.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search jobs..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowSearchDropdown(e.target.value.length > 0);
-              }}
-              onFocus={() => searchQuery && setShowSearchDropdown(true)}
-              onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
-              className="pl-10 w-64"
-            />
-            {showSearchDropdown && searchFilteredJobs.length > 0 && (
-              <div className="absolute top-full mt-2 w-full rounded-md border bg-popover text-popover-foreground shadow-lg z-50 max-h-80 overflow-y-auto">
-                <div className="p-2">
-                  <div className="text-xs text-muted-foreground mb-2 px-2">
-                    Found {searchFilteredJobs.length} job{searchFilteredJobs.length !== 1 ? 's' : ''}
-                  </div>
-                  <div className="space-y-1">
-                    {searchFilteredJobs.slice(0, 10).map((job) => (
-                      <div
-                        key={job.id}
-                        className="flex items-center justify-between p-3 rounded-md hover:bg-muted border border-transparent hover:border-border cursor-pointer"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate text-foreground">{job.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{job.jobOrderNumber}</p>
-                          <p className="text-xs text-muted-foreground truncate">{job.customer}</p>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            handleViewDetails(job);
-                            setShowSearchDropdown(false);
-                            setSearchQuery("");
-                          }}
-                          className="ml-2 h-8 w-8 p-0"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                  {searchFilteredJobs.length > 10 && (
-                    <div className="text-xs text-center text-muted-foreground mt-2 pb-1">
-                      And {searchFilteredJobs.length - 10} more...
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-            {showSearchDropdown && searchQuery && searchFilteredJobs.length === 0 && (
-              <div className="absolute top-full mt-2 w-full rounded-md border bg-popover text-popover-foreground shadow-lg z-50 p-4">
-                <div className="text-center text-sm text-muted-foreground">
-                  <Search className="w-6 h-6 mx-auto mb-2 opacity-40" />
-                  No jobs found matching "{searchQuery}"
-                </div>
-              </div>
-            )}
-          </div>
-          <DashboardNotifications />
+    <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-3 pb-3 pt-2 text-sm md:px-4">
+      <div className="flex min-h-8 shrink-0 flex-wrap items-center gap-x-3 gap-y-1">
+        <p className="text-sm">
+          <span className="font-semibold">{greeting}{firstName ? `, ${firstName}` : ""}</span>
+          <span className="ms-2 hidden text-muted-foreground sm:inline">{new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}</span>
+        </p>
+        <div className="ms-auto flex flex-wrap items-center gap-2">
+          {pendingApprovals > 0 ? (
+            <button type="button" onClick={() => goTo("work", "approvals-section")} className={`${pillBase} border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/20`}>
+              <AlertCircle className="h-3.5 w-3.5" aria-hidden />
+              {pendingApprovals} job{pendingApprovals === 1 ? "" : "s"} awaiting approval
+              <span className="inline-flex items-center gap-0.5 font-semibold underline-offset-2 hover:underline">Review<ArrowRight className="h-3 w-3 rtl:-scale-x-100" aria-hidden /></span>
+            </button>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"><span aria-hidden className="h-1.5 w-1.5 rounded-full bg-teal-500" />Nothing awaiting approval</span>
+          )}
+          {toInvoice > 0 && (
+            <button type="button" onClick={() => goTo("invoice", "dashboard-workspace")} className={`${pillBase} bg-card hover:bg-muted`}>
+              <Receipt className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />{toInvoice} ready to invoice
+            </button>
+          )}
         </div>
       </div>
 
-      {/* High Priority Reminder Banner */}
-      <div className="dashboard-card-enter" style={{ animationDelay: "80ms" }}>
-        <HighPriorityReminder jobs={jobs} onViewJob={handleViewDetails} />
+      <div className="shrink-0"><KpiStrip jobs={jobs} /></div>
+
+      <div className="grid shrink-0 gap-2 lg:h-[clamp(15rem,30vh,22rem)] lg:grid-cols-12 lg:grid-rows-1">
+        <RevenueTrend jobs={jobs} className="h-64 lg:col-span-5 lg:h-auto" />
+        <JobSummaryGauge jobs={jobs} className="h-auto lg:col-span-3 lg:h-auto" />
+        <ProductionPipeline jobs={jobs} className="h-auto lg:col-span-4 lg:h-auto" />
+      </div>
+      <div className="grid shrink-0 gap-2 lg:h-[clamp(15rem,30vh,22rem)] lg:grid-cols-12 lg:grid-rows-1">
+        <PriorityJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-4 lg:max-h-none" />
+        <RecentJobs jobs={jobs} onOpenJob={handleViewDetails} onViewAll={() => onViewChange?.("jobs")} className="max-h-72 lg:col-span-5 lg:max-h-none" />
+        <ActivityFeed className="max-h-72 lg:col-span-3 lg:max-h-none" />
       </div>
 
-      <section
-        aria-label="Uncompleted work and bottlenecks"
-        className="dashboard-card-enter space-y-3"
-        style={{ animationDelay: "140ms" }}
-      >
-        <div>
-          <h2 className="text-xl font-semibold">Uncompleted Work</h2>
-          <p className="text-sm text-muted-foreground">Current workflow queues and the person or team responsible.</p>
-        </div>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <WorkflowBucket
-            title="Pending Design"
-            jobs={pendingDesignJobs}
-            icon={Palette}
-            assigneeFor={(job) => job.designer && job.designer !== "Unassigned" ? job.designer : assignedTo(job)}
-            onSelect={handleViewDetails}
-            animationDelay={180}
-          />
-          <WorkflowBucket
-            title="In Production / Execution"
-            jobs={executionJobs}
-            icon={Cog}
-            assigneeFor={assignedTo}
-            onSelect={handleViewDetails}
-            animationDelay={240}
-          />
-          <WorkflowBucket
-            title="Pending Invoicing"
-            jobs={pendingInvoiceJobs}
-            icon={Receipt}
-            assigneeFor={(job) => job.assignee && job.assignee !== "Unassigned" ? job.assignee : "Admin"}
-            onSelect={handleViewDetails}
-            animationDelay={300}
-          />
-        </div>
+      <section id="dashboard-workspace" aria-label="Workspace" className="shrink-0 scroll-mt-2">
+        <Tabs value={tab} onValueChange={setTab} className="flex flex-col">
+          <TabsList aria-label="Dashboard panels" className="mb-2 grid h-9 w-full max-w-md grid-cols-4 gap-0 p-1">
+            <TabsTrigger value="work" className="h-full px-1 text-xs">Work</TabsTrigger>
+            <TabsTrigger value="status" className="h-full px-1 text-xs">Status</TabsTrigger>
+            <TabsTrigger value="invoice" className="h-full px-1 text-xs">Invoice</TabsTrigger>
+            <TabsTrigger value="priority" className="h-full px-1 text-xs">Priority</TabsTrigger>
+          </TabsList>
+          <TabsContent value="work" className="dashboard-workspace mt-0 space-y-4">
+            <section aria-label="Uncompleted work and bottlenecks" className="space-y-2">
+              <div>
+                <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">Uncompleted work</h2>
+                <p className="sr-only">Current workflow queues and the person or team responsible.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <WorkflowBucket title="Pending Design" jobs={pendingDesignJobs} icon={Palette} assigneeFor={(job) => job.designer && job.designer !== "Unassigned" ? job.designer : assignedTo(job)} onSelect={handleViewDetails} animationDelay={0} />
+                <WorkflowBucket title="In Production / Execution" jobs={executionJobs} icon={Cog} assigneeFor={assignedTo} onSelect={handleViewDetails} animationDelay={0} />
+                <WorkflowBucket title="Pending Invoicing" jobs={pendingInvoiceJobs} icon={Receipt} assigneeFor={(job) => job.assignee && job.assignee !== "Unassigned" ? job.assignee : "Admin"} onSelect={handleViewDetails} animationDelay={0} />
+              </div>
+            </section>
+            <section id="approvals-section" aria-label="Approvals" className="scroll-mt-2 space-y-2">
+              <h2 className="text-xs font-semibold tracking-wider text-muted-foreground">Approvals</h2>
+              <ApprovalBox />
+            </section>
+          </TabsContent>
+          <TabsContent value="status" className="dashboard-workspace mt-0">
+            <JobStatusOverview stats={stats} onStatusClick={handleStatusClick} />
+          </TabsContent>
+          <TabsContent value="invoice" className="dashboard-workspace mt-0">{quickWidget}</TabsContent>
+          <TabsContent value="priority" className="dashboard-workspace mt-0">
+            <HighPriorityReminder jobs={jobs} onViewJob={handleViewDetails} />
+            {!jobs.some(job => job.priority === "high" && !["completed", "invoiced", "cancelled"].includes(job.status)) && <p className="p-3 text-sm text-muted-foreground">No high priority jobs pending.</p>}
+          </TabsContent>
+        </Tabs>
       </section>
-
-      <div className="flex flex-col gap-6">
-        <div className="dashboard-card-enter" style={{ animationDelay: "420ms" }}>
-          <ApprovalBox />
-        </div>
-
-        <div className="dashboard-card-enter" style={{ animationDelay: "480ms" }}>
-          <JobStatusOverview stats={stats} onStatusClick={handleStatusClick} />
-        </div>
-      </div>
 
       <JobDetails
         isOpen={isJobDetailsOpen}

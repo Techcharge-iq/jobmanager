@@ -19,6 +19,8 @@ import {
   Lock
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import { useDirection } from "@/lib/directionContext";
 import { useAuth } from "@/hooks/useAuth";
 import { getProfileRole, getProfileSettings, updateProfile } from "@/data/profiles";
 import { ChangePasswordDialog } from "@/components/user-profile/ChangePasswordDialog";
@@ -28,7 +30,8 @@ import { DataManagement } from "@/components/settings/DataManagement";
 export function SettingsView() {
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
+  const { dir, setDir } = useDirection();
   const [isAdmin, setIsAdmin] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -120,8 +123,8 @@ export function SettingsView() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-2">Manage your application preferences</p>
+        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+        <p className="text-muted-foreground mt-2">Manage your application preferences</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -185,7 +188,7 @@ export function SettingsView() {
               onClick={handleProfileUpdate}
               disabled={isLoading}
             >
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="w-4 h-4 me-2" />
               {isLoading ? 'Updating...' : 'Update Profile'}
             </Button>
           </CardContent>
@@ -203,7 +206,7 @@ export function SettingsView() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>Push Notifications</Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Receive notifications about job updates
                 </p>
               </div>
@@ -216,7 +219,7 @@ export function SettingsView() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>Email Updates</Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Receive email summaries of daily activities
                 </p>
               </div>
@@ -240,24 +243,29 @@ export function SettingsView() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label>Dark Mode</Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-muted-foreground">
                   Switch to dark theme
                 </p>
               </div>
               <Switch
-                checked={darkMode}
-                onCheckedChange={setDarkMode}
+                aria-label="Dark mode"
+                checked={resolvedTheme === "dark"}
+                onCheckedChange={(on) => setTheme(on ? "dark" : "light")}
               />
             </div>
             <Separator />
-            <div className="space-y-2">
-              <Label>Theme Color</Label>
-              <div className="flex gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-600 cursor-pointer border-2 border-blue-600"></div>
-                <div className="w-8 h-8 rounded-full bg-green-600 cursor-pointer border-2 border-transparent hover:border-green-600"></div>
-                <div className="w-8 h-8 rounded-full bg-purple-600 cursor-pointer border-2 border-transparent hover:border-purple-600"></div>
-                <div className="w-8 h-8 rounded-full bg-red-600 cursor-pointer border-2 border-transparent hover:border-red-600"></div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Right-to-left layout</Label>
+                <p className="text-sm text-muted-foreground">
+                  Mirror the layout for Arabic. Saved on this device only.
+                </p>
               </div>
+              <Switch
+                aria-label="Right-to-left layout"
+                checked={dir === "rtl"}
+                onCheckedChange={(on) => setDir(on ? "rtl" : "ltr")}
+              />
             </div>
           </CardContent>
         </Card>
@@ -289,7 +297,7 @@ export function SettingsView() {
                 variant="outline"
                 onClick={() => setPasswordDialogOpen(true)}
               >
-                <Lock className="w-4 h-4 mr-2" />
+                <Lock className="w-4 h-4 me-2" />
                 Change Password
               </Button>
               <Button variant="outline" disabled>Two-Factor Authentication (Coming Soon)</Button>
@@ -304,7 +312,7 @@ export function SettingsView() {
           <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Shield className="w-5 h-5 text-red-600" />
+                <Shield className="w-5 h-5 text-red-600 dark:text-red-300" />
                 Admin Tools
               </CardTitle>
             </CardHeader>

@@ -88,7 +88,7 @@ export function ImageUploader({
       <div
         className={`
           relative border-2 border-dashed rounded-lg p-6 transition-colors
-          ${dragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}
+          ${dragActive ? 'border-blue-400 bg-blue-50 dark:bg-blue-500/15' : 'border-border'}
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-400'}
         `}
         onDragEnter={handleDrag}
@@ -108,12 +108,12 @@ export function ImageUploader({
         />
         
         <div className="text-center">
-          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+          <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
           <div className="mt-4">
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               <span className="font-medium">Click to upload</span> or drag and drop
             </p>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               JPEG, PNG up to 150KB (max {maxFiles} files)
             </p>
           </div>
@@ -124,11 +124,11 @@ export function ImageUploader({
         <div className="space-y-2">
           <h4 className="text-sm font-medium">Selected Files:</h4>
           {selectedFiles.map((file, index) => (
-            <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+            <div key={index} className="flex items-center justify-between p-2 bg-muted rounded">
               <div className="flex items-center space-x-2">
-                <ImageIcon className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-700">{file.name}</span>
-                <span className="text-xs text-gray-500">
+                <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-foreground">{file.name}</span>
+                <span className="text-xs text-muted-foreground">
                   ({Math.round(file.size / 1024)}KB)
                 </span>
               </div>

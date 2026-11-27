@@ -10,8 +10,9 @@ import { subscribeJobEdits } from "@/lib/realtime";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { isSyncAvailable } from "@/services/syncService";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { ThemeProvider } from "next-themes";
+import { DirectionProvider } from "@/lib/direction";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { FloatingCreateButton } from "@/components/FloatingCreateButton";
 import { WorkflowAlertManager } from "@/components/WorkflowAlertManager";
 import { NotificationProvider } from "@/contexts/NotificationContext";
 import Index from "./pages/Index";
@@ -74,11 +75,13 @@ function JobEditNotifications() {
 function App() {
   return (
     <ErrorBoundary>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="theme">
+    <DirectionProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <NotificationProvider>
           <TooltipProvider>
-            <div className="min-h-screen bg-background">
+            <div className="min-h-screen">
               <Toaster />
               <Sonner />
               <JobEditNotifications />
@@ -90,6 +93,11 @@ function App() {
                     </ProtectedRoute>
                   } />
                   <Route path="/dashboard" element={
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/jobs" element={
                     <ProtectedRoute>
                       <Index />
                     </ProtectedRoute>
@@ -127,7 +135,6 @@ function App() {
                   <Route path="/unauthorized" element={<Unauthorized />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                <FloatingCreateButton />
               </BrowserRouter>
               <WorkflowAlertManager />
             </div>
@@ -135,6 +142,8 @@ function App() {
         </NotificationProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </DirectionProvider>
+    </ThemeProvider>
     </ErrorBoundary>
   );
 }

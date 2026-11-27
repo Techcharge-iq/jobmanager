@@ -36,23 +36,23 @@ const STATUS_OPTIONS = [
 const getStatusClasses = (status: string): string => {
   switch (status) {
     case "pending":
-      return "bg-amber-100 text-amber-800 border-amber-200 hover:bg-amber-100";
+      return "bg-amber-100 dark:bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-500/30 hover:bg-amber-100";
     case "in-progress":
-      return "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-100";
+      return "bg-blue-100 dark:bg-blue-500/15 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-500/30 hover:bg-blue-100";
     case "designing":
-      return "bg-violet-100 text-violet-800 border-violet-200 hover:bg-violet-100";
+      return "bg-violet-100 dark:bg-violet-500/15 text-violet-800 dark:text-violet-300 border-violet-200 dark:border-violet-500/30 hover:bg-violet-100";
     case "out":
-      return "bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-100";
+      return "bg-orange-100 dark:bg-orange-500/15 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-500/30 hover:bg-orange-100";
     case "completed":
-      return "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-100";
+      return "bg-emerald-100 dark:bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-500/30 hover:bg-emerald-100";
     case "finished":
-      return "bg-teal-100 text-teal-800 border-teal-200 hover:bg-teal-100";
+      return "bg-teal-100 dark:bg-teal-500/15 text-teal-800 dark:text-teal-300 border-teal-200 dark:border-teal-500/30 hover:bg-teal-100";
     case "foc_sample":
-      return "bg-pink-100 text-pink-800 border-pink-200 hover:bg-pink-100";
+      return "bg-pink-100 dark:bg-pink-500/15 text-pink-800 dark:text-pink-300 border-pink-200 dark:border-pink-500/30 hover:bg-pink-100";
     case "invoiced":
       return "bg-slate-800 text-white border-slate-800 hover:bg-slate-800";
     case "cancelled":
-      return "bg-red-100 text-red-800 border-red-200 hover:bg-red-100";
+      return "bg-red-100 dark:bg-red-500/15 text-red-800 dark:text-red-300 border-red-200 dark:border-red-500/30 hover:bg-red-100";
     default:
       return "bg-muted text-muted-foreground border-border";
   }
@@ -126,7 +126,7 @@ export function JobCard({ job, onViewDetails, onStatusChange }: JobCardProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Badge variant="default" className="cursor-not-allowed">
-                      <Lock className="w-3 h-3 mr-1" />
+                      <Lock className="w-3 h-3 me-1" />
                       Invoiced
                     </Badge>
                   </TooltipTrigger>
@@ -159,11 +159,11 @@ export function JobCard({ job, onViewDetails, onStatusChange }: JobCardProps) {
           </Badge>
           <div className="flex gap-2">
             <Button size="sm" variant="outline" onClick={() => onViewDetails(job)}>
-              <Eye className="w-4 h-4 mr-1" />
+              <Eye className="w-4 h-4 me-1" />
               View
             </Button>
             <Button size="sm" variant="outline">
-              <MessageSquare className="w-4 h-4 mr-1" />
+              <MessageSquare className="w-4 h-4 me-1" />
               Chat
             </Button>
           </div>

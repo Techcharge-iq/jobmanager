@@ -44,8 +44,8 @@ export function JobListHeader({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Job Management</h1>
-          <p className="text-gray-600">Manage and track all your job orders</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Job Management</h1>
+          <p className="text-muted-foreground">Manage and track all your job orders</p>
         </div>
         <SyncStatusIndicator />
       </div>
@@ -58,11 +58,11 @@ export function JobListHeader({
               <Button
                 variant="outline"
                 className={cn(
-                  "w-auto justify-start text-left font-normal bg-white/90",
+                  "w-auto justify-start text-start font-normal bg-card",
                   !dateFilter && "text-muted-foreground"
                 )}
               >
-                <CalendarIcon className="mr-2 h-4 w-4" />
+                <CalendarIcon className="me-2 h-4 w-4" />
                 {dateFilter?.from ? (
                   dateFilter.to ? (
                     <>
@@ -113,18 +113,18 @@ export function JobListHeader({
         {/* Search and Status Filter */}
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute start-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <Input
               placeholder="Search jobs by title, order number, or customer..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 bg-white/90"
+              className="ps-10 bg-card"
             />
           </div>
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-gray-500" />
+            <Filter className="w-4 h-4 text-muted-foreground" />
             <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-              <SelectTrigger className="w-40 bg-white/90">
+              <SelectTrigger className="w-40 bg-card">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>

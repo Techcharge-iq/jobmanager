@@ -38,10 +38,10 @@ export class ErrorBoundary extends Component<Props, State> {
               An unexpected error occurred. Reloading usually fixes it. If the problem
               persists, contact your administrator.
             </p>
-            <p className="text-sm text-left text-muted-foreground bg-muted rounded p-3 break-words">
+            <p className="text-sm text-start text-muted-foreground bg-muted rounded p-3 break-words">
               {this.state.error.message || String(this.state.error)}
             </p>
-            <details className="text-left text-xs text-muted-foreground">
+            <details className="text-start text-xs text-muted-foreground">
               <summary className="cursor-pointer">Technical details</summary>
               <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded bg-muted p-3">
                 {this.state.error.stack || String(this.state.error)}

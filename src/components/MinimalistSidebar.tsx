@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { getProfileHeader } from "@/data/profiles";
 import { cn } from "@/lib/utils";
+import { JobFlowMark } from "@/components/brand/JobFlowMark";
 import {
   Tooltip,
   TooltipContent,
@@ -91,7 +92,10 @@ export function MinimalistSidebar({
 
   return (
     <TooltipProvider delayDuration={100}>
-      <div className="fixed left-0 top-0 h-full w-16 border-r border-sidebar-border bg-sidebar shadow-sm z-50 flex flex-col">
+       <nav aria-label="Primary" className="fixed left-0 top-0 h-full w-16 border-r border-sidebar-border bg-sidebar z-50 flex flex-col">
+         <div className="flex h-14 items-center justify-center border-b border-sidebar-border">
+          <JobFlowMark className="h-8 w-8" />
+         </div>
         {/* Avatar */}
         <div className="p-3 border-b border-sidebar-border">
           <Tooltip>
@@ -118,6 +122,8 @@ export function MinimalistSidebar({
                   variant="ghost"
                   size="icon"
                   onClick={() => onViewChange(item.view)}
+                  aria-label={item.title}
+                  aria-current={currentView === item.view ? "page" : undefined}
                   className={cn(
                     "w-10 h-10 mx-auto rounded-md",
                     currentView === item.view
@@ -144,6 +150,8 @@ export function MinimalistSidebar({
                   variant="ghost"
                   size="icon"
                   onClick={() => onViewChange(item.view)}
+                  aria-label={item.title}
+                  aria-current={currentView === item.view ? "page" : undefined}
                   className={cn(
                     "w-10 h-10 mx-auto rounded-md",
                     currentView === item.view
@@ -178,7 +186,7 @@ export function MinimalistSidebar({
         <div className="flex flex-col items-center gap-2 p-3 border-t border-sidebar-border mt-auto">
           <UserProfileDropdown userProfile={userProfile} />
         </div>
-      </div>
+      </nav>
     </TooltipProvider>
   );
 }

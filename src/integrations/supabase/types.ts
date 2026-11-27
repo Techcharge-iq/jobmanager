@@ -311,6 +311,7 @@ export type Database = {
           estimated_hours: number | null
           id: string
           invoice_number: string | null
+          invoiced_at: string | null
           job_order_details: string | null
           job_order_number: string
           job_title_id: string | null
@@ -340,6 +341,7 @@ export type Database = {
           estimated_hours?: number | null
           id?: string
           invoice_number?: string | null
+          invoiced_at?: string | null
           job_order_details?: string | null
           job_order_number: string
           job_title_id?: string | null
@@ -369,6 +371,7 @@ export type Database = {
           estimated_hours?: number | null
           id?: string
           invoice_number?: string | null
+          invoiced_at?: string | null
           job_order_details?: string | null
           job_order_number?: string
           job_title_id?: string | null

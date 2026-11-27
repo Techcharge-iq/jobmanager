@@ -1,0 +1,2 @@
+DROP POLICY IF EXISTS "Authenticated users can view checklists" ON public.daily_checklists;
+CREATE POLICY "Active staff can view checklists" ON public.daily_checklists FOR SELECT TO authenticated USING (public.is_active_staff(auth.uid()));

@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Briefcase, Clock, CheckCircle, Activity, Palette, DollarSign, XCircle
 } from "lucide-react";
@@ -35,19 +36,19 @@ const statusConfig = [
 export function JobStatusOverview({ stats, onStatusClick }: JobStatusOverviewProps) {
   return (
     <Card className="h-full">
-      <CardContent className="p-6">
-        <h3 className="text-base font-semibold mb-4">Job Status Overview</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <CardContent className="p-3">
+        <h3 className="text-sm font-semibold mb-3">Job Status Overview</h3>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {statusConfig.map(({ key, label, icon: Icon, getValue }) => (
-            <button
+            <Button variant="ghost"
               key={key}
               onClick={() => onStatusClick(key, label)}
-              className="flex flex-col items-center justify-center p-4 rounded-md border bg-muted/30 hover:bg-muted text-center"
+              className="flex h-24 flex-col items-center justify-center p-2 rounded-md border bg-muted/30 hover:bg-muted text-center"
             >
               <Icon className="w-5 h-5 mb-2 text-muted-foreground" />
               <p className="text-xs font-medium text-muted-foreground mb-1">{label}</p>
               <p className="text-xl font-bold text-foreground">{getValue(stats)}</p>
-            </button>
+            </Button>
           ))}
         </div>
       </CardContent>

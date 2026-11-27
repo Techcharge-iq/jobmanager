@@ -74,7 +74,12 @@ export function useUserManagement() {
       );
       if (error) {
         console.error('Error creating user:', error);
-        throw error;
+        let message = error.message;
+        try {
+          const body = await (error as { context?: Response }).context?.json();
+          if (body?.error) message = body.error;
+        } catch { /* keep generic message */ }
+        throw new Error(message);
       }
 
       if (!data?.profile) {
@@ -111,6 +116,10 @@ export function useUserManagement() {
 
   const handleAddUser = (e: React.FormEvent) => {
     e.preventDefault();
+    if (userForm.password.length < 8) {
+      toast({ title: "Error", description: "Password must be at least 8 characters", variant: "destructive" });
+      return;
+    }
     if (userForm.email.trim() && userForm.password.trim() && userForm.fullName.trim()) {
       addUserMutation.mutate(userForm);
     }

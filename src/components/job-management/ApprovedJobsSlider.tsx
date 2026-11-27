@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Job } from "@/pages/Index";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { JobDetails } from "@/components/JobDetails";
@@ -40,22 +40,6 @@ const STATUS_OPTIONS = [
   { value: "cancelled", label: "Cancelled" },
 ];
 
-const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
-  switch (status) {
-    case "completed":
-    case "finished":
-    case "invoiced":
-      return "default";
-    case "cancelled":
-      return "destructive";
-    case "pending":
-    case "in-progress":
-    case "designing":
-      return "secondary";
-    default:
-      return "outline";
-  }
-};
 
 function DetailItem({ icon: Icon, label, value, sub }: {
   icon: any;
@@ -160,12 +144,12 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
   const filterControls = (
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           placeholder="Search..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-10 w-52"
+          className="ps-10 w-52"
         />
       </div>
       {[
@@ -190,7 +174,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
       ))}
       {onRefresh && (
         <Button variant="outline" size="sm" onClick={onRefresh} disabled={isSyncing || isLoading}>
-          <RefreshCw className={cn("w-4 h-4 mr-1", isSyncing && "animate-spin")} />
+          <RefreshCw className={cn("w-4 h-4 me-1", isSyncing && "animate-spin")} />
           Sync
         </Button>
       )}
@@ -222,7 +206,7 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
   return (
     <div className="p-6 min-h-screen">
       {(isSyncing || isLoading) && (
-        <div className="fixed inset-0 bg-background/70 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-background/70  z-50 flex items-center justify-center">
           <div className="flex items-center gap-3 bg-card border px-5 py-4 rounded-md shadow-lg">
             <RefreshCw className="w-5 h-5 animate-spin text-primary" />
             <span className="text-sm font-medium">{isLoading ? "Loading data..." : "Syncing..."}</span>
@@ -266,25 +250,20 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
                     key={job.id}
                     onClick={() => setSelectedJobIndex(idx)}
                     className={cn(
-                      "w-full text-left p-3 rounded-md border transition-colors",
+                      "w-full text-start p-3 rounded-md border transition-colors",
                       isActive
-                        ? "bg-primary text-primary-foreground border-primary"
+                        ? "border-transparent bg-gradient-to-r from-lavender to-peach text-foreground shadow-glow"
                         : "bg-card hover:bg-muted border-border"
                     )}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-semibold text-sm">{job.jobOrderNumber}</span>
-                      <Badge
-                        variant={isActive ? "outline" : getStatusVariant(job.status)}
-                        className={cn("text-[10px]", isActive && "border-primary-foreground/40 text-primary-foreground")}
-                      >
-                        {job.status}
-                      </Badge>
+                      <StatusBadge status={job.status} />
                     </div>
-                    <p className={cn("text-xs truncate", isActive ? "text-primary-foreground/80" : "text-muted-foreground")}>
+                    <p className={cn("text-xs truncate", "text-muted-foreground")}>
                       {job.title}
                     </p>
-                    <p className={cn("text-xs truncate mt-0.5", isActive ? "text-primary-foreground/70" : "text-muted-foreground")}>
+                    <p className={cn("text-xs truncate mt-0.5", "text-muted-foreground")}>
                       {job.customer}
                     </p>
                   </button>
@@ -304,14 +283,12 @@ export function ApprovedJobsSlider({ jobs, onStatusUpdate, isSyncing, isLoading,
                 <p className="text-sm text-muted-foreground mt-1">{currentJob?.title}</p>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant={getStatusVariant(currentJob?.status || "")}>
-                  {currentJob?.status}
-                </Badge>
+                {currentJob && <StatusBadge status={currentJob.status} />}
                 <Button variant="outline" size="sm" onClick={() => currentJob && handleViewDetails(currentJob)}>
-                  <Eye className="w-4 h-4 mr-1" /> View
+                  <Eye className="w-4 h-4 me-1" /> View
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => currentJob && handleEditJob(currentJob)}>
-                  <Edit className="w-4 h-4 mr-1" /> Edit
+                  <Edit className="w-4 h-4 me-1" /> Edit
                 </Button>
               </div>
             </div>

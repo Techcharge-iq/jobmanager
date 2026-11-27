@@ -18,6 +18,7 @@ export type DexieJobOrder = Pick<
     | 'actual_hours'
     | 'total_value'
     | 'invoice_number'
+    | 'invoiced_at'
     | 'job_order_details'
     | 'client_name'
     | 'delivered_at'

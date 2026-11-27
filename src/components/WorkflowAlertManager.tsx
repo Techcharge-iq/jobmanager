@@ -523,7 +523,7 @@ export function WorkflowAlertManager() {
               {submitError && <p role="alert" className="text-sm text-destructive">{submitError}</p>}
               <DialogFooter>
                 <Button variant="outline" onClick={openJobDetails} disabled={isSubmitting}>
-                  <Eye className="mr-2 h-4 w-4" />
+                  <Eye className="me-2 h-4 w-4" />
                   View
                 </Button>
                 {canApproveJobs(role) && (

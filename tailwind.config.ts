@@ -18,7 +18,30 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['"Inter Variable"', 'Inter', 'ui-sans-serif', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', '"Noto Sans Arabic"', 'sans-serif'],
+			},
+			fontSize: {
+				h1: ['1.75rem', { lineHeight: '2.25rem', letterSpacing: '-0.022em', fontWeight: '650' }],
+				h2: ['1.25rem', { lineHeight: '1.75rem', letterSpacing: '-0.016em', fontWeight: '600' }],
+				h3: ['1rem', { lineHeight: '1.5rem', letterSpacing: '-0.01em', fontWeight: '600' }],
+				display: ['2rem', { lineHeight: '2.5rem', letterSpacing: '-0.02em' }],
+			},
+			boxShadow: {
+				sm: 'var(--shadow-sm)',
+				DEFAULT: 'var(--shadow-sm)',
+				md: 'var(--shadow-md)',
+				lg: 'var(--shadow-lg)',
+				card: 'var(--shadow-card)',
+				glass: 'var(--shadow-glass)',
+				glow: 'var(--shadow-glow)',
+			},
 			colors: {
+				lavender: { DEFAULT: 'hsl(var(--tone-lavender))', foreground: 'hsl(var(--tone-lavender-fg))' },
+				mint: { DEFAULT: 'hsl(var(--tone-mint))', foreground: 'hsl(var(--tone-mint-fg))' },
+				peach: { DEFAULT: 'hsl(var(--tone-peach))', foreground: 'hsl(var(--tone-peach-fg))' },
+				sky: { DEFAULT: 'hsl(var(--tone-sky))', foreground: 'hsl(var(--tone-sky-fg))' },
+				rose: { DEFAULT: 'hsl(var(--tone-rose))', foreground: 'hsl(var(--tone-rose-fg))' },
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
@@ -77,6 +100,10 @@ export default {
 						height: 'var(--radix-accordion-content-height)'
 					}
 				},
+				'tab-in': {
+					from: { opacity: '0', transform: 'translateY(4px) scale(0.96)' },
+					to: { opacity: '1', transform: 'translateY(0) scale(1)' }
+				},
 				'accordion-up': {
 					from: {
 						height: 'var(--radix-accordion-content-height)'
@@ -88,9 +115,10 @@ export default {
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'tab-in': 'tab-in 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)'
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;

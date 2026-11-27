@@ -1,4 +1,4 @@
-import { AlertTriangle, Bell, Check, Clock } from "lucide-react";
+import { AlertTriangle, Bell, Check, Clock, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,27 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNotifications as useServerNotifications } from "@/hooks/useNotifications";
 import { useNotifications as useLocalNotifications } from "@/contexts/NotificationContext";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
-export function NotificationTray() {
+export function NotificationTray({ className }: { className?: string } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const {
     allNotifications,
     acknowledgeNotification,
     notificationSyncError,
   } = useServerNotifications();
-  const { notifications: localNotifications, markAsRead } = useLocalNotifications();
+  const { notifications: localNotifications, markAsRead, clearNotifications } = useLocalNotifications();
+  const [desktopPermission, setDesktopPermission] = useState(
+    typeof Notification === "undefined" ? ("unsupported" as const) : Notification.permission,
+  );
+  const enableDesktopAlerts = async () => {
+    if (typeof Notification === "undefined") return;
+    try {
+      setDesktopPermission(await Notification.requestPermission());
+    } catch (error) {
+      console.error("Failed to request desktop notification permission:", error);
+    }
+  };
   const { toast } = useToast();
   const serverEntries = allNotifications.map((notification) => ({
     id: notification.id,
@@ -70,19 +82,19 @@ export function NotificationTray() {
           variant="ghost"
           size="icon"
           aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
-          className="relative w-10 h-10 mx-auto rounded-md text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+          className={cn("relative mx-auto h-10 w-10 rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground", className)}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <Badge className="absolute -right-1 -top-1 h-5 min-w-5 justify-center rounded-full px-1 text-[10px]">
+            <Badge className="absolute -end-1 -top-1 h-5 min-w-5 justify-center rounded-full px-1 text-[10px]">
               {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
       <PopoverContent
-        side="right"
-        align="start"
+        side="bottom"
+        align="end"
         className="w-[min(24rem,calc(100vw-5rem))] p-0"
         aria-label="Notification tray"
       >
@@ -93,7 +105,11 @@ export function NotificationTray() {
               {unreadCount ? `${unreadCount} unread` : "You're all caught up"}
             </p>
           </div>
-          <Bell className="h-4 w-4 text-muted-foreground" />
+          {localNotifications.length > 0 && (
+            <Button type="button" variant="ghost" size="sm" onClick={clearNotifications} className="h-7 px-2 text-xs">
+              <Trash2 className="me-1 h-3 w-3" />Clear
+            </Button>
+          )}
         </div>
         {notificationSyncError && (
           <p role="status" className="border-b bg-destructive/10 px-4 py-2 text-xs text-destructive">
@@ -113,7 +129,7 @@ export function NotificationTray() {
                     key={notification.id}
                     className={`flex gap-3 px-4 py-3 ${notification.read ? "" : "bg-primary/5"}`}
                   >
-                    <div className={`mt-0.5 rounded-full p-2 ${notification.isHighPriority ? "bg-amber-100 text-amber-700" : "bg-muted text-muted-foreground"}`}>
+                    <div className={`mt-0.5 rounded-full p-2 ${notification.isHighPriority ? "bg-amber-100 dark:bg-amber-500/15 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground"}`}>
                       {notification.isHighPriority
                         ? <AlertTriangle className="h-4 w-4" />
                         : <Bell className="h-4 w-4" />}
@@ -170,6 +186,17 @@ export function NotificationTray() {
             </div>
           </ScrollArea>
         )}
+        <div className="border-t p-3 text-xs text-muted-foreground">
+          {desktopPermission === "default" && (
+            <>
+              <Button type="button" variant="outline" size="sm" className="w-full" onClick={enableDesktopAlerts}>Enable desktop alerts</Button>
+              <p className="mt-2">Show job updates when this tab is in the background.</p>
+            </>
+          )}
+          {desktopPermission === "granted" && <p>Desktop alerts are enabled.</p>}
+          {desktopPermission === "denied" && <p role="status">Desktop alerts are blocked. Allow notifications for this site in your browser settings, then reload.</p>}
+          {desktopPermission === "unsupported" && <p role="status">Desktop alerts are not supported by this browser. In-app alerts still work while the portal is open.</p>}
+        </div>
       </PopoverContent>
     </Popover>
   );
